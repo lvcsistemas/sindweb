@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { NavLink, Outlet } from "react-router-dom";
-import { Circle, Folder, LogOut, ShieldCheck, UsersRound } from "lucide-react";
+import { ChevronRight, Circle, Folder, LogOut, ShieldCheck, UsersRound } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../features/auth/AuthProvider";
 
@@ -12,6 +12,8 @@ export function AppShell() {
   const queryClient = useQueryClient();
   const [claiming, setClaiming] = useState(false);
   const [claimMessage, setClaimMessage] = useState<string | null>(null);
+  const [cadastrosOpen, setCadastrosOpen] = useState(false);
+  const [associadosOpen, setAssociadosOpen] = useState(false);
 
   async function claimFirstAdmin() {
     setClaiming(true);
@@ -35,11 +37,19 @@ export function AppShell() {
         <div className="brand">SindWeb</div>
         <nav className="side-nav">
           <div className="nav-group">
-            <div className="nav-label"><Folder size={18} /> Cadastros</div>
-            <div className="nav-subgroup">
-              <div className="nav-label nested"><UsersRound size={17} /> Associados</div>
-              <NavLink className="nav-leaf" to="/associados"><Circle size={10} /> Cadastro</NavLink>
-            </div>
+            <button className="nav-toggle" onClick={() => setCadastrosOpen((open) => !open)} aria-expanded={cadastrosOpen}>
+              <ChevronRight className="nav-chevron" size={16} />
+              <Folder size={18} /> Cadastros
+            </button>
+            {cadastrosOpen ? (
+              <div className="nav-subgroup">
+                <button className="nav-toggle nested" onClick={() => setAssociadosOpen((open) => !open)} aria-expanded={associadosOpen}>
+                  <ChevronRight className="nav-chevron" size={16} />
+                  <UsersRound size={17} /> Associados
+                </button>
+                {associadosOpen ? <NavLink className="nav-leaf" to="/associados"><Circle size={10} /> Cadastro</NavLink> : null}
+              </div>
+            ) : null}
           </div>
         </nav>
       </aside>
