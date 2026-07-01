@@ -1,8 +1,10 @@
 import { Building2, ClipboardList, UsersRound } from "lucide-react";
+import { Breadcrumb } from "../../shared/Breadcrumb";
 
 export function DashboardPage() {
   return (
     <main className="dashboard-page">
+      <Breadcrumb items={[]} />
       <section className="dashboard-header">
         <div>
           <h1>Painel Principal</h1>
