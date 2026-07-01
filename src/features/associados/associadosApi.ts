@@ -2,6 +2,8 @@ import { supabase } from "../../lib/supabase";
 import type { Associado, AssociadoLista, Empresa, LookupItem } from "../../types/database";
 import type { AssociadoFormValues } from "./associadosSchema";
 
+const supabaseUnsafe = supabase as any;
+
 export async function listAssociados(search: string) {
   let query = supabase
     .from("associados_lista")
@@ -26,7 +28,7 @@ export async function getAssociado(id: number) {
 }
 
 export async function saveAssociado(values: AssociadoFormValues) {
-  const { data, error } = await supabase.rpc("save_associado", { payload: values });
+  const { data, error } = await supabaseUnsafe.rpc("save_associado", { payload: values });
   if (error) throw error;
   return data as number;
 }
@@ -58,7 +60,7 @@ export async function uploadAssociadoFoto(associadoId: number, file: File) {
   const { error } = await supabase.storage.from("associados-fotos").upload(path, file, { upsert: false });
   if (error) throw error;
 
-  const { error: updateError } = await supabase.from("associados").update({ foto_path: path }).eq("id", associadoId);
+  const { error: updateError } = await supabaseUnsafe.from("associados").update({ foto_path: path }).eq("id", associadoId);
   if (updateError) throw updateError;
 
   return path;
