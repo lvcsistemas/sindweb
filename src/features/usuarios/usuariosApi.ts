@@ -5,10 +5,6 @@ export type UsuarioRow = {
   email: string | null;
   full_name: string | null;
   codinome: string | null;
-  is_admin: boolean;
-  associados_access: boolean;
-  associados_save: boolean;
-  associados_delete: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -19,10 +15,6 @@ export type UsuarioPayload = {
   password?: string;
   full_name?: string;
   codinome?: string;
-  is_admin: boolean;
-  associados_access: boolean;
-  associados_save: boolean;
-  associados_delete: boolean;
 };
 
 async function callAdminUsers<T>(method: "GET" | "POST", body?: unknown) {

@@ -12,10 +12,6 @@ type UserPayload = {
   password?: string;
   full_name?: string | null;
   codinome?: string | null;
-  is_admin?: boolean;
-  associados_access?: boolean;
-  associados_save?: boolean;
-  associados_delete?: boolean;
 };
 
 function json(body: unknown, status = 200) {
@@ -44,12 +40,18 @@ Deno.serve(async (req) => {
   });
   const serviceClient = createClient(supabaseUrl, serviceRoleKey);
 
-  const { data: allowed, error: permissionError } = await userClient.rpc("can_access_module", {
-    module_key: "usuarios",
-    action_key: req.method === "GET" ? "access" : "save"
-  });
+  const { data: currentUser, error: userError } = await userClient.auth.getUser();
+  if (userError || !currentUser.user) {
+    return json({ error: "Sessao expirada. Entre novamente." }, 401);
+  }
 
-  if (permissionError || !allowed) {
+  const { data: currentProfile, error: profileLookupError } = await userClient
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", currentUser.user.id)
+    .single();
+
+  if (profileLookupError || !currentProfile?.is_admin) {
     return json({ error: "Sem permissao para administrar usuarios." }, 403);
   }
 
@@ -107,40 +109,22 @@ Deno.serve(async (req) => {
     return json({ error: "Nao foi possivel identificar o usuario salvo." }, 400);
   }
 
+  const profileValues: Record<string, unknown> = {
+    id: userId,
+    email,
+    full_name: payload.full_name?.trim() || email,
+    codinome: payload.codinome?.trim().toUpperCase() || null
+  };
+
+  if (!payload.id) {
+    profileValues.is_admin = false;
+  }
+
   const { error: profileError } = await serviceClient
     .from("profiles")
-    .upsert({
-      id: userId,
-      email,
-      full_name: payload.full_name?.trim() || email,
-      codinome: payload.codinome?.trim().toUpperCase() || null,
-      is_admin: Boolean(payload.is_admin)
-    }, { onConflict: "id" });
+    .upsert(profileValues, { onConflict: "id" });
 
   if (profileError) return json({ error: profileError.message }, 400);
-
-  const permissions = [
-    {
-      user_id: userId,
-      module_key: "associados",
-      can_access: Boolean(payload.associados_access),
-      can_save: Boolean(payload.associados_save),
-      can_delete: Boolean(payload.associados_delete)
-    },
-    {
-      user_id: userId,
-      module_key: "usuarios",
-      can_access: Boolean(payload.is_admin),
-      can_save: Boolean(payload.is_admin),
-      can_delete: Boolean(payload.is_admin)
-    }
-  ];
-
-  const { error: permissionSaveError } = await serviceClient
-    .from("module_permissions")
-    .upsert(permissions, { onConflict: "user_id,module_key" });
-
-  if (permissionSaveError) return json({ error: permissionSaveError.message }, 400);
 
   return json({ id: userId });
 });

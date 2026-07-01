@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Save, Search, ShieldCheck, UserRound } from "lucide-react";
+import { Plus, Save, Search, UserRound } from "lucide-react";
 import { Breadcrumb } from "../../shared/Breadcrumb";
 import { listUsuarios, saveUsuario, type UsuarioPayload, type UsuarioRow } from "./usuariosApi";
 
@@ -8,11 +8,7 @@ const emptyForm: UsuarioPayload = {
   email: "",
   password: "",
   full_name: "",
-  codinome: "",
-  is_admin: false,
-  associados_access: true,
-  associados_save: true,
-  associados_delete: false
+  codinome: ""
 };
 
 export function UsuariosPage() {
@@ -37,11 +33,7 @@ export function UsuariosPage() {
       email: selectedUser.email ?? "",
       password: "",
       full_name: selectedUser.full_name ?? "",
-      codinome: selectedUser.codinome ?? "",
-      is_admin: selectedUser.is_admin,
-      associados_access: selectedUser.associados_access,
-      associados_save: selectedUser.associados_save,
-      associados_delete: selectedUser.associados_delete
+      codinome: selectedUser.codinome ?? ""
     });
   }, [selectedUser]);
 
@@ -90,7 +82,7 @@ export function UsuariosPage() {
       <section className="module-header">
         <div>
           <h1>Usuários</h1>
-          <p>Cadastro de acesso ao SindWeb e permissoes iniciais por modulo.</p>
+          <p>Cadastro de acesso ao SindWeb.</p>
         </div>
         <button onClick={handleNew}><Plus size={16} /> Novo</button>
       </section>
@@ -128,28 +120,6 @@ export function UsuariosPage() {
               </label>
             </div>
 
-            <section className="permission-box">
-              <div className="permission-title"><ShieldCheck size={17} /> Perfil e permissoes</div>
-              <label className="check">
-                <input type="checkbox" checked={form.is_admin} onChange={(event) => setForm({ ...form, is_admin: event.target.checked })} />
-                Administrador do sistema
-              </label>
-              <div className="permission-grid">
-                <label className="check">
-                  <input type="checkbox" checked={form.associados_access} onChange={(event) => setForm({ ...form, associados_access: event.target.checked })} />
-                  Acessar Associados
-                </label>
-                <label className="check">
-                  <input type="checkbox" checked={form.associados_save} onChange={(event) => setForm({ ...form, associados_save: event.target.checked })} />
-                  Salvar Associados
-                </label>
-                <label className="check">
-                  <input type="checkbox" checked={form.associados_delete} onChange={(event) => setForm({ ...form, associados_delete: event.target.checked })} />
-                  Excluir Associados
-                </label>
-              </div>
-            </section>
-
             {message ? <div className={saveMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
 
             <div className="form-actions">
@@ -172,7 +142,7 @@ function UsuarioRowView({ usuario, selected, onClick }: { usuario: UsuarioRow; s
         <strong>{label}</strong>
         <span>{usuario.email ?? "Sem e-mail"}</span>
       </div>
-      <small className={usuario.is_admin ? "status-ok" : "status-muted"}>{usuario.is_admin ? "Admin" : "Usuário"}</small>
+      <small className="status-muted">Acesso</small>
     </button>
   );
 }
