@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { NavLink, Outlet } from "react-router-dom";
-import { LogOut, ShieldCheck, UsersRound } from "lucide-react";
+import { Circle, Folder, LogOut, ShieldCheck, UsersRound } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../features/auth/AuthProvider";
 
@@ -33,8 +33,14 @@ export function AppShell() {
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">SindWeb</div>
-        <nav>
-          <NavLink to="/associados"><UsersRound size={18} /> Associados</NavLink>
+        <nav className="side-nav">
+          <div className="nav-group">
+            <div className="nav-label"><Folder size={18} /> Cadastros</div>
+            <div className="nav-subgroup">
+              <div className="nav-label nested"><UsersRound size={17} /> Associados</div>
+              <NavLink className="nav-leaf" to="/associados"><Circle size={10} /> Cadastro</NavLink>
+            </div>
+          </div>
         </nav>
       </aside>
       <div className="workspace">
