@@ -14,7 +14,7 @@ begin
   end if;
 
   insert into public.profiles(id, full_name, is_admin)
-  values (auth.uid(), auth.email(), true)
+  values (auth.uid(), coalesce(auth.jwt()->>'email', 'Administrador'), true)
   on conflict (id) do update set is_admin = true, updated_at = now();
 
   insert into public.module_permissions(user_id, module_key, can_access, can_save, can_delete)
