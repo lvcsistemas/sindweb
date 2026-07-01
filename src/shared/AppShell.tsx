@@ -10,6 +10,22 @@ export function AppShell() {
   const [associadosOpen, setAssociadosOpen] = useState(false);
   const [usuariosOpen, setUsuariosOpen] = useState(false);
 
+  function toggleAssociados() {
+    setAssociadosOpen((open) => {
+      const nextOpen = !open;
+      if (nextOpen) setUsuariosOpen(false);
+      return nextOpen;
+    });
+  }
+
+  function toggleUsuarios() {
+    setUsuariosOpen((open) => {
+      const nextOpen = !open;
+      if (nextOpen) setAssociadosOpen(false);
+      return nextOpen;
+    });
+  }
+
   return (
     <div className={`app-shell ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
       <aside className="sidebar" aria-hidden={!sidebarOpen}>
@@ -22,12 +38,12 @@ export function AppShell() {
             </button>
             {cadastrosOpen ? (
               <div className="nav-subgroup">
-                <button className="nav-toggle nested" onClick={() => setAssociadosOpen((open) => !open)} aria-expanded={associadosOpen}>
+                <button className="nav-toggle nested" onClick={toggleAssociados} aria-expanded={associadosOpen}>
                   <ChevronRight className="nav-chevron" size={16} />
                   <UsersRound size={17} /> Associados
                 </button>
                 {associadosOpen ? <NavLink className="nav-leaf" to="/associados"><Circle size={10} /> Cadastro</NavLink> : null}
-                <button className="nav-toggle nested" onClick={() => setUsuariosOpen((open) => !open)} aria-expanded={usuariosOpen}>
+                <button className="nav-toggle nested" onClick={toggleUsuarios} aria-expanded={usuariosOpen}>
                   <ChevronRight className="nav-chevron" size={16} />
                   <UserCog size={17} /> Usuários
                 </button>
