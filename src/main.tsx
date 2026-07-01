@@ -1,12 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { AppShell } from "./shared/AppShell";
 import { AuthProvider } from "./features/auth/AuthProvider";
 import { LoginPage } from "./features/auth/LoginPage";
 import { ProtectedRoute } from "./features/auth/ProtectedRoute";
 import { AssociadosPage } from "./features/associados/AssociadosPage";
+import { DashboardPage } from "./features/dashboard/DashboardPage";
 import "./styles.css";
 
 const queryClient = new QueryClient();
@@ -21,7 +22,7 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <Navigate to="/associados" replace /> },
+      { index: true, element: <DashboardPage /> },
       { path: "associados", element: <AssociadosPage /> }
     ]
   }
