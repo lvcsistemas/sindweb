@@ -8,6 +8,7 @@ import { LoginPage } from "./features/auth/LoginPage";
 import { ProtectedRoute } from "./features/auth/ProtectedRoute";
 import { AssociadosPage } from "./features/associados/AssociadosPage";
 import { DashboardPage } from "./features/dashboard/DashboardPage";
+import { UsuariosPage } from "./features/usuarios/UsuariosPage";
 import "./styles.css";
 
 const queryClient = new QueryClient();
@@ -23,7 +24,8 @@ const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <DashboardPage /> },
-      { path: "associados", element: <AssociadosPage /> }
+      { path: "associados", element: <AssociadosPage /> },
+      { path: "usuarios", element: <UsuariosPage /> }
     ]
   }
 ]);

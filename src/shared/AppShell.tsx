@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { ChevronRight, Circle, Folder, LogOut, Menu, UsersRound } from "lucide-react";
+import { ChevronRight, Circle, Folder, LogOut, Menu, UserCog, UsersRound } from "lucide-react";
 import { useAuth } from "../features/auth/AuthProvider";
 
 export function AppShell() {
@@ -8,6 +8,7 @@ export function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [cadastrosOpen, setCadastrosOpen] = useState(false);
   const [associadosOpen, setAssociadosOpen] = useState(false);
+  const [usuariosOpen, setUsuariosOpen] = useState(false);
 
   return (
     <div className={`app-shell ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
@@ -26,6 +27,11 @@ export function AppShell() {
                   <UsersRound size={17} /> Associados
                 </button>
                 {associadosOpen ? <NavLink className="nav-leaf" to="/associados"><Circle size={10} /> Cadastro</NavLink> : null}
+                <button className="nav-toggle nested" onClick={() => setUsuariosOpen((open) => !open)} aria-expanded={usuariosOpen}>
+                  <ChevronRight className="nav-chevron" size={16} />
+                  <UserCog size={17} /> Usuários
+                </button>
+                {usuariosOpen ? <NavLink className="nav-leaf" to="/usuarios"><Circle size={10} /> Cadastro</NavLink> : null}
               </div>
             ) : null}
           </div>

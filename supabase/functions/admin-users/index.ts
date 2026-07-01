@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
   const authHeader = req.headers.get("Authorization") ?? "";
 
   if (!supabaseUrl || !anonKey || !serviceRoleKey) {
-    return json({ error: "Configuração da função incompleta." }, 500);
+    return json({ error: "Configuracao da funcao incompleta." }, 500);
   }
 
   const userClient = createClient(supabaseUrl, anonKey, {
@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
   });
 
   if (permissionError || !allowed) {
-    return json({ error: "Sem permissão para administrar usuários." }, 403);
+    return json({ error: "Sem permissao para administrar usuarios." }, 403);
   }
 
   if (req.method === "GET") {
@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
   }
 
   if (req.method !== "POST") {
-    return json({ error: "Método não permitido." }, 405);
+    return json({ error: "Metodo nao permitido." }, 405);
   }
 
   const payload = await req.json() as UserPayload;
@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
   const password = payload.password?.trim();
 
   if (!email) {
-    return json({ error: "Informe o e-mail do usuário." }, 400);
+    return json({ error: "Informe o e-mail do usuario." }, 400);
   }
 
   let userId = payload.id;
@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
     if (error) return json({ error: error.message }, 400);
   } else {
     if (!password) {
-      return json({ error: "Informe a senha para criar um novo usuário." }, 400);
+      return json({ error: "Informe a senha para criar um novo usuario." }, 400);
     }
 
     const { data, error } = await serviceClient.auth.admin.createUser({
@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
   }
 
   if (!userId) {
-    return json({ error: "Não foi possível identificar o usuário salvo." }, 400);
+    return json({ error: "Nao foi possivel identificar o usuario salvo." }, 400);
   }
 
   const { error: profileError } = await serviceClient
