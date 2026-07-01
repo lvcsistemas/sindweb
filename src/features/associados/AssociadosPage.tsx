@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Search } from "lucide-react";
 import type { AssociadoLista } from "../../types/database";
+import { Breadcrumb } from "../../shared/Breadcrumb";
 import { getAssociado, getFotoUrl, listAssociados } from "./associadosApi";
 import { AssociadoForm } from "./AssociadoForm";
 
@@ -15,6 +16,7 @@ export function AssociadosPage() {
 
   return (
     <main className="module-page">
+      <Breadcrumb items={[{ label: "Cadastros" }, { label: "Associados" }, { label: "Cadastro" }]} />
       <section className="module-header">
         <div>
           <h1>Associados</h1>
