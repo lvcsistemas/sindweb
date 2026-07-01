@@ -35,9 +35,11 @@ button { cursor: pointer; }
 .sidebar nav { display: grid; gap: 8px; }
 .sidebar a { color: #dbe8ed; display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 10px 12px; border-radius: 6px; }
 .sidebar a.active, .sidebar a:hover { background: #214756; color: #fff; }
-.workspace { min-width: 0; display: grid; grid-template-rows: 56px 1fr; }
+.workspace { min-width: 0; display: grid; grid-template-rows: 56px auto 1fr; }
 .topbar { background: #fff; border-bottom: 1px solid #d7dee5; display: flex; align-items: center; justify-content: flex-end; gap: 14px; padding: 0 22px; color: #53616f; }
 .icon-button { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid #d7dee5; background: #fff; border-radius: 6px; }
+.compact-button { min-height: 32px; padding: 0 10px; font-size: 0.88rem; white-space: nowrap; }
+.system-message { margin: 12px 22px 0; border: 1px solid #c7ddd2; background: #eff8f3; color: #24543e; border-radius: 6px; padding: 10px 12px; }
 
 .module-page { padding: 22px; min-width: 0; }
 .module-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; gap: 18px; }
@@ -86,4 +88,5 @@ textarea { resize: vertical; }
   .module-page { padding: 14px; }
   .module-header { align-items: stretch; flex-direction: column; }
   .form-grid, .form-grid.compact { grid-template-columns: 1fr; }
+  .topbar { padding: 10px 14px; min-height: 56px; flex-wrap: wrap; justify-content: flex-start; }
 }
