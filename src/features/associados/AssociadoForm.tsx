@@ -54,14 +54,44 @@ function toInputDate(value: string | null) {
 function toValues(associado: Associado | null): AssociadoFormValues {
   if (!associado) return defaultValues;
   return {
-    ...defaultValues,
-    ...associado,
+    id: associado.id,
+    ativo: associado.ativo,
+    nome: associado.nome,
+    cpf: associado.cpf,
+    matricula: associado.matricula ?? "",
+    matricula_empresa: associado.matricula_empresa ?? "",
+    empresa_id: associado.empresa_id,
+    situacao_id: associado.situacao_id,
+    local_trabalho_id: associado.local_trabalho_id,
+    local_pagamento_id: associado.local_pagamento_id,
+    escolaridade_id: associado.escolaridade_id,
+    funcao_id: associado.funcao_id,
     data_categoria: toInputDate(associado.data_categoria),
     data_nascimento: toInputDate(associado.data_nascimento),
     data_admissao: toInputDate(associado.data_admissao),
     data_situacao: toInputDate(associado.data_situacao),
     data_ficha: toInputDate(associado.data_ficha),
-    salario: associado.salario ?? 0
+    endereco: associado.endereco ?? "",
+    complemento: associado.complemento ?? "",
+    bairro: associado.bairro ?? "",
+    cidade: associado.cidade ?? "",
+    uf: associado.uf ?? "",
+    cep: associado.cep ?? "",
+    tel1: associado.tel1 ?? "",
+    tel2: associado.tel2 ?? "",
+    tel3: associado.tel3 ?? "",
+    email: associado.email ?? "",
+    rg: associado.rg ?? "",
+    sexo: associado.sexo ?? "",
+    estado_civil: associado.estado_civil ?? "",
+    pis: associado.pis ?? "",
+    ctps: associado.ctps ?? "",
+    ctps_serie: associado.ctps_serie ?? "",
+    salario: associado.salario ?? 0,
+    posto_trabalho: associado.posto_trabalho ?? "",
+    masterclin: associado.masterclin ?? "",
+    observacao: associado.observacao ?? "",
+    foto_path: associado.foto_path
   };
 }
 
@@ -69,8 +99,9 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
   const queryClient = useQueryClient();
   const [savedId, setSavedId] = useState<number | null>(associado?.id ?? null);
   const { data: empresas = [] } = useQuery({ queryKey: ["empresas"], queryFn: listEmpresas });
-  const lookupKinds = ["situacao", "local_trabalho", "local_pagamento", "escolaridade", "funcao"];
-  const lookups = Object.fromEntries(lookupKinds.map((kind) => [kind, useQuery({ queryKey: ["lookup", kind], queryFn: () => listLookup(kind) }).data ?? []]));
+  const { data: situacoes = [] } = useQuery({ queryKey: ["lookup", "situacao"], queryFn: () => listLookup("situacao") });
+  const { data: locaisTrabalho = [] } = useQuery({ queryKey: ["lookup", "local_trabalho"], queryFn: () => listLookup("local_trabalho") });
+  const { data: locaisPagamento = [] } = useQuery({ queryKey: ["lookup", "local_pagamento"], queryFn: () => listLookup("local_pagamento") });
 
   const form = useForm<AssociadoFormValues>({ resolver: zodResolver(associadoSchema), defaultValues: toValues(associado) });
 
@@ -109,11 +140,11 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
       <label>Nome do associado<input {...form.register("nome")} /></label>
       <div className="form-grid">
         <label>Empresa<select {...form.register("empresa_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{empresas.map((empresa) => <option key={empresa.id} value={empresa.id}>{empresa.nome_fantasia}</option>)}</select></label>
-        <label>Situação<select {...form.register("situacao_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{lookups.situacao.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
+        <label>Situação<select {...form.register("situacao_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{situacoes.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
       </div>
       <div className="form-grid">
-        <label>Local trabalho<select {...form.register("local_trabalho_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{lookups.local_trabalho.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
-        <label>Local pagamento<select {...form.register("local_pagamento_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{lookups.local_pagamento.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
+        <label>Local trabalho<select {...form.register("local_trabalho_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{locaisTrabalho.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
+        <label>Local pagamento<select {...form.register("local_pagamento_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{locaisPagamento.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
       </div>
       <div className="form-grid compact">
         <label>Nascimento<input type="date" {...form.register("data_nascimento")} /></label>
