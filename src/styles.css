@@ -41,9 +41,10 @@ button { cursor: pointer; }
 .nav-toggle.nested { color: #dbe8ed; padding-left: 24px; font-weight: 700; }
 .nav-chevron { transition: transform 0.16s ease; }
 .nav-toggle[aria-expanded="true"] .nav-chevron { transform: rotate(90deg); }
-.nav-leaf { margin-left: 38px; white-space: nowrap; }
+.nav-leaf { margin-left: 38px; white-space: normal; overflow-wrap: anywhere; line-height: 1.25; }
 .nav-leaf.direct { margin-left: 24px; }
 .sidebar a { color: #dbe8ed; display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 10px 12px; border-radius: 6px; }
+.sidebar a svg { flex: 0 0 auto; }
 .sidebar a.active, .sidebar a:hover { background: #214756; color: #fff; }
 .sidebar .empty-state.small { padding: 8px 12px 8px 40px; color: #a9bbc4; text-align: left; font-size: 0.86rem; }
 .workspace { min-width: 0; display: grid; grid-template-rows: 56px 1fr; }

@@ -115,10 +115,10 @@ export function AtendimentoMedicoConvenioPage() {
 
   return (
     <main className="module-page">
-      <Breadcrumb items={[{ label: "Cadastros" }, { label: "Atendimento Médico Especialidades" }]} />
+      <Breadcrumb items={[{ label: "Cadastros" }, { label: "Atendimento Médico Convênios" }]} />
       <section className="module-header">
         <div>
-          <h1>Atendimento Médico Especialidades</h1>
+          <h1>Atendimento Médico Convênios</h1>
           <p>Tabela auxiliar de convênios, responsáveis e contatos para atendimento médico.</p>
         </div>
         <button onClick={handleNew}><Plus size={16} /> Novo</button>

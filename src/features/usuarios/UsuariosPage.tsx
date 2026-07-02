@@ -113,7 +113,7 @@ export function UsuariosPage() {
 
   return (
     <main className="module-page">
-      <Breadcrumb items={[{ label: "Cadastros" }, { label: "Usuários" }, { label: "Cadastro" }]} />
+      <Breadcrumb items={[{ label: "Cadastros" }, { label: "Usuários" }]} />
       <section className="module-header">
         <div>
           <h1>Usuários</h1>

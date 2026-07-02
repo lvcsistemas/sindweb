@@ -16,7 +16,7 @@ export function AssociadosPage() {
 
   return (
     <main className="module-page">
-      <Breadcrumb items={[{ label: "Cadastros" }, { label: "Associados" }, { label: "Cadastro" }]} />
+      <Breadcrumb items={[{ label: "Cadastros" }, { label: "Associados" }]} />
       <section className="module-header">
         <div>
           <h1>Associados</h1>
