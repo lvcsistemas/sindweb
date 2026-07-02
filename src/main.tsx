@@ -7,6 +7,7 @@ import { AuthProvider } from "./features/auth/AuthProvider";
 import { LoginPage } from "./features/auth/LoginPage";
 import { ProtectedRoute } from "./features/auth/ProtectedRoute";
 import { AssociadosPage } from "./features/associados/AssociadosPage";
+import { ContribuicaoPage } from "./features/contribuicao/ContribuicaoPage";
 import { DashboardPage } from "./features/dashboard/DashboardPage";
 import { UsuariosPage } from "./features/usuarios/UsuariosPage";
 import "./styles.css";
@@ -25,6 +26,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <DashboardPage /> },
       { path: "associados", element: <AssociadosPage /> },
+      { path: "contribuicao", element: <ContribuicaoPage /> },
       { path: "usuarios", element: <UsuariosPage /> }
     ]
   }

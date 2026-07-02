@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { ChevronRight, Circle, Folder, LogOut, Menu, UserCog, UsersRound } from "lucide-react";
+import { ChevronRight, Circle, Coins, Folder, LogOut, Menu, UserCog, UsersRound } from "lucide-react";
 import { useAuth } from "../features/auth/AuthProvider";
 
 export function AppShell() {
@@ -8,12 +8,27 @@ export function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [cadastrosOpen, setCadastrosOpen] = useState(false);
   const [associadosOpen, setAssociadosOpen] = useState(false);
+  const [contribuicaoOpen, setContribuicaoOpen] = useState(false);
   const [usuariosOpen, setUsuariosOpen] = useState(false);
+
+  function closeCadastroSiblings(except: "associados" | "contribuicao" | "usuarios") {
+    if (except !== "associados") setAssociadosOpen(false);
+    if (except !== "contribuicao") setContribuicaoOpen(false);
+    if (except !== "usuarios") setUsuariosOpen(false);
+  }
 
   function toggleAssociados() {
     setAssociadosOpen((open) => {
       const nextOpen = !open;
-      if (nextOpen) setUsuariosOpen(false);
+      if (nextOpen) closeCadastroSiblings("associados");
+      return nextOpen;
+    });
+  }
+
+  function toggleContribuicao() {
+    setContribuicaoOpen((open) => {
+      const nextOpen = !open;
+      if (nextOpen) closeCadastroSiblings("contribuicao");
       return nextOpen;
     });
   }
@@ -21,7 +36,7 @@ export function AppShell() {
   function toggleUsuarios() {
     setUsuariosOpen((open) => {
       const nextOpen = !open;
-      if (nextOpen) setAssociadosOpen(false);
+      if (nextOpen) closeCadastroSiblings("usuarios");
       return nextOpen;
     });
   }
@@ -43,6 +58,11 @@ export function AppShell() {
                   <UsersRound size={17} /> Associados
                 </button>
                 {associadosOpen ? <NavLink className="nav-leaf" to="/associados"><Circle size={10} /> Cadastro</NavLink> : null}
+                <button className="nav-toggle nested" onClick={toggleContribuicao} aria-expanded={contribuicaoOpen}>
+                  <ChevronRight className="nav-chevron" size={16} />
+                  <Coins size={17} /> Contribuição
+                </button>
+                {contribuicaoOpen ? <NavLink className="nav-leaf" to="/contribuicao"><Circle size={10} /> Cadastro</NavLink> : null}
                 <button className="nav-toggle nested" onClick={toggleUsuarios} aria-expanded={usuariosOpen}>
                   <ChevronRight className="nav-chevron" size={16} />
                   <UserCog size={17} /> Usuários

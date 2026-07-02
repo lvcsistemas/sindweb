@@ -4,6 +4,7 @@ export type Database = {
   public: {
     Tables: {
       associados: { Row: Associado; Insert: AssociadoInsert; Update: Partial<AssociadoInsert> };
+      contribuicao: { Row: Contribuicao; Insert: ContribuicaoInsert; Update: Partial<ContribuicaoInsert> };
       empresas: { Row: Empresa; Insert: EmpresaInsert; Update: Partial<EmpresaInsert> };
       lookup_items: { Row: LookupItem; Insert: Omit<LookupItem, "id" | "created_at">; Update: Partial<Omit<LookupItem, "id" | "created_at">> };
       module_permissions: { Row: ModulePermission; Insert: Omit<ModulePermission, "id" | "created_at">; Update: Partial<Omit<ModulePermission, "id" | "created_at">> };
@@ -89,6 +90,19 @@ export type Empresa = {
 };
 
 export type EmpresaInsert = Omit<Empresa, "id" | "created_at" | "updated_at"> & { id?: number };
+
+export type Contribuicao = {
+  id: number;
+  tipo: string;
+  nm_contribuicao: string;
+  dia_vencimento: number;
+  instrucao: string | null;
+  valor_base: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ContribuicaoInsert = Omit<Contribuicao, "id" | "created_at" | "updated_at"> & { id?: number };
 
 export type LookupItem = {
   id: number;
