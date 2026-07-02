@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { BriefcaseBusiness, ChevronRight, Coins, FileText, Folder, Handshake, ListTree, LogOut, Menu, Stethoscope, UserCog, UsersRound } from "lucide-react";
+import { BriefcaseBusiness, Building2, ChevronRight, Coins, FileText, Folder, Handshake, ListTree, LogOut, Menu, Stethoscope, UserCog, UsersRound } from "lucide-react";
 import { useAuth } from "../features/auth/AuthProvider";
 import { AUXILIAR_GRUPOS } from "../features/auxiliares/auxiliaresConfig";
 
@@ -28,6 +28,7 @@ export function AppShell() {
                 <NavLink className="nav-leaf direct" to="/atendimento-medico-convenios"><Stethoscope size={17} /> Atendimento Médico Convênios</NavLink>
                 <NavLink className="nav-leaf direct" to="/atendimento-medico-especialidades"><Stethoscope size={17} /> Atendimento Médico Especialidades</NavLink>
                 <NavLink className="nav-leaf direct" to="/cnae"><FileText size={17} /> CNAE</NavLink>
+                <NavLink className="nav-leaf direct" to="/escritorios"><Building2 size={17} /> Escritórios</NavLink>
                 <NavLink className="nav-leaf direct" to="/contribuicao"><Coins size={17} /> Contribuições</NavLink>
                 <NavLink className="nav-leaf direct" to="/usuarios"><UserCog size={17} /> Usuários</NavLink>
               </div>

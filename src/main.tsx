@@ -13,6 +13,7 @@ import { AuxiliaresPage } from "./features/auxiliares/AuxiliaresPage";
 import { CnaePage } from "./features/cnae/CnaePage";
 import { ContribuicaoPage } from "./features/contribuicao/ContribuicaoPage";
 import { DashboardPage } from "./features/dashboard/DashboardPage";
+import { EscritorioPage } from "./features/escritorio/EscritorioPage";
 import { UsuariosPage } from "./features/usuarios/UsuariosPage";
 import "./styles.css";
 
@@ -35,6 +36,7 @@ const router = createBrowserRouter([
       { path: "auxiliares/:grupoPath", element: <AuxiliaresPage /> },
       { path: "cnae", element: <CnaePage /> },
       { path: "contribuicao", element: <ContribuicaoPage /> },
+      { path: "escritorios", element: <EscritorioPage /> },
       { path: "usuarios", element: <UsuariosPage /> }
     ]
   }

@@ -10,6 +10,7 @@ export type Database = {
       cnae: { Row: Cnae; Insert: CnaeInsert; Update: Partial<CnaeInsert> };
       contribuicao: { Row: Contribuicao; Insert: ContribuicaoInsert; Update: Partial<ContribuicaoInsert> };
       empresas: { Row: Empresa; Insert: EmpresaInsert; Update: Partial<EmpresaInsert> };
+      escritorio: { Row: Escritorio; Insert: EscritorioInsert; Update: Partial<EscritorioInsert> };
       lookup_items: { Row: LookupItem; Insert: Omit<LookupItem, "id" | "created_at">; Update: Partial<Omit<LookupItem, "id" | "created_at">> };
       module_permissions: { Row: ModulePermission; Insert: Omit<ModulePermission, "id" | "created_at">; Update: Partial<Omit<ModulePermission, "id" | "created_at">> };
     };
@@ -163,6 +164,30 @@ export type Cnae = {
 };
 
 export type CnaeInsert = Omit<Cnae, "id" | "created_at" | "updated_at"> & { id?: number };
+
+export type Escritorio = {
+  id: number;
+  empresa_id: number;
+  razao_social: string;
+  nm_fantasia: string;
+  cpf_cnpj: string;
+  email: string | null;
+  tel1: string | null;
+  tel2: string | null;
+  nm_contato: string | null;
+  endereco: string | null;
+  numero: string | null;
+  complemento: string | null;
+  bairro: string | null;
+  cidade: string | null;
+  uf: string;
+  cep: string | null;
+  obs: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type EscritorioInsert = Omit<Escritorio, "id" | "created_at" | "updated_at"> & { id?: number };
 
 export type LookupItem = {
   id: number;
