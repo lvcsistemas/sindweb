@@ -1,14 +1,15 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Save, Search, UserRound } from "lucide-react";
+import { Camera, Plus, Save, Search, UserRound } from "lucide-react";
 import { Breadcrumb } from "../../shared/Breadcrumb";
-import { listUsuarios, saveUsuario, type UsuarioPayload, type UsuarioRow } from "./usuariosApi";
+import { getUsuarioFotoUrl, listUsuarios, saveUsuario, type UsuarioPayload, type UsuarioRow, uploadUsuarioFoto } from "./usuariosApi";
 
 const emptyForm: UsuarioPayload = {
   email: "",
   password: "",
   full_name: "",
-  codinome: ""
+  codinome: "",
+  avatar_path: null
 };
 
 export function UsuariosPage() {
@@ -16,6 +17,8 @@ export function UsuariosPage() {
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [form, setForm] = useState<UsuarioPayload>(emptyForm);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   const usuariosQuery = useQuery({ queryKey: ["usuarios"], queryFn: listUsuarios });
@@ -33,9 +36,22 @@ export function UsuariosPage() {
       email: selectedUser.email ?? "",
       password: "",
       full_name: selectedUser.full_name ?? "",
-      codinome: selectedUser.codinome ?? ""
+      codinome: selectedUser.codinome ?? "",
+      avatar_path: selectedUser.avatar_path
     });
+    setPhotoFile(null);
   }, [selectedUser]);
+
+  useEffect(() => {
+    if (!photoFile) {
+      setPhotoPreview(getUsuarioFotoUrl(form.avatar_path));
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(photoFile);
+    setPhotoPreview(previewUrl);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [form.avatar_path, photoFile]);
 
   const filteredUsuarios = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -48,9 +64,17 @@ export function UsuariosPage() {
   }, [usuarios, search]);
 
   const saveMutation = useMutation({
-    mutationFn: saveUsuario,
+    mutationFn: async (values: UsuarioPayload) => {
+      const id = await saveUsuario(values);
+      if (!photoFile) return id;
+
+      const avatarPath = await uploadUsuarioFoto(id, photoFile);
+      await saveUsuario({ ...values, id, password: undefined, avatar_path: avatarPath });
+      return id;
+    },
     onSuccess: async (id) => {
       setSelectedId(id);
+      setPhotoFile(null);
       setMessage("Usuario salvo com sucesso.");
       await queryClient.invalidateQueries({ queryKey: ["usuarios"] });
       setForm((current) => ({ ...current, id, password: "" }));
@@ -61,6 +85,7 @@ export function UsuariosPage() {
   function handleNew() {
     setSelectedId(null);
     setMessage(null);
+    setPhotoFile(null);
     setForm(emptyForm);
   }
 
@@ -120,6 +145,14 @@ export function UsuariosPage() {
               </label>
             </div>
 
+            <div className="photo-field">
+              <div className="avatar large">{photoPreview ? <img src={photoPreview} alt="" /> : <UserRound size={30} />}</div>
+              <label className="secondary-button">
+                <Camera size={16} /> Foto do usuario
+                <input type="file" accept="image/*" onChange={(event) => setPhotoFile(event.target.files?.[0] ?? null)} />
+              </label>
+            </div>
+
             {message ? <div className={saveMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
 
             <div className="form-actions">
@@ -134,10 +167,11 @@ export function UsuariosPage() {
 
 function UsuarioRowView({ usuario, selected, onClick }: { usuario: UsuarioRow; selected: boolean; onClick: () => void }) {
   const label = usuario.full_name || usuario.email || "Usuário";
+  const avatarUrl = getUsuarioFotoUrl(usuario.avatar_path);
 
   return (
     <button className={`record-row ${selected ? "selected" : ""}`} onClick={onClick}>
-      <div className="avatar"><UserRound size={19} /></div>
+      <div className="avatar">{avatarUrl ? <img src={avatarUrl} alt="" /> : <UserRound size={19} />}</div>
       <div>
         <strong>{label}</strong>
         <span>{usuario.email ?? "Sem e-mail"}</span>

@@ -5,6 +5,7 @@ export type UsuarioRow = {
   email: string | null;
   full_name: string | null;
   codinome: string | null;
+  avatar_path: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -15,6 +16,7 @@ export type UsuarioPayload = {
   password?: string;
   full_name?: string;
   codinome?: string;
+  avatar_path?: string | null;
 };
 
 async function callAdminUsers<T>(method: "GET" | "POST", body?: unknown) {
@@ -46,4 +48,17 @@ export async function listUsuarios() {
 export async function saveUsuario(values: UsuarioPayload) {
   const data = await callAdminUsers<{ id: string }>("POST", values);
   return data.id;
+}
+
+export async function uploadUsuarioFoto(userId: string, file: File) {
+  const extension = file.name.split(".").pop() ?? "jpg";
+  const path = `${userId}/${crypto.randomUUID()}.${extension}`;
+  const { error } = await supabase.storage.from("usuarios-fotos").upload(path, file, { upsert: false });
+  if (error) throw error;
+  return path;
+}
+
+export function getUsuarioFotoUrl(path: string | null | undefined) {
+  if (!path) return null;
+  return supabase.storage.from("usuarios-fotos").getPublicUrl(path).data.publicUrl;
 }

@@ -12,6 +12,7 @@ type UserPayload = {
   password?: string;
   full_name?: string | null;
   codinome?: string | null;
+  avatar_path?: string | null;
 };
 
 function json(body: unknown, status = 200) {
@@ -113,7 +114,8 @@ Deno.serve(async (req) => {
     id: userId,
     email,
     full_name: payload.full_name?.trim() || email,
-    codinome: payload.codinome?.trim().toUpperCase() || null
+    codinome: payload.codinome?.trim().toUpperCase() || null,
+    avatar_path: payload.avatar_path ?? null
   };
 
   if (!payload.id) {
