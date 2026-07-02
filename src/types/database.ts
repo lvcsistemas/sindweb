@@ -7,6 +7,7 @@ export type Database = {
       atendimento_medico_convenio: { Row: AtendimentoMedicoConvenio; Insert: AtendimentoMedicoConvenioInsert; Update: Partial<AtendimentoMedicoConvenioInsert> };
       atendimento_medico_especialidade: { Row: AtendimentoMedicoEspecialidade; Insert: AtendimentoMedicoEspecialidadeInsert; Update: Partial<AtendimentoMedicoEspecialidadeInsert> };
       auxiliares: { Row: Auxiliar; Insert: AuxiliarInsert; Update: Partial<AuxiliarInsert> };
+      cnae: { Row: Cnae; Insert: CnaeInsert; Update: Partial<CnaeInsert> };
       contribuicao: { Row: Contribuicao; Insert: ContribuicaoInsert; Update: Partial<ContribuicaoInsert> };
       empresas: { Row: Empresa; Insert: EmpresaInsert; Update: Partial<EmpresaInsert> };
       lookup_items: { Row: LookupItem; Insert: Omit<LookupItem, "id" | "created_at">; Update: Partial<Omit<LookupItem, "id" | "created_at">> };
@@ -152,6 +153,16 @@ export type Auxiliar = {
 };
 
 export type AuxiliarInsert = Omit<Auxiliar, "id" | "created_at" | "updated_at"> & { id?: number };
+
+export type Cnae = {
+  id: number;
+  codigo_cnae: string;
+  descricao: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CnaeInsert = Omit<Cnae, "id" | "created_at" | "updated_at"> & { id?: number };
 
 export type LookupItem = {
   id: number;
