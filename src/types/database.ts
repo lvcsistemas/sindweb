@@ -5,6 +5,7 @@ export type Database = {
     Tables: {
       associados: { Row: Associado; Insert: AssociadoInsert; Update: Partial<AssociadoInsert> };
       atendimento_medico_convenio: { Row: AtendimentoMedicoConvenio; Insert: AtendimentoMedicoConvenioInsert; Update: Partial<AtendimentoMedicoConvenioInsert> };
+      atendimento_medico_especialidade: { Row: AtendimentoMedicoEspecialidade; Insert: AtendimentoMedicoEspecialidadeInsert; Update: Partial<AtendimentoMedicoEspecialidadeInsert> };
       auxiliares: { Row: Auxiliar; Insert: AuxiliarInsert; Update: Partial<AuxiliarInsert> };
       contribuicao: { Row: Contribuicao; Insert: ContribuicaoInsert; Update: Partial<ContribuicaoInsert> };
       empresas: { Row: Empresa; Insert: EmpresaInsert; Update: Partial<EmpresaInsert> };
@@ -129,6 +130,16 @@ export type AtendimentoMedicoConvenio = {
 };
 
 export type AtendimentoMedicoConvenioInsert = Omit<AtendimentoMedicoConvenio, "id" | "created_at" | "updated_at"> & { id?: number };
+
+export type AtendimentoMedicoEspecialidade = {
+  id: number;
+  tipo: string;
+  nm_especialidade: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AtendimentoMedicoEspecialidadeInsert = Omit<AtendimentoMedicoEspecialidade, "id" | "created_at" | "updated_at"> & { id?: number };
 
 export type Auxiliar = {
   id: number;
