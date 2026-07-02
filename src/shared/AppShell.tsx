@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { BriefcaseBusiness, ChevronRight, Coins, Folder, Handshake, LogOut, Menu, UserCog, UsersRound } from "lucide-react";
+import { BriefcaseBusiness, ChevronRight, Coins, Folder, Handshake, LogOut, Menu, Stethoscope, UserCog, UsersRound } from "lucide-react";
 import { useAuth } from "../features/auth/AuthProvider";
 
 export function AppShell() {
@@ -23,6 +23,7 @@ export function AppShell() {
             {cadastrosOpen ? (
               <div className="nav-subgroup">
                 <NavLink className="nav-leaf direct" to="/associados"><UsersRound size={17} /> Associados</NavLink>
+                <NavLink className="nav-leaf direct" to="/atendimento-medico-especialidades"><Stethoscope size={17} /> Atendimento Médico Especialidades</NavLink>
                 <NavLink className="nav-leaf direct" to="/contribuicao"><Coins size={17} /> Contribuições</NavLink>
                 <NavLink className="nav-leaf direct" to="/usuarios"><UserCog size={17} /> Usuários</NavLink>
               </div>

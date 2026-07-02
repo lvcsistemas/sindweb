@@ -4,6 +4,7 @@ export type Database = {
   public: {
     Tables: {
       associados: { Row: Associado; Insert: AssociadoInsert; Update: Partial<AssociadoInsert> };
+      atendimento_medico_convenio: { Row: AtendimentoMedicoConvenio; Insert: AtendimentoMedicoConvenioInsert; Update: Partial<AtendimentoMedicoConvenioInsert> };
       contribuicao: { Row: Contribuicao; Insert: ContribuicaoInsert; Update: Partial<ContribuicaoInsert> };
       empresas: { Row: Empresa; Insert: EmpresaInsert; Update: Partial<EmpresaInsert> };
       lookup_items: { Row: LookupItem; Insert: Omit<LookupItem, "id" | "created_at">; Update: Partial<Omit<LookupItem, "id" | "created_at">> };
@@ -103,6 +104,30 @@ export type Contribuicao = {
 };
 
 export type ContribuicaoInsert = Omit<Contribuicao, "id" | "created_at" | "updated_at"> & { id?: number };
+
+export type AtendimentoMedicoConvenio = {
+  id: number;
+  ativo: string;
+  tipo_pessoa: string;
+  nm_convenio: string;
+  nm_responsavel: string | null;
+  cpf_cnpj: string;
+  endereco: string | null;
+  numero: string | null;
+  complemento: string | null;
+  bairro: string | null;
+  cidade: string | null;
+  uf: string;
+  cep: string | null;
+  tel1: string | null;
+  tel2: string | null;
+  tel3: string | null;
+  obs: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AtendimentoMedicoConvenioInsert = Omit<AtendimentoMedicoConvenio, "id" | "created_at" | "updated_at"> & { id?: number };
 
 export type LookupItem = {
   id: number;
