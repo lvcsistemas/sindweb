@@ -42,8 +42,10 @@ button { cursor: pointer; }
 .nav-chevron { transition: transform 0.16s ease; }
 .nav-toggle[aria-expanded="true"] .nav-chevron { transform: rotate(90deg); }
 .nav-leaf { margin-left: 38px; white-space: nowrap; }
+.nav-leaf.direct { margin-left: 24px; }
 .sidebar a { color: #dbe8ed; display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 10px 12px; border-radius: 6px; }
 .sidebar a.active, .sidebar a:hover { background: #214756; color: #fff; }
+.sidebar .empty-state.small { padding: 8px 12px 8px 40px; color: #a9bbc4; text-align: left; font-size: 0.86rem; }
 .workspace { min-width: 0; display: grid; grid-template-rows: 56px 1fr; }
 .topbar { background: #fff; border-bottom: 1px solid #d7dee5; display: flex; align-items: center; gap: 14px; padding: 0 22px; color: #53616f; }
 .topbar-spacer { flex: 1; }

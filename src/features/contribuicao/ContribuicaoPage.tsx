@@ -93,10 +93,10 @@ export function ContribuicaoPage() {
 
   return (
     <main className="module-page">
-      <Breadcrumb items={[{ label: "Cadastros" }, { label: "Contribuição" }]} />
+      <Breadcrumb items={[{ label: "Cadastros" }, { label: "Contribuições" }]} />
       <section className="module-header">
         <div>
-          <h1>Contribuição</h1>
+          <h1>Contribuições</h1>
           <p>Tabela auxiliar para tipos de contribuição e valores base.</p>
         </div>
         <button onClick={handleNew}><Plus size={16} /> Novo</button>
