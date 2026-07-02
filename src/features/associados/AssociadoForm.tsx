@@ -134,39 +134,39 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
     <form className="form-panel" onSubmit={form.handleSubmit((values) => saveMutation.mutate(values))}>
       <div className="form-grid compact">
         <label className="check"><input type="checkbox" {...form.register("ativo")} /> Ativo</label>
-        <label>Matrícula<input {...form.register("matricula")} /></label>
-        <label>CPF<input {...form.register("cpf")} /></label>
+        <label className="field"><input {...form.register("matricula")} placeholder=" " /><span>Matrícula</span></label>
+        <label className="field"><input {...form.register("cpf")} placeholder=" " /><span>CPF</span></label>
       </div>
-      <label>Nome do associado<input {...form.register("nome")} /></label>
+      <label className="field"><input {...form.register("nome")} placeholder=" " /><span>Nome do associado</span></label>
       <div className="form-grid">
-        <label>Empresa<select {...form.register("empresa_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{empresas.map((empresa) => <option key={empresa.id} value={empresa.id}>{empresa.nome_fantasia}</option>)}</select></label>
-        <label>Situação<select {...form.register("situacao_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{situacoes.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
-      </div>
-      <div className="form-grid">
-        <label>Local trabalho<select {...form.register("local_trabalho_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{locaisTrabalho.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
-        <label>Local pagamento<select {...form.register("local_pagamento_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{locaisPagamento.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
-      </div>
-      <div className="form-grid compact">
-        <label>Nascimento<input type="date" {...form.register("data_nascimento")} /></label>
-        <label>Admissão<input type="date" {...form.register("data_admissao")} /></label>
-        <label>Categoria<input type="date" {...form.register("data_categoria")} /></label>
+        <label className="field"><select {...form.register("empresa_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{empresas.map((empresa) => <option key={empresa.id} value={empresa.id}>{empresa.nome_fantasia}</option>)}</select><span>Empresa</span></label>
+        <label className="field"><select {...form.register("situacao_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{situacoes.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select><span>Situação</span></label>
       </div>
       <div className="form-grid">
-        <label>Telefone<input {...form.register("tel1")} /></label>
-        <label>E-mail<input {...form.register("email")} /></label>
+        <label className="field"><select {...form.register("local_trabalho_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{locaisTrabalho.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select><span>Local trabalho</span></label>
+        <label className="field"><select {...form.register("local_pagamento_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{locaisPagamento.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select><span>Local pagamento</span></label>
       </div>
       <div className="form-grid compact">
-        <label>RG<input {...form.register("rg")} /></label>
-        <label>Sexo<select {...form.register("sexo")}><option value="">Selecione</option><option value="M">Masculino</option><option value="F">Feminino</option></select></label>
-        <label>Salário<input type="number" step="0.01" {...form.register("salario")} /></label>
+        <label className="field"><input type="date" {...form.register("data_nascimento")} placeholder=" " /><span>Nascimento</span></label>
+        <label className="field"><input type="date" {...form.register("data_admissao")} placeholder=" " /><span>Admissão</span></label>
+        <label className="field"><input type="date" {...form.register("data_categoria")} placeholder=" " /><span>Categoria</span></label>
       </div>
-      <label>Endereço<input {...form.register("endereco")} /></label>
+      <div className="form-grid">
+        <label className="field"><input {...form.register("tel1")} placeholder=" " /><span>Telefone</span></label>
+        <label className="field"><input {...form.register("email")} placeholder=" " /><span>E-mail</span></label>
+      </div>
       <div className="form-grid compact">
-        <label>Bairro<input {...form.register("bairro")} /></label>
-        <label>Cidade<input {...form.register("cidade")} /></label>
-        <label>UF<input maxLength={2} {...form.register("uf")} /></label>
+        <label className="field"><input {...form.register("rg")} placeholder=" " /><span>RG</span></label>
+        <label className="field"><select {...form.register("sexo")}><option value="">Selecione</option><option value="M">Masculino</option><option value="F">Feminino</option></select><span>Sexo</span></label>
+        <label className="field"><input type="number" step="0.01" {...form.register("salario")} placeholder=" " /><span>Salário</span></label>
       </div>
-      <label>Observação<textarea rows={3} {...form.register("observacao")} /></label>
+      <label className="field"><input {...form.register("endereco")} placeholder=" " /><span>Endereço</span></label>
+      <div className="form-grid compact">
+        <label className="field"><input {...form.register("bairro")} placeholder=" " /><span>Bairro</span></label>
+        <label className="field"><input {...form.register("cidade")} placeholder=" " /><span>Cidade</span></label>
+        <label className="field"><input maxLength={2} {...form.register("uf")} placeholder=" " /><span>UF</span></label>
+      </div>
+      <label className="field"><textarea rows={3} {...form.register("observacao")} placeholder=" " /><span>Observação</span></label>
       {errorList.length ? <div className="form-error">{errorList.join(" ")}</div> : null}
       {saveMutation.error ? <div className="form-error">{saveMutation.error.message}</div> : null}
       {photoMutation.error ? <div className="form-error">{photoMutation.error.message}</div> : null}

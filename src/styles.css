@@ -94,6 +94,10 @@ button, .secondary-button { border: 1px solid #1b6b50; background: #1f7a5b; colo
 .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .form-grid.compact { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 label { display: grid; gap: 6px; color: #465563; font-weight: 650; }
+.field { position: relative; display: block; }
+.field input, .field select, .field textarea { padding-top: 18px; padding-bottom: 5px; }
+.field textarea { padding-top: 22px; }
+.field span { position: absolute; left: 11px; top: 5px; color: #657383; font-size: 0.72rem; font-weight: 750; line-height: 1; pointer-events: none; }
 label.check { display: flex; align-items: center; gap: 8px; align-self: end; min-height: 38px; }
 input, select, textarea { width: 100%; border: 1px solid #cbd5dd; border-radius: 6px; padding: 9px 10px; background: #fff; color: #17202a; min-height: 38px; }
 textarea { resize: vertical; }

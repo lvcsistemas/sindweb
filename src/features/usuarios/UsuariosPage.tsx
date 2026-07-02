@@ -137,21 +137,21 @@ export function UsuariosPage() {
         {formOpen ? <div className="detail-panel">
           <form className="form-panel" onSubmit={handleSubmit}>
             <div className="form-grid">
-              <label>
-                E-mail
-                <input type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} required />
+              <label className="field">
+                <input type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} placeholder=" " required />
+                <span>E-mail</span>
               </label>
-              <label>
-                Senha {form.id ? "(opcional)" : ""}
-                <input type="password" value={form.password ?? ""} onChange={(event) => setForm({ ...form, password: event.target.value })} required={!form.id} minLength={6} autoComplete="new-password" />
+              <label className="field">
+                <input type="password" value={form.password ?? ""} onChange={(event) => setForm({ ...form, password: event.target.value })} required={!form.id} minLength={6} autoComplete="new-password" placeholder=" " />
+                <span>Senha {form.id ? "(opcional)" : ""}</span>
               </label>
-              <label>
-                Nome
-                <input value={form.full_name ?? ""} onChange={(event) => setForm({ ...form, full_name: event.target.value })} />
+              <label className="field">
+                <input value={form.full_name ?? ""} onChange={(event) => setForm({ ...form, full_name: event.target.value })} placeholder=" " />
+                <span>Nome</span>
               </label>
-              <label>
-                Codinome
-                <input value={form.codinome ?? ""} onChange={(event) => setForm({ ...form, codinome: event.target.value })} />
+              <label className="field">
+                <input value={form.codinome ?? ""} onChange={(event) => setForm({ ...form, codinome: event.target.value })} placeholder=" " />
+                <span>Codinome</span>
               </label>
             </div>
 

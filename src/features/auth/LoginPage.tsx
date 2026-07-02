@@ -34,13 +34,13 @@ export function LoginPage() {
     <main className="login-page">
       <form className="login-card" onSubmit={handleSubmit}>
         <div className="login-brand"><ShieldCheck size={28} /> SindWeb</div>
-        <label>
-          E-mail
-          <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" autoComplete="email" required />
+        <label className="field">
+          <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" autoComplete="email" placeholder=" " required />
+          <span>E-mail</span>
         </label>
-        <label>
-          Senha
-          <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" autoComplete="current-password" required />
+        <label className="field">
+          <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" autoComplete="current-password" placeholder=" " required />
+          <span>Senha</span>
         </label>
         {error ? <p className="form-error">{error}</p> : null}
         <button type="submit" disabled={submitting}>{submitting ? "Entrando..." : "Entrar"}</button>
