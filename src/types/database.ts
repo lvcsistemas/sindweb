@@ -5,6 +5,7 @@ export type Database = {
     Tables: {
       associados: { Row: Associado; Insert: AssociadoInsert; Update: Partial<AssociadoInsert> };
       atendimento_medico_convenio: { Row: AtendimentoMedicoConvenio; Insert: AtendimentoMedicoConvenioInsert; Update: Partial<AtendimentoMedicoConvenioInsert> };
+      auxiliares: { Row: Auxiliar; Insert: AuxiliarInsert; Update: Partial<AuxiliarInsert> };
       contribuicao: { Row: Contribuicao; Insert: ContribuicaoInsert; Update: Partial<ContribuicaoInsert> };
       empresas: { Row: Empresa; Insert: EmpresaInsert; Update: Partial<EmpresaInsert> };
       lookup_items: { Row: LookupItem; Insert: Omit<LookupItem, "id" | "created_at">; Update: Partial<Omit<LookupItem, "id" | "created_at">> };
@@ -128,6 +129,18 @@ export type AtendimentoMedicoConvenio = {
 };
 
 export type AtendimentoMedicoConvenioInsert = Omit<AtendimentoMedicoConvenio, "id" | "created_at" | "updated_at"> & { id?: number };
+
+export type Auxiliar = {
+  id: number;
+  grupo: string;
+  nome: string;
+  ativo: string;
+  ordem: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AuxiliarInsert = Omit<Auxiliar, "id" | "created_at" | "updated_at"> & { id?: number };
 
 export type LookupItem = {
   id: number;

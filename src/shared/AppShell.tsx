@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { BriefcaseBusiness, ChevronRight, Coins, Folder, Handshake, LogOut, Menu, Stethoscope, UserCog, UsersRound } from "lucide-react";
+import { BriefcaseBusiness, ChevronRight, Coins, Folder, Handshake, ListTree, LogOut, Menu, Stethoscope, UserCog, UsersRound } from "lucide-react";
 import { useAuth } from "../features/auth/AuthProvider";
+import { AUXILIAR_GRUPOS } from "../features/auxiliares/auxiliaresConfig";
 
 export function AppShell() {
   const { signOut, user } = useAuth();
@@ -9,6 +10,7 @@ export function AppShell() {
   const [cadastrosOpen, setCadastrosOpen] = useState(false);
   const [atendimentosOpen, setAtendimentosOpen] = useState(false);
   const [financeiroOpen, setFinanceiroOpen] = useState(false);
+  const [auxiliaresOpen, setAuxiliaresOpen] = useState(false);
 
   return (
     <div className={`app-shell ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
@@ -42,6 +44,19 @@ export function AppShell() {
               <BriefcaseBusiness size={18} /> Financeiro
             </button>
             {financeiroOpen ? <div className="nav-subgroup empty-state small">Sem itens cadastrados.</div> : null}
+          </div>
+          <div className="nav-group">
+            <button className="nav-toggle" onClick={() => setAuxiliaresOpen((open) => !open)} aria-expanded={auxiliaresOpen}>
+              <ChevronRight className="nav-chevron" size={16} />
+              <ListTree size={18} /> Auxiliares
+            </button>
+            {auxiliaresOpen ? (
+              <div className="nav-subgroup">
+                {AUXILIAR_GRUPOS.map((grupo) => (
+                  <NavLink key={grupo.key} className="nav-leaf direct" to={`/auxiliares/${grupo.path}`}>{grupo.label}</NavLink>
+                ))}
+              </div>
+            ) : null}
           </div>
         </nav>
       </aside>
