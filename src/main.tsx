@@ -14,6 +14,7 @@ import { CnaePage } from "./features/cnae/CnaePage";
 import { ContribuicaoPage } from "./features/contribuicao/ContribuicaoPage";
 import { DashboardPage } from "./features/dashboard/DashboardPage";
 import { EscritorioPage } from "./features/escritorio/EscritorioPage";
+import { LocalTrabalhoPage } from "./features/localTrabalho/LocalTrabalhoPage";
 import { UsuariosPage } from "./features/usuarios/UsuariosPage";
 import "./styles.css";
 
@@ -37,6 +38,7 @@ const router = createBrowserRouter([
       { path: "cnae", element: <CnaePage /> },
       { path: "contribuicao", element: <ContribuicaoPage /> },
       { path: "escritorios", element: <EscritorioPage /> },
+      { path: "local-trabalho", element: <LocalTrabalhoPage /> },
       { path: "usuarios", element: <UsuariosPage /> }
     ]
   }
