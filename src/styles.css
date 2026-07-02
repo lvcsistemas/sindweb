@@ -72,6 +72,7 @@ button, .secondary-button { border: 1px solid #1b6b50; background: #1f7a5b; colo
 .secondary-button input[type="file"] { display: none; }
 
 .split-view { display: grid; grid-template-columns: minmax(310px, 38%) 1fr; gap: 16px; align-items: start; }
+.split-view.list-only { grid-template-columns: minmax(310px, 520px); }
 .list-panel, .detail-panel, .form-panel { background: #fff; border: 1px solid #d7dee5; border-radius: 8px; }
 .list-panel { padding: 14px; }
 .detail-panel { padding: 0; overflow: hidden; }

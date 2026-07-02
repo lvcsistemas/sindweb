@@ -16,6 +16,7 @@ export function UsuariosPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [creatingNew, setCreatingNew] = useState(false);
   const [form, setForm] = useState<UsuarioPayload>(emptyForm);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -24,6 +25,7 @@ export function UsuariosPage() {
   const usuariosQuery = useQuery({ queryKey: ["usuarios"], queryFn: listUsuarios });
   const usuarios = usuariosQuery.data ?? [];
   const selectedUser = usuarios.find((usuario) => usuario.id === selectedId) ?? null;
+  const formOpen = creatingNew || Boolean(selectedId);
 
   useEffect(() => {
     if (!selectedUser) {
@@ -74,6 +76,7 @@ export function UsuariosPage() {
     },
     onSuccess: async (id) => {
       setSelectedId(id);
+      setCreatingNew(false);
       setPhotoFile(null);
       setMessage("Usuario salvo com sucesso.");
       await queryClient.invalidateQueries({ queryKey: ["usuarios"] });
@@ -84,9 +87,16 @@ export function UsuariosPage() {
 
   function handleNew() {
     setSelectedId(null);
+    setCreatingNew(true);
     setMessage(null);
     setPhotoFile(null);
     setForm(emptyForm);
+  }
+
+  function handleSelectUser(id: string) {
+    setSelectedId(id);
+    setCreatingNew(false);
+    setMessage(null);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -112,19 +122,19 @@ export function UsuariosPage() {
         <button onClick={handleNew}><Plus size={16} /> Novo</button>
       </section>
 
-      <section className="split-view">
+      <section className={`split-view ${formOpen ? "" : "list-only"}`}>
         <div className="list-panel">
           <label className="search-box"><Search size={16} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por nome, e-mail ou codinome" /></label>
           <div className="record-list">
             {usuariosQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
             {filteredUsuarios.map((usuario) => (
-              <UsuarioRowView key={usuario.id} usuario={usuario} selected={usuario.id === selectedId} onClick={() => setSelectedId(usuario.id)} />
+              <UsuarioRowView key={usuario.id} usuario={usuario} selected={usuario.id === selectedId} onClick={() => handleSelectUser(usuario.id)} />
             ))}
             {!usuariosQuery.isLoading && filteredUsuarios.length === 0 ? <div className="empty-state">Nenhum usuário encontrado.</div> : null}
           </div>
         </div>
 
-        <div className="detail-panel">
+        {formOpen ? <div className="detail-panel">
           <form className="form-panel" onSubmit={handleSubmit}>
             <div className="form-grid">
               <label>
@@ -159,7 +169,7 @@ export function UsuariosPage() {
               <button type="submit" disabled={saveMutation.isPending}><Save size={16} /> {saveMutation.isPending ? "Salvando..." : "Salvar"}</button>
             </div>
           </form>
-        </div>
+        </div> : null}
       </section>
     </main>
   );
