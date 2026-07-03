@@ -24,6 +24,26 @@ const emptyForm: EscritorioInsert = {
   obs: ""
 };
 
+function onlyDigits(value: string | null | undefined) {
+  return value?.replace(/\D/g, "") ?? "";
+}
+
+function formatCpfCnpj(value: string) {
+  const digits = onlyDigits(value).slice(0, 14);
+  if (digits.length <= 11) {
+    return digits
+      .replace(/^(\d{3})(\d)/, "$1.$2")
+      .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+      .replace(/\.(\d{3})(\d)/, ".$1-$2");
+  }
+
+  return digits
+    .replace(/^(\d{2})(\d)/, "$1.$2")
+    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1/$2")
+    .replace(/(\d{4})(\d)/, "$1-$2");
+}
+
 export function EscritorioPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
@@ -48,7 +68,7 @@ export function EscritorioPage() {
       empresa_id: selected.empresa_id,
       razao_social: selected.razao_social,
       nm_fantasia: selected.nm_fantasia,
-      cpf_cnpj: selected.cpf_cnpj,
+      cpf_cnpj: formatCpfCnpj(selected.cpf_cnpj),
       email: selected.email ?? "",
       tel1: selected.tel1 ?? "",
       tel2: selected.tel2 ?? "",
@@ -134,7 +154,7 @@ export function EscritorioPage() {
               <button key={item.id} className={`record-row simple ${item.id === selectedId ? "selected" : ""}`} onClick={() => handleSelect(item)}>
                 <div>
                   <strong>{item.razao_social}</strong>
-                  <span>{item.cpf_cnpj} - {item.cidade ?? "Sem cidade"} - {item.nm_contato ?? "Sem contato"}</span>
+                  <span>{formatCpfCnpj(item.cpf_cnpj)} - {item.cidade ?? "Sem cidade"} - {item.nm_contato ?? "Sem contato"}</span>
                 </div>
               </button>
             ))}
@@ -144,16 +164,10 @@ export function EscritorioPage() {
 
         {formOpen ? <div className="detail-panel">
           <form className="form-panel" onSubmit={handleSubmit}>
-            <div className="form-grid compact">
-              <label className="field">
-                <input type="number" min={0} value={form.empresa_id} onChange={(event) => setForm({ ...form, empresa_id: Number(event.target.value) })} placeholder=" " />
-                <span>Empresa ID</span>
-              </label>
-              <label className="field">
-                <input value={form.cpf_cnpj} maxLength={25} onChange={(event) => setForm({ ...form, cpf_cnpj: event.target.value })} placeholder=" " required />
-                <span>CPF/CNPJ</span>
-              </label>
-            </div>
+            <label className="field">
+              <input value={form.cpf_cnpj} maxLength={18} onChange={(event) => setForm({ ...form, cpf_cnpj: formatCpfCnpj(event.target.value) })} placeholder=" " required />
+              <span>CPF/CNPJ</span>
+            </label>
 
             <div className="form-grid">
               <label className="field">
