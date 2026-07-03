@@ -9,7 +9,7 @@ function onlyDigits(value: string | null | undefined) {
 
 export async function listEscritorios(search: string) {
   let query = supabaseUnsafe
-    .from("escritorios")
+    .from("empresas_escritorios")
     .select("*")
     .order("razao_social", { ascending: true });
 
@@ -19,6 +19,17 @@ export async function listEscritorios(search: string) {
   }
 
   const { data, error } = await query;
+  if (error) throw error;
+  return data as Escritorio[];
+}
+
+export async function listEscritoriosByEmpresa(empresaId: number) {
+  const { data, error } = await supabaseUnsafe
+    .from("empresas_escritorios")
+    .select("*")
+    .eq("empresa_id", empresaId)
+    .order("nm_fantasia", { ascending: true });
+
   if (error) throw error;
   return data as Escritorio[];
 }
@@ -46,7 +57,7 @@ export async function saveEscritorio(values: EscritorioInsert) {
 
   if (payload.id) {
     const { data, error } = await supabaseUnsafe
-      .from("escritorios")
+      .from("empresas_escritorios")
       .update(payload)
       .eq("id", payload.id)
       .select()
@@ -56,7 +67,7 @@ export async function saveEscritorio(values: EscritorioInsert) {
   }
 
   const { data, error } = await supabaseUnsafe
-    .from("escritorios")
+    .from("empresas_escritorios")
     .insert(payload)
     .select()
     .single();
@@ -65,6 +76,6 @@ export async function saveEscritorio(values: EscritorioInsert) {
 }
 
 export async function deleteEscritorio(id: number) {
-  const { error } = await supabaseUnsafe.from("escritorios").delete().eq("id", id);
+  const { error } = await supabaseUnsafe.from("empresas_escritorios").delete().eq("id", id);
   if (error) throw error;
 }

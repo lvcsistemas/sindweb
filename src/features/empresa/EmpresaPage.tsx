@@ -5,6 +5,7 @@ import { Breadcrumb } from "../../shared/Breadcrumb";
 import type { EmpresaCadastro, EmpresaCadastroInsert } from "../../types/database";
 import { listAuxiliares } from "../auxiliares/auxiliaresApi";
 import { listContribuicoes } from "../contribuicao/contribuicaoApi";
+import { listEscritoriosByEmpresa } from "../escritorio/escritorioApi";
 import { listUsuarios } from "../usuarios/usuariosApi";
 import { addEmpresaContribuicao, consultarCnpj, deleteEmpresaCadastro, deleteEmpresaContribuicao, getEmpresaLogoUrl, listEmpresaAssociados, listEmpresaContribuicoes, listEmpresasCadastro, saveEmpresaCadastro, uploadEmpresaLogo } from "./empresaApi";
 import type { CnpjConsulta } from "./empresaApi";
@@ -153,6 +154,11 @@ export function EmpresaPage() {
     queryFn: () => listEmpresaAssociados(selectedId ?? 0),
     enabled: Boolean(selectedId)
   });
+  const empresaEscritoriosQuery = useQuery({
+    queryKey: ["empresa-escritorios", selectedId],
+    queryFn: () => listEscritoriosByEmpresa(selectedId ?? 0),
+    enabled: Boolean(selectedId)
+  });
   const empresas = empresasQuery.data ?? [];
   const usuarios = usuariosQuery.data ?? [];
   const contribuicoes = contribuicoesQuery.data ?? [];
@@ -162,6 +168,7 @@ export function EmpresaPage() {
   const defaultEstabelecimentoTipoId = estabelecimentoTipos[0]?.id ?? emptyForm.estabelecimento_tipo_id;
   const empresaContribuicoes = empresaContribuicoesQuery.data ?? [];
   const empresaAssociados = empresaAssociadosQuery.data ?? [];
+  const empresaEscritorios = empresaEscritoriosQuery.data ?? [];
   const selected = empresas.find((item) => item.id === selectedId) ?? null;
   const formOpen = creatingNew || Boolean(selectedId);
 
@@ -560,7 +567,13 @@ export function EmpresaPage() {
               </div>
 
               <div className="form-grid compact">
-                <label className="field"><input type="number" min={0} value={form.escritorio_id} onChange={(event) => setForm({ ...form, escritorio_id: Number(event.target.value) })} placeholder=" " /><span>Escritorio</span></label>
+                <label className="field">
+                  <select value={form.escritorio_id} onChange={(event) => setForm({ ...form, escritorio_id: Number(event.target.value) })} disabled={!selectedId}>
+                    <option value={0}>Selecione</option>
+                    {empresaEscritorios.map((item) => <option key={item.id} value={item.id}>{item.nm_fantasia || item.razao_social}</option>)}
+                  </select>
+                  <span>Escritorio</span>
+                </label>
                 <label className="field"><input type="number" min={0} value={form.ramo_atividade_id} onChange={(event) => setForm({ ...form, ramo_atividade_id: Number(event.target.value) })} placeholder=" " /><span>Ramo atividade</span></label>
                 <label className="field"><input type="number" min={0} value={form.convencao_id} onChange={(event) => setForm({ ...form, convencao_id: Number(event.target.value) })} placeholder=" " /><span>Convencao</span></label>
               </div>

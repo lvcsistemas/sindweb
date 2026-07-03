@@ -12,7 +12,7 @@ export type Database = {
       contribuicoes: { Row: Contribuicao; Insert: ContribuicaoInsert; Update: Partial<ContribuicaoInsert> };
       empresas: { Row: EmpresaCadastro; Insert: EmpresaCadastroInsert; Update: Partial<EmpresaCadastroInsert> };
       empresas_contribuicoes: { Row: EmpresaContribuicao; Insert: EmpresaContribuicaoInsert; Update: Partial<EmpresaContribuicaoInsert> };
-      escritorios: { Row: Escritorio; Insert: EscritorioInsert; Update: Partial<EscritorioInsert> };
+      empresas_escritorios: { Row: Escritorio; Insert: EscritorioInsert; Update: Partial<EscritorioInsert> };
       locais_trabalho: { Row: LocalTrabalho; Insert: LocalTrabalhoInsert; Update: Partial<LocalTrabalhoInsert> };
       lookup_items: { Row: LookupItem; Insert: Omit<LookupItem, "id" | "created_at">; Update: Partial<Omit<LookupItem, "id" | "created_at">> };
     };
