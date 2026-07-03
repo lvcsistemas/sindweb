@@ -1,5 +1,5 @@
 import { supabase } from "../../lib/supabase";
-import type { EmpresaCadastro, EmpresaCadastroInsert } from "../../types/database";
+import type { EmpresaCadastro, EmpresaCadastroInsert, EmpresaContribuicaoLista } from "../../types/database";
 
 const supabaseUnsafe = supabase as any;
 
@@ -109,6 +109,44 @@ export async function saveEmpresaCadastro(values: EmpresaCadastroInsert) {
 
 export async function deleteEmpresaCadastro(id: number) {
   const { error } = await supabaseUnsafe.from("empresas").delete().eq("id", id);
+  if (error) throw error;
+}
+
+export async function listEmpresaContribuicoes(empresaId: number) {
+  const { data, error } = await supabaseUnsafe
+    .from("empresas_contribuicoes")
+    .select(`
+      id,
+      empresa_id,
+      contribuicao_id,
+      created_at,
+      dt_pg,
+      contribuicao:contribuicoes!empresas_contribuicoes_contribuicao_id_fkey (
+        tipo,
+        nm_contribuicao,
+        valor_base
+      )
+    `)
+    .eq("empresa_id", empresaId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data as EmpresaContribuicaoLista[];
+}
+
+export async function addEmpresaContribuicao(empresaId: number, contribuicaoId: number) {
+  const { data, error } = await supabaseUnsafe
+    .from("empresas_contribuicoes")
+    .insert({ empresa_id: empresaId, contribuicao_id: contribuicaoId })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteEmpresaContribuicao(id: number) {
+  const { error } = await supabaseUnsafe.from("empresas_contribuicoes").delete().eq("id", id);
   if (error) throw error;
 }
 

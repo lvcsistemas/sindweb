@@ -3,8 +3,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Building2, Camera, Plus, Save, Search, Trash2 } from "lucide-react";
 import { Breadcrumb } from "../../shared/Breadcrumb";
 import type { EmpresaCadastro, EmpresaCadastroInsert } from "../../types/database";
+import { listContribuicoes } from "../contribuicao/contribuicaoApi";
 import { listUsuarios } from "../usuarios/usuariosApi";
-import { consultarCnpj, deleteEmpresaCadastro, getEmpresaLogoUrl, listEmpresasCadastro, saveEmpresaCadastro, uploadEmpresaLogo } from "./empresaApi";
+import { addEmpresaContribuicao, consultarCnpj, deleteEmpresaCadastro, deleteEmpresaContribuicao, getEmpresaLogoUrl, listEmpresaContribuicoes, listEmpresasCadastro, saveEmpresaCadastro, uploadEmpresaLogo } from "./empresaApi";
 import type { CnpjConsulta } from "./empresaApi";
 
 type EmpresaTab = "dados" | "associados" | "contribuicoes" | "financeiro";
@@ -37,6 +38,15 @@ function formatCeiCnpj(value: string, tipo: number) {
 
 function firstText(...values: Array<string | null | undefined>) {
   return values.find((value) => value && value.trim())?.trim() ?? "";
+}
+
+function formatCurrency(value: number | string | null | undefined) {
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(value ?? 0));
+}
+
+function formatDateTime(value: string | null | undefined) {
+  if (!value) return "-";
+  return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
 }
 
 function mapCnpjConsultaToForm(data: CnpjConsulta): EmpresaCadastroInsert {
@@ -117,11 +127,20 @@ export function EmpresaPage() {
   const [cnpjInput, setCnpjInput] = useState("");
   const [cnpjData, setCnpjData] = useState<CnpjConsulta | null>(null);
   const [cnpjMessage, setCnpjMessage] = useState<string | null>(null);
+  const [selectedContribuicaoId, setSelectedContribuicaoId] = useState("");
 
   const empresasQuery = useQuery({ queryKey: ["empresas-cadastro", search], queryFn: () => listEmpresasCadastro(search) });
   const usuariosQuery = useQuery({ queryKey: ["usuarios"], queryFn: listUsuarios });
+  const contribuicoesQuery = useQuery({ queryKey: ["contribuicoes-options"], queryFn: () => listContribuicoes("") });
+  const empresaContribuicoesQuery = useQuery({
+    queryKey: ["empresa-contribuicoes", selectedId],
+    queryFn: () => listEmpresaContribuicoes(selectedId ?? 0),
+    enabled: Boolean(selectedId)
+  });
   const empresas = empresasQuery.data ?? [];
   const usuarios = usuariosQuery.data ?? [];
+  const contribuicoes = contribuicoesQuery.data ?? [];
+  const empresaContribuicoes = empresaContribuicoesQuery.data ?? [];
   const selected = empresas.find((item) => item.id === selectedId) ?? null;
   const formOpen = creatingNew || Boolean(selectedId);
 
@@ -222,6 +241,25 @@ export function EmpresaPage() {
     onError: (error) => setCnpjMessage(error instanceof Error ? error.message : "Nao foi possivel consultar esse CNPJ.")
   });
 
+  const addContribuicaoMutation = useMutation({
+    mutationFn: ({ empresaId, contribuicaoId }: { empresaId: number; contribuicaoId: number }) => addEmpresaContribuicao(empresaId, contribuicaoId),
+    onSuccess: async () => {
+      setSelectedContribuicaoId("");
+      setMessage("Contribuicao adicionada com sucesso.");
+      await queryClient.invalidateQueries({ queryKey: ["empresa-contribuicoes", selectedId] });
+    },
+    onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel adicionar a contribuicao.")
+  });
+
+  const deleteContribuicaoMutation = useMutation({
+    mutationFn: deleteEmpresaContribuicao,
+    onSuccess: async () => {
+      setMessage("Contribuicao removida com sucesso.");
+      await queryClient.invalidateQueries({ queryKey: ["empresa-contribuicoes", selectedId] });
+    },
+    onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel remover a contribuicao.")
+  });
+
   const totalLabel = useMemo(() => `${empresas.length} registro${empresas.length === 1 ? "" : "s"}`, [empresas.length]);
 
   function handleNew() {
@@ -278,6 +316,7 @@ export function EmpresaPage() {
     setActiveTab("dados");
     setMessage(null);
     setLogoFile(null);
+    setSelectedContribuicaoId("");
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -297,6 +336,18 @@ export function EmpresaPage() {
 
   function handleCeiCnpjChange(value: string) {
     setForm({ ...form, cei_cnpj: formatCeiCnpj(value, form.tipo_cei_cnpj) });
+  }
+
+  function handleAddContribuicao() {
+    if (!selectedId || !selectedContribuicaoId) return;
+    setMessage(null);
+    addContribuicaoMutation.mutate({ empresaId: selectedId, contribuicaoId: Number(selectedContribuicaoId) });
+  }
+
+  function handleDeleteContribuicao(id: number) {
+    if (!window.confirm("Deseja excluir esta contribuicao da empresa?")) return;
+    setMessage(null);
+    deleteContribuicaoMutation.mutate(id);
   }
 
   return (
@@ -497,7 +548,51 @@ export function EmpresaPage() {
             </> : null}
 
             {activeTab === "associados" ? <div className="empty-state tab-empty">Nenhum associado vinculado nesta tela.</div> : null}
-            {activeTab === "contribuicoes" ? <div className="empty-state tab-empty">Nenhuma contribuição vinculada nesta tela.</div> : null}
+            {activeTab === "contribuicoes" ? <div className="related-panel">
+              {!selectedId ? <div className="empty-state tab-empty">Salve a empresa antes de adicionar contribuicoes.</div> : <>
+                <div className="related-toolbar">
+                  <label className="field">
+                    <select value={selectedContribuicaoId} onChange={(event) => setSelectedContribuicaoId(event.target.value)}>
+                      <option value="">Selecione</option>
+                      {contribuicoes.map((contribuicao) => (
+                        <option key={contribuicao.id} value={contribuicao.id}>{contribuicao.tipo} • {contribuicao.nm_contribuicao}</option>
+                      ))}
+                    </select>
+                    <span>Contribuicao</span>
+                  </label>
+                  <button type="button" onClick={handleAddContribuicao} disabled={!selectedContribuicaoId || addContribuicaoMutation.isPending}>
+                    <Plus size={16} /> Adicionar
+                  </button>
+                </div>
+
+                <div className="data-table-wrap">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>Tipo</th>
+                        <th>Contribuicao</th>
+                        <th>Valor</th>
+                        <th>Pagamento</th>
+                        <th>Incluido</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {empresaContribuicoes.map((item) => (
+                        <tr key={item.id} onClick={() => handleDeleteContribuicao(item.id)} tabIndex={0}>
+                          <td>{item.contribuicao?.tipo ?? "-"}</td>
+                          <td>{item.contribuicao?.nm_contribuicao ?? "-"}</td>
+                          <td className="numeric-cell">{formatCurrency(item.contribuicao?.valor_base)}</td>
+                          <td>{formatDateTime(item.dt_pg)}</td>
+                          <td>{formatDateTime(item.created_at)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {empresaContribuicoesQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
+                  {!empresaContribuicoesQuery.isLoading && empresaContribuicoes.length === 0 ? <div className="empty-state">Nenhuma contribuicao vinculada.</div> : null}
+                </div>
+              </>}
+            </div> : null}
             {activeTab === "financeiro" ? <div className="empty-state tab-empty">Nenhum lançamento financeiro vinculado nesta tela.</div> : null}
 
             {message ? <div className={saveMutation.isError || deleteMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}

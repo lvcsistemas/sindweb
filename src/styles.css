@@ -116,6 +116,16 @@ textarea { resize: vertical; }
 .form-success { color: #16613f; background: #edf8f3; border: 1px solid #b9dfce; border-radius: 6px; padding: 10px; }
 .form-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 8px; }
 .photo-field { display: flex; align-items: center; gap: 14px; padding-top: 2px; }
+.related-panel { display: grid; gap: 14px; }
+.related-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: stretch; }
+.data-table-wrap { width: 100%; overflow-x: auto; border: 1px solid #d7dee5; border-radius: 8px; }
+.data-table { width: 100%; border-collapse: collapse; min-width: 680px; background: #fff; }
+.data-table th, .data-table td { padding: 10px 12px; border-bottom: 1px solid #e5ebf0; text-align: left; vertical-align: middle; }
+.data-table th { color: #465563; background: #f8fafb; font-size: 0.82rem; text-transform: uppercase; }
+.data-table tbody tr { cursor: pointer; }
+.data-table tbody tr:hover { background: #edf8f3; }
+.data-table tbody tr:last-child td { border-bottom: 0; }
+.numeric-cell { text-align: right; white-space: nowrap; }
 .modal-backdrop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 18px; background: rgba(23, 32, 42, 0.42); }
 .modal-panel { width: min(560px, 100%); display: grid; gap: 14px; background: #fff; border: 1px solid #d7dee5; border-radius: 8px; box-shadow: 0 18px 48px rgba(20, 33, 45, 0.18); padding: 18px; }
 .modal-panel h2 { margin: 0 0 4px; font-size: 1.2rem; }
@@ -139,6 +149,7 @@ textarea { resize: vertical; }
   .dashboard-page, .module-page { padding: 14px; }
   .dashboard-header, .module-header { align-items: stretch; flex-direction: column; }
   .form-grid, .form-grid.compact { grid-template-columns: 1fr; }
+  .related-toolbar { grid-template-columns: 1fr; }
   .choice-grid, .lookup-summary div { grid-template-columns: 1fr; }
   .topbar { padding: 10px 14px; min-height: 56px; flex-wrap: wrap; justify-content: flex-start; }
 }

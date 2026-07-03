@@ -11,6 +11,7 @@ export type Database = {
       cnaes: { Row: Cnae; Insert: CnaeInsert; Update: Partial<CnaeInsert> };
       contribuicoes: { Row: Contribuicao; Insert: ContribuicaoInsert; Update: Partial<ContribuicaoInsert> };
       empresas: { Row: EmpresaCadastro; Insert: EmpresaCadastroInsert; Update: Partial<EmpresaCadastroInsert> };
+      empresas_contribuicoes: { Row: EmpresaContribuicao; Insert: EmpresaContribuicaoInsert; Update: Partial<EmpresaContribuicaoInsert> };
       escritorios: { Row: Escritorio; Insert: EscritorioInsert; Update: Partial<EscritorioInsert> };
       locais_trabalho: { Row: LocalTrabalho; Insert: LocalTrabalhoInsert; Update: Partial<LocalTrabalhoInsert> };
       lookup_items: { Row: LookupItem; Insert: Omit<LookupItem, "id" | "created_at">; Update: Partial<Omit<LookupItem, "id" | "created_at">> };
@@ -170,6 +171,23 @@ export type Contribuicao = {
 };
 
 export type ContribuicaoInsert = Omit<Contribuicao, "id" | "created_at" | "updated_at"> & { id?: number };
+
+export type EmpresaContribuicao = {
+  id: number;
+  empresa_id: number;
+  contribuicao_id: number;
+  created_at: string;
+  dt_pg: string | null;
+};
+
+export type EmpresaContribuicaoInsert = Omit<EmpresaContribuicao, "id" | "created_at"> & {
+  id?: number;
+  created_at?: string;
+};
+
+export type EmpresaContribuicaoLista = EmpresaContribuicao & {
+  contribuicao: Pick<Contribuicao, "tipo" | "nm_contribuicao" | "valor_base"> | null;
+};
 
 export type AtendimentoMedicoConvenio = {
   id: number;
