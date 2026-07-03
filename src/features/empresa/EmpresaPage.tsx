@@ -4,6 +4,7 @@ import { Building2, Camera, Plus, Save, Search, Trash2 } from "lucide-react";
 import { Breadcrumb } from "../../shared/Breadcrumb";
 import type { EmpresaCadastro, EmpresaCadastroInsert } from "../../types/database";
 import { listAuxiliares } from "../auxiliares/auxiliaresApi";
+import { listCnaes } from "../cnae/cnaeApi";
 import { listContribuicoes } from "../contribuicao/contribuicaoApi";
 import { listEscritorios } from "../escritorio/escritorioApi";
 import { listUsuarios } from "../usuarios/usuariosApi";
@@ -57,6 +58,13 @@ function formatCurrency(value: number | string | null | undefined) {
 function formatDateTime(value: string | null | undefined) {
   if (!value) return "-";
   return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
+}
+
+function findCnaeIdByApiCode(apiCode: string | number | null | undefined, cnaes: Array<{ id: number; codigo_cnae: string }>) {
+  const prefix = onlyDigits(String(apiCode ?? "")).slice(0, 2);
+  if (!prefix) return 0;
+
+  return cnaes.find((item) => onlyDigits(item.codigo_cnae).startsWith(prefix))?.id ?? 0;
 }
 
 function mapCnpjConsultaToForm(data: CnpjConsulta): EmpresaCadastroInsert {
@@ -142,6 +150,7 @@ export function EmpresaPage() {
   const empresasQuery = useQuery({ queryKey: ["empresas-cadastro", search], queryFn: () => listEmpresasCadastro(search) });
   const usuariosQuery = useQuery({ queryKey: ["usuarios"], queryFn: listUsuarios });
   const contribuicoesQuery = useQuery({ queryKey: ["contribuicoes-options"], queryFn: () => listContribuicoes("") });
+  const cnaesQuery = useQuery({ queryKey: ["cnaes-options"], queryFn: () => listCnaes("") });
   const estabelecimentosQuery = useQuery({ queryKey: ["auxiliares", "estabelecimento"], queryFn: () => listAuxiliares("estabelecimento", "") });
   const estabelecimentoTiposQuery = useQuery({ queryKey: ["auxiliares", "estabelecimento_tipo"], queryFn: () => listAuxiliares("estabelecimento_tipo", "") });
   const ramoAtividadesQuery = useQuery({ queryKey: ["auxiliares", "ramo_atividade"], queryFn: () => listAuxiliares("ramo_atividade", "") });
@@ -160,6 +169,7 @@ export function EmpresaPage() {
   const empresas = empresasQuery.data ?? [];
   const usuarios = usuariosQuery.data ?? [];
   const contribuicoes = contribuicoesQuery.data ?? [];
+  const cnaes = cnaesQuery.data ?? [];
   const estabelecimentos = (estabelecimentosQuery.data ?? []).filter((item) => item.ativo === "S");
   const estabelecimentoTipos = (estabelecimentoTiposQuery.data ?? []).filter((item) => item.ativo === "S");
   const ramoAtividades = (ramoAtividadesQuery.data ?? []).filter((item) => item.ativo === "S");
@@ -342,7 +352,8 @@ export function EmpresaPage() {
       estabelecimento_id: defaultEstabelecimentoId,
       estabelecimento_tipo_id: defaultEstabelecimentoTipoId,
       ramo_atividade_id: defaultRamoAtividadeId,
-      convencao_id: defaultConvencaoId
+      convencao_id: defaultConvencaoId,
+      cnae_id: findCnaeIdByApiCode(cnpjData.cnae_fiscal, cnaes)
     });
     setNovoStep(null);
   }
@@ -554,7 +565,7 @@ export function EmpresaPage() {
                     <option value="">Selecione</option>
                     {usuarios.map((usuario) => <option key={usuario.id} value={usuario.id}>{usuario.full_name || usuario.codinome || usuario.email}</option>)}
                   </select>
-                  <span>Usuario responsavel</span>
+                  <span>Usuário Responsável</span>
                 </label>
                 <label className="field">
                   <select value={form.estabelecimento_id} onChange={(event) => setForm({ ...form, estabelecimento_id: Number(event.target.value) })}>
@@ -568,7 +579,7 @@ export function EmpresaPage() {
                     <option value={0}>Selecione</option>
                     {estabelecimentoTipos.map((item) => <option key={item.id} value={item.id}>{item.nome}</option>)}
                   </select>
-                  <span>Tipo estabelecimento</span>
+                  <span>Tipo Estabelecimento</span>
                 </label>
               </div>
 
@@ -578,25 +589,31 @@ export function EmpresaPage() {
                     <option value={0}>Selecione</option>
                     {escritorios.map((item) => <option key={item.id} value={item.id}>{item.nm_fantasia || item.razao_social}</option>)}
                   </select>
-                  <span>Escritorio</span>
+                  <span>Escritório</span>
                 </label>
                 <label className="field">
                   <select value={form.ramo_atividade_id} onChange={(event) => setForm({ ...form, ramo_atividade_id: Number(event.target.value) })}>
                     <option value={0}>Selecione</option>
                     {ramoAtividades.map((item) => <option key={item.id} value={item.id}>{item.nome}</option>)}
                   </select>
-                  <span>Ramo atividade</span>
+                  <span>Ramo Atividade</span>
                 </label>
                 <label className="field">
                   <select value={form.convencao_id} onChange={(event) => setForm({ ...form, convencao_id: Number(event.target.value) })}>
                     <option value={0}>Selecione</option>
                     {convencoes.map((item) => <option key={item.id} value={item.id}>{item.nome}</option>)}
                   </select>
-                  <span>Convencao</span>
+                  <span>Convenção Coletiva</span>
                 </label>
               </div>
 
-              <label className="field"><input type="number" min={0} value={form.cnae_id} onChange={(event) => setForm({ ...form, cnae_id: Number(event.target.value) })} placeholder=" " /><span>CNAE</span></label>
+              <label className="field">
+                <select value={form.cnae_id} onChange={(event) => setForm({ ...form, cnae_id: Number(event.target.value) })}>
+                  <option value={0}>Selecione</option>
+                  {cnaes.map((item) => <option key={item.id} value={item.id}>{item.codigo_cnae} - {item.descricao}</option>)}
+                </select>
+                <span>CNAE</span>
+              </label>
 
               <div className="form-grid compact">
                 <label className="field"><input value={form.nm_contato1 ?? ""} maxLength={40} onChange={(event) => setForm({ ...form, nm_contato1: event.target.value })} placeholder=" " /><span>Contato 1</span></label>
@@ -686,7 +703,7 @@ export function EmpresaPage() {
                     <thead>
                       <tr>
                         <th>Tipo</th>
-                        <th>Contribuicao</th>
+                        <th>Contribuição</th>
                         <th>Valor</th>
                         <th>Pagamento</th>
                         <th>Incluido</th>
