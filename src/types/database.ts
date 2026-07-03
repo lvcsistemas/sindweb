@@ -9,6 +9,7 @@ export type Database = {
       auxiliares: { Row: Auxiliar; Insert: AuxiliarInsert; Update: Partial<AuxiliarInsert> };
       cnae: { Row: Cnae; Insert: CnaeInsert; Update: Partial<CnaeInsert> };
       contribuicao: { Row: Contribuicao; Insert: ContribuicaoInsert; Update: Partial<ContribuicaoInsert> };
+      empresa: { Row: EmpresaCadastro; Insert: EmpresaCadastroInsert; Update: Partial<EmpresaCadastroInsert> };
       empresas: { Row: Empresa; Insert: EmpresaInsert; Update: Partial<EmpresaInsert> };
       escritorio: { Row: Escritorio; Insert: EscritorioInsert; Update: Partial<EscritorioInsert> };
       local_trabalho: { Row: LocalTrabalho; Insert: LocalTrabalhoInsert; Update: Partial<LocalTrabalhoInsert> };
@@ -96,6 +97,47 @@ export type Empresa = {
 };
 
 export type EmpresaInsert = Omit<Empresa, "id" | "created_at" | "updated_at"> & { id?: number };
+
+export type EmpresaCadastro = {
+  id: number;
+  user_resp_id: number;
+  estabelecimento_id: number;
+  estabelecimento_tipo_id: number;
+  escritorio_id: number;
+  ramo_atividade_id: number;
+  convencao_id: number;
+  cnae_id: number;
+  tipo_cei_cnpj: number;
+  dt_inicio_atividades: string | null;
+  ativo: string;
+  razao_social: string;
+  nm_fantasia: string;
+  cei_cnpj: string;
+  insc_estadual: string | null;
+  nm_contato1: string | null;
+  nm_contato2: string | null;
+  nm_contato3: string | null;
+  email1: string | null;
+  email2: string | null;
+  email3: string | null;
+  tel1: string | null;
+  tel2: string | null;
+  tel3: string | null;
+  site: string | null;
+  endereco: string | null;
+  numero: string | null;
+  complemento: string | null;
+  bairro: string | null;
+  cidade: string | null;
+  uf: string;
+  cep: string | null;
+  capital_social: number;
+  obs: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type EmpresaCadastroInsert = Omit<EmpresaCadastro, "id" | "created_at" | "updated_at"> & { id?: number };
 
 export type Contribuicao = {
   id: number;
