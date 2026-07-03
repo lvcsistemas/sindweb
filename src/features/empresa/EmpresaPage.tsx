@@ -144,6 +144,8 @@ export function EmpresaPage() {
   const contribuicoesQuery = useQuery({ queryKey: ["contribuicoes-options"], queryFn: () => listContribuicoes("") });
   const estabelecimentosQuery = useQuery({ queryKey: ["auxiliares", "estabelecimento"], queryFn: () => listAuxiliares("estabelecimento", "") });
   const estabelecimentoTiposQuery = useQuery({ queryKey: ["auxiliares", "estabelecimento_tipo"], queryFn: () => listAuxiliares("estabelecimento_tipo", "") });
+  const ramoAtividadesQuery = useQuery({ queryKey: ["auxiliares", "ramo_atividade"], queryFn: () => listAuxiliares("ramo_atividade", "") });
+  const convencoesQuery = useQuery({ queryKey: ["auxiliares", "convencao"], queryFn: () => listAuxiliares("convencao", "") });
   const empresaContribuicoesQuery = useQuery({
     queryKey: ["empresa-contribuicoes", selectedId],
     queryFn: () => listEmpresaContribuicoes(selectedId ?? 0),
@@ -160,8 +162,12 @@ export function EmpresaPage() {
   const contribuicoes = contribuicoesQuery.data ?? [];
   const estabelecimentos = (estabelecimentosQuery.data ?? []).filter((item) => item.ativo === "S");
   const estabelecimentoTipos = (estabelecimentoTiposQuery.data ?? []).filter((item) => item.ativo === "S");
+  const ramoAtividades = (ramoAtividadesQuery.data ?? []).filter((item) => item.ativo === "S");
+  const convencoes = (convencoesQuery.data ?? []).filter((item) => item.ativo === "S");
   const defaultEstabelecimentoId = estabelecimentos[0]?.id ?? emptyForm.estabelecimento_id;
   const defaultEstabelecimentoTipoId = estabelecimentoTipos[0]?.id ?? emptyForm.estabelecimento_tipo_id;
+  const defaultRamoAtividadeId = ramoAtividades[0]?.id ?? emptyForm.ramo_atividade_id;
+  const defaultConvencaoId = convencoes[0]?.id ?? emptyForm.convencao_id;
   const empresaContribuicoes = empresaContribuicoesQuery.data ?? [];
   const empresaAssociados = empresaAssociadosQuery.data ?? [];
   const escritorios = escritoriosQuery.data ?? [];
@@ -310,6 +316,8 @@ export function EmpresaPage() {
       ...emptyForm,
       estabelecimento_id: defaultEstabelecimentoId,
       estabelecimento_tipo_id: defaultEstabelecimentoTipoId,
+      ramo_atividade_id: defaultRamoAtividadeId,
+      convencao_id: defaultConvencaoId,
       tipo_cei_cnpj: tipo,
       cei_cnpj: ""
     });
@@ -332,7 +340,9 @@ export function EmpresaPage() {
     setForm({
       ...mapCnpjConsultaToForm(cnpjData),
       estabelecimento_id: defaultEstabelecimentoId,
-      estabelecimento_tipo_id: defaultEstabelecimentoTipoId
+      estabelecimento_tipo_id: defaultEstabelecimentoTipoId,
+      ramo_atividade_id: defaultRamoAtividadeId,
+      convencao_id: defaultConvencaoId
     });
     setNovoStep(null);
   }
@@ -570,8 +580,20 @@ export function EmpresaPage() {
                   </select>
                   <span>Escritorio</span>
                 </label>
-                <label className="field"><input type="number" min={0} value={form.ramo_atividade_id} onChange={(event) => setForm({ ...form, ramo_atividade_id: Number(event.target.value) })} placeholder=" " /><span>Ramo atividade</span></label>
-                <label className="field"><input type="number" min={0} value={form.convencao_id} onChange={(event) => setForm({ ...form, convencao_id: Number(event.target.value) })} placeholder=" " /><span>Convencao</span></label>
+                <label className="field">
+                  <select value={form.ramo_atividade_id} onChange={(event) => setForm({ ...form, ramo_atividade_id: Number(event.target.value) })}>
+                    <option value={0}>Selecione</option>
+                    {ramoAtividades.map((item) => <option key={item.id} value={item.id}>{item.nome}</option>)}
+                  </select>
+                  <span>Ramo atividade</span>
+                </label>
+                <label className="field">
+                  <select value={form.convencao_id} onChange={(event) => setForm({ ...form, convencao_id: Number(event.target.value) })}>
+                    <option value={0}>Selecione</option>
+                    {convencoes.map((item) => <option key={item.id} value={item.id}>{item.nome}</option>)}
+                  </select>
+                  <span>Convencao</span>
+                </label>
               </div>
 
               <label className="field"><input type="number" min={0} value={form.cnae_id} onChange={(event) => setForm({ ...form, cnae_id: Number(event.target.value) })} placeholder=" " /><span>CNAE</span></label>
