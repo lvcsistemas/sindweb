@@ -110,6 +110,7 @@ label { display: grid; gap: 6px; color: #465563; font-weight: 650; }
 .field span { position: absolute; left: 11px; top: 5px; color: #657383; font-size: 0.72rem; font-weight: 750; line-height: 1; pointer-events: none; }
 label.check { display: flex; align-items: center; gap: 8px; align-self: end; min-height: 38px; }
 input, select, textarea { width: 100%; border: 1px solid #cbd5dd; border-radius: 6px; padding: 9px 10px; background: #fff; color: #17202a; min-height: 38px; }
+.currency-input { text-align: right; }
 textarea { resize: vertical; }
 .form-error { color: #a33b2f; background: #fff3f0; border: 1px solid #f0c7bf; border-radius: 6px; padding: 10px; }
 .form-success { color: #16613f; background: #edf8f3; border: 1px solid #b9dfce; border-radius: 6px; padding: 10px; }

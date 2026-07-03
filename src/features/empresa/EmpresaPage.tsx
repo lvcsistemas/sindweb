@@ -8,6 +8,31 @@ import { deleteEmpresaCadastro, listEmpresasCadastro, saveEmpresaCadastro } from
 
 type EmpresaTab = "dados" | "associados" | "contribuicoes" | "financeiro";
 
+function onlyDigits(value: string | null | undefined) {
+  return value?.replace(/\D/g, "") ?? "";
+}
+
+function formatCnpj(value: string) {
+  const digits = onlyDigits(value).slice(0, 14);
+  return digits
+    .replace(/^(\d{2})(\d)/, "$1.$2")
+    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1/$2")
+    .replace(/(\d{4})(\d)/, "$1-$2");
+}
+
+function formatCei(value: string) {
+  const digits = onlyDigits(value).slice(0, 12);
+  return digits
+    .replace(/^(\d{2})(\d)/, "$1.$2")
+    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{5})(\d)/, ".$1/$2");
+}
+
+function formatCeiCnpj(value: string, tipo: number) {
+  return tipo === 2 ? formatCei(value) : formatCnpj(value);
+}
+
 const emptyForm: EmpresaCadastroInsert = {
   user_resp_id: "",
   estabelecimento_id: 1,
@@ -80,7 +105,7 @@ export function EmpresaPage() {
       ativo: selected.ativo,
       razao_social: selected.razao_social,
       nm_fantasia: selected.nm_fantasia,
-      cei_cnpj: selected.cei_cnpj,
+      cei_cnpj: formatCeiCnpj(selected.cei_cnpj, selected.tipo_cei_cnpj),
       insc_estadual: selected.insc_estadual ?? "",
       nm_contato1: selected.nm_contato1 ?? "",
       nm_contato2: selected.nm_contato2 ?? "",
@@ -155,6 +180,14 @@ export function EmpresaPage() {
     deleteMutation.mutate(form.id);
   }
 
+  function handleTipoCeiCnpjChange(value: number) {
+    setForm({ ...form, tipo_cei_cnpj: value, cei_cnpj: formatCeiCnpj(form.cei_cnpj, value) });
+  }
+
+  function handleCeiCnpjChange(value: string) {
+    setForm({ ...form, cei_cnpj: formatCeiCnpj(value, form.tipo_cei_cnpj) });
+  }
+
   return (
     <main className="module-page">
       <Breadcrumb items={[{ label: "Cadastros" }, { label: "Empresas" }]} />
@@ -203,19 +236,19 @@ export function EmpresaPage() {
                   <span>Status</span>
                 </label>
                 <label className="field">
-                  <select value={form.tipo_cei_cnpj} onChange={(event) => setForm({ ...form, tipo_cei_cnpj: Number(event.target.value) })}>
+                  <select value={form.tipo_cei_cnpj} onChange={(event) => handleTipoCeiCnpjChange(Number(event.target.value))}>
                     <option value={1}>CNPJ</option>
                     <option value={2}>CEI</option>
                   </select>
                   <span>Tipo CEI/CNPJ</span>
                 </label>
-                <label className="field"><input type="date" value={form.dt_inicio_atividades ?? ""} onChange={(event) => setForm({ ...form, dt_inicio_atividades: event.target.value })} placeholder=" " /><span>Inicio atividades</span></label>
+                <label className="field"><input value={form.cei_cnpj} maxLength={form.tipo_cei_cnpj === 2 ? 15 : 18} onChange={(event) => handleCeiCnpjChange(event.target.value)} placeholder=" " required /><span>CEI/CNPJ</span></label>
               </div>
 
               <div className="form-grid compact">
-                <label className="field"><input value={form.cei_cnpj} maxLength={14} onChange={(event) => setForm({ ...form, cei_cnpj: event.target.value })} placeholder=" " required /><span>CEI/CNPJ</span></label>
+                <label className="field"><input type="date" value={form.dt_inicio_atividades ?? ""} onChange={(event) => setForm({ ...form, dt_inicio_atividades: event.target.value })} placeholder=" " /><span>Inicio atividades</span></label>
                 <label className="field"><input value={form.insc_estadual ?? ""} maxLength={25} onChange={(event) => setForm({ ...form, insc_estadual: event.target.value })} placeholder=" " /><span>Inscricao estadual</span></label>
-                <label className="field"><input type="number" min={0} step="0.01" value={form.capital_social} onChange={(event) => setForm({ ...form, capital_social: Number(event.target.value) })} placeholder=" " /><span>Capital social</span></label>
+                <label className="field"><input className="currency-input" type="number" min={0} step="0.01" value={form.capital_social} onChange={(event) => setForm({ ...form, capital_social: Number(event.target.value) })} placeholder=" " /><span>Capital social</span></label>
               </div>
 
               <div className="form-grid">
@@ -232,7 +265,15 @@ export function EmpresaPage() {
                   <span>Usuario responsavel</span>
                 </label>
                 <label className="field"><input type="number" min={0} value={form.estabelecimento_id} onChange={(event) => setForm({ ...form, estabelecimento_id: Number(event.target.value) })} placeholder=" " /><span>Estabelecimento</span></label>
-                <label className="field"><input type="number" min={0} value={form.estabelecimento_tipo_id} onChange={(event) => setForm({ ...form, estabelecimento_tipo_id: Number(event.target.value) })} placeholder=" " /><span>Tipo estabelecimento</span></label>
+                <label className="field">
+                  <select value={form.estabelecimento_tipo_id} onChange={(event) => setForm({ ...form, estabelecimento_tipo_id: Number(event.target.value) })}>
+                    <option value={1}>FILIAL</option>
+                    <option value={2}>OUTROS</option>
+                    <option value={3}>PRINCIPAL</option>
+                    <option value={4}>UNICO</option>
+                  </select>
+                  <span>Tipo estabelecimento</span>
+                </label>
               </div>
 
               <div className="form-grid compact">
