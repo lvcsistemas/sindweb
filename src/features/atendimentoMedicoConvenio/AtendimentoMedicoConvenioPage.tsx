@@ -72,7 +72,7 @@ export function AtendimentoMedicoConvenioPage() {
       setMessage("Cadastro salvo com sucesso.");
       await queryClient.invalidateQueries({ queryKey: ["atendimento-medico-convenios"] });
     },
-    onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel salvar o cadastro.")
+    onError: (error) => setMessage(error instanceof Error ? error.message : "Não foi possível salvar o cadastro.")
   });
 
   const deleteMutation = useMutation({
@@ -157,7 +157,7 @@ export function AtendimentoMedicoConvenioPage() {
                   <option value="J">Jurídica</option>
                   <option value="F">Física</option>
                 </select>
-                <span>Tipo pessoa</span>
+                <span>Tipo Pessoa</span>
               </label>
               <label className="field">
                 <input value={form.cpf_cnpj} maxLength={14} onChange={(event) => setForm({ ...form, cpf_cnpj: event.target.value })} placeholder=" " required />
@@ -168,7 +168,7 @@ export function AtendimentoMedicoConvenioPage() {
             <div className="form-grid">
               <label className="field">
                 <input value={form.nm_convenio} maxLength={50} onChange={(event) => setForm({ ...form, nm_convenio: event.target.value })} placeholder=" " required />
-                <span>Nome convênio</span>
+                <span>Nome Convênio</span>
               </label>
               <label className="field">
                 <input value={form.nm_responsavel ?? ""} maxLength={50} onChange={(event) => setForm({ ...form, nm_responsavel: event.target.value })} placeholder=" " />

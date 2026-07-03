@@ -68,7 +68,7 @@ export function AuxiliaresPage() {
       setMessage("Auxiliar salvo com sucesso.");
       await queryClient.invalidateQueries({ queryKey: ["auxiliares", grupoConfig?.key] });
     },
-    onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel salvar o auxiliar.")
+    onError: (error) => setMessage(error instanceof Error ? error.message : "Não foi possível salvar o auxiliar.")
   });
 
   const deleteMutation = useMutation({
@@ -77,10 +77,10 @@ export function AuxiliaresPage() {
       setSelectedId(null);
       setCreatingNew(false);
       setForm(emptyForm(grupoConfig!.key));
-      setMessage("Auxiliar excluido com sucesso.");
+      setMessage("Auxiliar excluído com sucesso.");
       await queryClient.invalidateQueries({ queryKey: ["auxiliares", grupoConfig?.key] });
     },
-    onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel excluir o auxiliar.")
+    onError: (error) => setMessage(error instanceof Error ? error.message : "Não foi possível excluir o auxiliar.")
   });
 
   const totalLabel = useMemo(() => `${auxiliares.length} registro${auxiliares.length === 1 ? "" : "s"}`, [auxiliares.length]);

@@ -8,7 +8,7 @@ import { listCnaes } from "../cnae/cnaeApi";
 import { listContribuicoes } from "../contribuicao/contribuicaoApi";
 import { listEscritorios } from "../escritorio/escritorioApi";
 import { listUsuarios } from "../usuarios/usuariosApi";
-import { addEmpresaContribuicao, consultarCnpj, deleteEmpresaCadastro, deleteEmpresaContribuicao, getEmpresaLogoUrl, listEmpresaAssociados, listEmpresaContribuicoes, listEmpresasCadastro, saveEmpresaCadastro, uploadEmpresaLogo } from "./empresaApi";
+import { addEmpresaContribuicao, consultarCep, consultarCnpj, deleteEmpresaCadastro, deleteEmpresaContribuicao, getEmpresaLogoUrl, listEmpresaAssociados, listEmpresaContribuicoes, listEmpresasCadastro, saveEmpresaCadastro, uploadEmpresaLogo } from "./empresaApi";
 import type { CnpjConsulta } from "./empresaApi";
 
 type EmpresaTab = "dados" | "associados" | "contribuicoes" | "financeiro";
@@ -39,6 +39,24 @@ function formatCeiCnpj(value: string, tipo: number) {
   return tipo === 2 ? formatCei(value) : formatCnpj(value);
 }
 
+function formatCep(value: string | null | undefined) {
+  const digits = onlyDigits(value).slice(0, 8);
+  return digits.replace(/^(\d{5})(\d)/, "$1-$2");
+}
+
+function formatTelefone(value: string | null | undefined) {
+  const digits = onlyDigits(value).slice(0, 11);
+  if (digits.length <= 10) {
+    return digits
+      .replace(/^(\d{2})(\d)/, "($1) $2")
+      .replace(/(\d{4})(\d)/, "$1-$2");
+  }
+
+  return digits
+    .replace(/^(\d{2})(\d)/, "($1) $2")
+    .replace(/(\d{5})(\d)/, "$1-$2");
+}
+
 function formatCpf(value: string | null | undefined) {
   const digits = onlyDigits(value).slice(0, 11);
   return digits
@@ -55,6 +73,11 @@ function formatCurrency(value: number | string | null | undefined) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(value ?? 0));
 }
 
+function parseCurrency(value: string) {
+  const digits = onlyDigits(value);
+  return Number(digits || 0) / 100;
+}
+
 function formatDateTime(value: string | null | undefined) {
   if (!value) return "-";
   return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
@@ -68,27 +91,27 @@ function findCnaeIdByApiCode(apiCode: string | number | null | undefined, cnaes:
 }
 
 function mapCnpjConsultaToForm(data: CnpjConsulta): EmpresaCadastroInsert {
-  const razaoSocial = firstText(data.razao_social);
-  const nomeFantasia = firstText(data.nome_fantasia, data.razao_social);
+  const razaoSocial   = firstText(data.razao_social);
+  const nomeFantasia  = firstText(data.nome_fantasia, data.razao_social);
 
   return {
     ...emptyForm,
-    tipo_cei_cnpj: 1,
+    tipo_cei_cnpj       : 1,
     dt_inicio_atividades: data.data_inicio_atividade ?? "",
-    ativo: data.descricao_situacao_cadastral ? (data.descricao_situacao_cadastral.toUpperCase() === "ATIVA" ? "S" : "N") : emptyForm.ativo,
-    razao_social: razaoSocial,
-    nm_fantasia: nomeFantasia,
+    ativo               : data.descricao_situacao_cadastral ? (data.descricao_situacao_cadastral.toUpperCase() === "ATIVA" ? "S" : "N") : emptyForm.ativo,
+    razao_social        : razaoSocial,
+    nm_fantasia         : nomeFantasia,
     cei_cnpj: formatCnpj(data.cnpj),
     email1: data.email ?? "",
-    tel1: onlyDigits(data.ddd_telefone_1),
-    tel2: onlyDigits(data.ddd_telefone_2),
+    tel1: formatTelefone(data.ddd_telefone_1),
+    tel2: formatTelefone(data.ddd_telefone_2),
     endereco: data.logradouro ?? "",
     numero: data.numero ?? "",
     complemento: data.complemento ?? "",
     bairro: data.bairro ?? "",
     cidade: data.municipio ?? "",
     uf: data.uf ?? emptyForm.uf,
-    cep: onlyDigits(data.cep),
+    cep: formatCep(data.cep),
     capital_social: Number(data.capital_social ?? 0) || 0,
     obs: data.cnae_fiscal_descricao ? `CNAE fiscal: ${data.cnae_fiscal ?? ""} - ${data.cnae_fiscal_descricao}` : ""
   };
@@ -212,9 +235,9 @@ export function EmpresaPage() {
       email1: selected.email1 ?? "",
       email2: selected.email2 ?? "",
       email3: selected.email3 ?? "",
-      tel1: selected.tel1 ?? "",
-      tel2: selected.tel2 ?? "",
-      tel3: selected.tel3 ?? "",
+      tel1: formatTelefone(selected.tel1),
+      tel2: formatTelefone(selected.tel2),
+      tel3: formatTelefone(selected.tel3),
       site: selected.site ?? "",
       endereco: selected.endereco ?? "",
       numero: selected.numero ?? "",
@@ -222,7 +245,7 @@ export function EmpresaPage() {
       bairro: selected.bairro ?? "",
       cidade: selected.cidade ?? "",
       uf: selected.uf,
-      cep: selected.cep ?? "",
+      cep: formatCep(selected.cep),
       capital_social: selected.capital_social,
       logo_path: selected.logo_path,
       obs: selected.obs ?? ""
@@ -279,6 +302,24 @@ export function EmpresaPage() {
       setNovoStep("revisao");
     },
     onError: (error) => setCnpjMessage(error instanceof Error ? error.message : "Nao foi possivel consultar esse CNPJ.")
+  });
+
+  const cepMutation = useMutation({
+    mutationFn: consultarCep,
+    onSuccess: (data) => {
+      setForm((current) => {
+        if (current.endereco?.trim()) return current;
+
+        return {
+          ...current,
+          cep: formatCep(data.cep),
+          endereco: data.street ?? current.endereco,
+          bairro: data.neighborhood ?? current.bairro,
+          cidade: data.city ?? current.cidade,
+          uf: data.state ?? current.uf
+        };
+      });
+    }
   });
 
   const addContribuicaoMutation = useMutation({
@@ -394,6 +435,13 @@ export function EmpresaPage() {
     setForm({ ...form, cei_cnpj: formatCeiCnpj(value, form.tipo_cei_cnpj) });
   }
 
+  function handleCepBlur() {
+    if (form.endereco?.trim()) return;
+    const digits = onlyDigits(form.cep);
+    if (digits.length !== 8) return;
+    cepMutation.mutate(digits);
+  }
+
   function handleAddContribuicao() {
     if (!selectedId || !selectedContribuicaoId) return;
     setMessage(null);
@@ -497,7 +545,7 @@ export function EmpresaPage() {
                 <button
                   type="button"
                   className="icon-button danger-icon"
-                  title="Excluir empresa"
+                  title="Excluir Empresa"
                   onClick={(event) => {
                     event.stopPropagation();
                     handleDeleteEmpresa(item.id);
@@ -541,14 +589,14 @@ export function EmpresaPage() {
               </div>
 
               <div className="form-grid compact">
-                <label className="field"><input type="date" value={form.dt_inicio_atividades ?? ""} onChange={(event) => setForm({ ...form, dt_inicio_atividades: event.target.value })} placeholder=" " /><span>Inicio atividades</span></label>
-                <label className="field"><input value={form.insc_estadual ?? ""} maxLength={25} onChange={(event) => setForm({ ...form, insc_estadual: event.target.value })} placeholder=" " /><span>Inscricao estadual</span></label>
-                <label className="field"><input className="currency-input" type="number" min={0} step="0.01" value={form.capital_social} onChange={(event) => setForm({ ...form, capital_social: Number(event.target.value) })} placeholder=" " /><span>Capital social</span></label>
+                <label className="field"><input type="date" value={form.dt_inicio_atividades ?? ""} onChange={(event) => setForm({ ...form, dt_inicio_atividades: event.target.value })} placeholder=" " /><span>Inicio Atividades</span></label>
+                <label className="field"><input value={form.insc_estadual ?? ""} maxLength={25} onChange={(event) => setForm({ ...form, insc_estadual: event.target.value })} placeholder=" " /><span>Inscrição Estadual</span></label>
+                <label className="field"><input className="currency-input" value={formatCurrency(form.capital_social)} onChange={(event) => setForm({ ...form, capital_social: parseCurrency(event.target.value) })} placeholder=" " /><span>Capital Social</span></label>
               </div>
 
               <div className="form-grid">
-                <label className="field"><input value={form.razao_social} maxLength={100} onChange={(event) => setForm({ ...form, razao_social: event.target.value })} placeholder=" " required /><span>Razao social</span></label>
-                <label className="field"><input value={form.nm_fantasia} maxLength={50} onChange={(event) => setForm({ ...form, nm_fantasia: event.target.value })} placeholder=" " required /><span>Nome fantasia</span></label>
+                <label className="field"><input value={form.razao_social} maxLength={100} onChange={(event) => setForm({ ...form, razao_social: event.target.value })} placeholder=" " required /><span>Razão Social</span></label>
+                <label className="field"><input value={form.nm_fantasia} maxLength={50} onChange={(event) => setForm({ ...form, nm_fantasia: event.target.value })} placeholder=" " required /><span>Nome Fantasia</span></label>
               </div>
 
               <div className="photo-field">
@@ -618,26 +666,27 @@ export function EmpresaPage() {
               <div className="form-grid compact">
                 <label className="field"><input value={form.nm_contato1 ?? ""} maxLength={40} onChange={(event) => setForm({ ...form, nm_contato1: event.target.value })} placeholder=" " /><span>Contato 1</span></label>
                 <label className="field"><input type="email" value={form.email1 ?? ""} maxLength={100} onChange={(event) => setForm({ ...form, email1: event.target.value })} placeholder=" " /><span>E-mail 1</span></label>
-                <label className="field"><input value={form.tel1 ?? ""} maxLength={11} onChange={(event) => setForm({ ...form, tel1: event.target.value })} placeholder=" " /><span>Telefone 1</span></label>
+                <label className="field"><input value={form.tel1 ?? ""} maxLength={15} onChange={(event) => setForm({ ...form, tel1: formatTelefone(event.target.value) })} placeholder=" " /><span>Telefone 1</span></label>
               </div>
 
               <div className="form-grid compact">
                 <label className="field"><input value={form.nm_contato2 ?? ""} maxLength={40} onChange={(event) => setForm({ ...form, nm_contato2: event.target.value })} placeholder=" " /><span>Contato 2</span></label>
                 <label className="field"><input type="email" value={form.email2 ?? ""} maxLength={100} onChange={(event) => setForm({ ...form, email2: event.target.value })} placeholder=" " /><span>E-mail 2</span></label>
-                <label className="field"><input value={form.tel2 ?? ""} maxLength={11} onChange={(event) => setForm({ ...form, tel2: event.target.value })} placeholder=" " /><span>Telefone 2</span></label>
+                <label className="field"><input value={form.tel2 ?? ""} maxLength={15} onChange={(event) => setForm({ ...form, tel2: formatTelefone(event.target.value) })} placeholder=" " /><span>Telefone 2</span></label>
               </div>
 
               <div className="form-grid compact">
                 <label className="field"><input value={form.nm_contato3 ?? ""} maxLength={40} onChange={(event) => setForm({ ...form, nm_contato3: event.target.value })} placeholder=" " /><span>Contato 3</span></label>
                 <label className="field"><input type="email" value={form.email3 ?? ""} maxLength={100} onChange={(event) => setForm({ ...form, email3: event.target.value })} placeholder=" " /><span>E-mail 3</span></label>
-                <label className="field"><input value={form.tel3 ?? ""} maxLength={11} onChange={(event) => setForm({ ...form, tel3: event.target.value })} placeholder=" " /><span>Telefone 3</span></label>
+                <label className="field"><input value={form.tel3 ?? ""} maxLength={15} onChange={(event) => setForm({ ...form, tel3: formatTelefone(event.target.value) })} placeholder=" " /><span>Telefone 3</span></label>
               </div>
 
               <label className="field"><input value={form.site ?? ""} maxLength={100} onChange={(event) => setForm({ ...form, site: event.target.value })} placeholder=" " /><span>Site</span></label>
+              <label className="field"><input value={form.cep ?? ""} maxLength={9} onBlur={handleCepBlur} onChange={(event) => setForm({ ...form, cep: formatCep(event.target.value) })} placeholder=" " /><span>CEP</span></label>
 
               <div className="form-grid compact">
-                <label className="field"><input value={form.endereco ?? ""} maxLength={50} onChange={(event) => setForm({ ...form, endereco: event.target.value })} placeholder=" " /><span>Endereco</span></label>
-                <label className="field"><input value={form.numero ?? ""} maxLength={15} onChange={(event) => setForm({ ...form, numero: event.target.value })} placeholder=" " /><span>Numero</span></label>
+                <label className="field"><input value={form.endereco ?? ""} maxLength={50} onChange={(event) => setForm({ ...form, endereco: event.target.value })} placeholder=" " /><span>Endereço</span></label>
+                <label className="field"><input value={form.numero ?? ""} maxLength={15} onChange={(event) => setForm({ ...form, numero: event.target.value })} placeholder=" " /><span>Número</span></label>
                 <label className="field"><input value={form.complemento ?? ""} maxLength={30} onChange={(event) => setForm({ ...form, complemento: event.target.value })} placeholder=" " /><span>Complemento</span></label>
               </div>
 
@@ -647,8 +696,7 @@ export function EmpresaPage() {
                 <label className="field"><input value={form.uf} maxLength={2} onChange={(event) => setForm({ ...form, uf: event.target.value.toUpperCase() })} placeholder=" " /><span>UF</span></label>
               </div>
 
-              <label className="field"><input value={form.cep ?? ""} maxLength={10} onChange={(event) => setForm({ ...form, cep: event.target.value })} placeholder=" " /><span>CEP</span></label>
-              <label className="field"><textarea rows={3} value={form.obs ?? ""} onChange={(event) => setForm({ ...form, obs: event.target.value })} placeholder=" " /><span>Observacao</span></label>
+              <label className="field"><textarea rows={3} value={form.obs ?? ""} onChange={(event) => setForm({ ...form, obs: event.target.value })} placeholder=" " /><span>Observação</span></label>
             </> : null}
 
             {activeTab === "associados" ? <div className="related-panel">
@@ -682,7 +730,7 @@ export function EmpresaPage() {
               </div>}
             </div> : null}
             {activeTab === "contribuicoes" ? <div className="related-panel">
-              {!selectedId ? <div className="empty-state tab-empty">Salve a empresa antes de adicionar contribuicoes.</div> : <>
+              {!selectedId ? <div className="empty-state tab-empty">Salve a empresa antes de adicionar contribuições.</div> : <>
                 <div className="related-toolbar">
                   <label className="field">
                     <select value={selectedContribuicaoId} onChange={(event) => setSelectedContribuicaoId(event.target.value)}>
@@ -722,7 +770,7 @@ export function EmpresaPage() {
                     </tbody>
                   </table>
                   {empresaContribuicoesQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
-                  {!empresaContribuicoesQuery.isLoading && empresaContribuicoes.length === 0 ? <div className="empty-state">Nenhuma contribuicao vinculada.</div> : null}
+                  {!empresaContribuicoesQuery.isLoading && empresaContribuicoes.length === 0 ? <div className="empty-state">Nenhuma contribuição vinculada.</div> : null}
                 </div>
               </>}
             </div> : null}

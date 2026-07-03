@@ -61,7 +61,7 @@ export function AtendimentoMedicoEspecialidadePage() {
       setMessage("Especialidade excluida com sucesso.");
       await queryClient.invalidateQueries({ queryKey: ["atendimento-medico-especialidades"] });
     },
-    onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel excluir a especialidade.")
+    onError: (error) => setMessage(error instanceof Error ? error.message : "Não foi possível excluir a especialidade.")
   });
 
   const totalLabel = useMemo(() => `${especialidades.length} registro${especialidades.length === 1 ? "" : "s"}`, [especialidades.length]);
@@ -129,7 +129,7 @@ export function AtendimentoMedicoEspecialidadePage() {
             </label>
             <label className="field">
               <input value={form.nm_especialidade} maxLength={50} onChange={(event) => setForm({ ...form, nm_especialidade: event.target.value })} placeholder=" " required />
-              <span>Nome da especialidade</span>
+              <span>Nome da Especialidade</span>
             </label>
 
             {message ? <div className={saveMutation.isError || deleteMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}

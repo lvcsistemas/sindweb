@@ -137,14 +137,14 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
         <label className="field"><input {...form.register("matricula")} placeholder=" " /><span>Matrícula</span></label>
         <label className="field"><input {...form.register("cpf")} placeholder=" " /><span>CPF</span></label>
       </div>
-      <label className="field"><input {...form.register("nome")} placeholder=" " /><span>Nome do associado</span></label>
+      <label className="field"><input {...form.register("nome")} placeholder=" " /><span>Nome do Associado</span></label>
       <div className="form-grid">
         <label className="field"><select {...form.register("empresa_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{empresas.map((empresa) => <option key={empresa.id} value={empresa.id}>{empresa.nome_fantasia}</option>)}</select><span>Empresa</span></label>
         <label className="field"><select {...form.register("situacao_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{situacoes.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select><span>Situação</span></label>
       </div>
       <div className="form-grid">
-        <label className="field"><select {...form.register("local_trabalho_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{locaisTrabalho.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select><span>Local trabalho</span></label>
-        <label className="field"><select {...form.register("local_pagamento_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{locaisPagamento.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select><span>Local pagamento</span></label>
+        <label className="field"><select {...form.register("local_trabalho_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{locaisTrabalho.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select><span>Local Trabalho</span></label>
+        <label className="field"><select {...form.register("local_pagamento_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{locaisPagamento.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select><span>Local Pagamento</span></label>
       </div>
       <div className="form-grid compact">
         <label className="field"><input type="date" {...form.register("data_nascimento")} placeholder=" " /><span>Nascimento</span></label>

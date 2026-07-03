@@ -24,6 +24,15 @@ export type CnpjConsulta = {
   capital_social?: number | string | null;
 };
 
+export type CepConsulta = {
+  cep: string;
+  state?: string | null;
+  city?: string | null;
+  neighborhood?: string | null;
+  street?: string | null;
+  service?: string | null;
+};
+
 function onlyDigits(value: string | null | undefined) {
   return value?.replace(/\D/g, "") || null;
 }
@@ -186,4 +195,18 @@ export async function consultarCnpj(cnpj: string) {
   }
 
   return payload as CnpjConsulta;
+}
+
+export async function consultarCep(cep: string) {
+  const digits = cep.replace(/\D/g, "");
+  if (digits.length !== 8) throw new Error("Informe um CEP com 8 digitos.");
+
+  const response = await fetch(`https://brasilapi.com.br/api/cep/v1/${digits}`);
+  const payload = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(payload?.message ?? "Nao foi possivel consultar esse CEP.");
+  }
+
+  return payload as CepConsulta;
 }
