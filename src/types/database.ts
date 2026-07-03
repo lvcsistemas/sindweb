@@ -249,7 +249,6 @@ export type CnaeInsert = Omit<Cnae, "id" | "created_at" | "updated_at"> & { id?:
 
 export type Escritorio = {
   id: number;
-  empresa_id: number;
   razao_social: string;
   nm_fantasia: string;
   cpf_cnpj: string;

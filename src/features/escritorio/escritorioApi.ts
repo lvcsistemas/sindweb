@@ -23,21 +23,9 @@ export async function listEscritorios(search: string) {
   return data as Escritorio[];
 }
 
-export async function listEscritoriosByEmpresa(empresaId: number) {
-  const { data, error } = await supabaseUnsafe
-    .from("empresas_escritorios")
-    .select("*")
-    .eq("empresa_id", empresaId)
-    .order("nm_fantasia", { ascending: true });
-
-  if (error) throw error;
-  return data as Escritorio[];
-}
-
 export async function saveEscritorio(values: EscritorioInsert) {
   const payload = {
     ...values,
-    empresa_id: Number(values.empresa_id || 0),
     razao_social: values.razao_social.trim().toUpperCase(),
     nm_fantasia: values.nm_fantasia.trim().toUpperCase(),
     cpf_cnpj: onlyDigits(values.cpf_cnpj) ?? "",

@@ -6,7 +6,6 @@ import type { Escritorio, EscritorioInsert } from "../../types/database";
 import { deleteEscritorio, listEscritorios, saveEscritorio } from "./escritorioApi";
 
 const emptyForm: EscritorioInsert = {
-  empresa_id: 0,
   razao_social: "",
   nm_fantasia: "",
   cpf_cnpj: "",
@@ -65,7 +64,6 @@ export function EscritorioPage() {
 
     setForm({
       id: selected.id,
-      empresa_id: selected.empresa_id,
       razao_social: selected.razao_social,
       nm_fantasia: selected.nm_fantasia,
       cpf_cnpj: formatCpfCnpj(selected.cpf_cnpj),
