@@ -118,7 +118,7 @@ export type EmpresaInsert = Omit<Empresa, "id" | "created_at" | "updated_at"> & 
 
 export type EmpresaCadastro = {
   id: number;
-  user_resp_id: number;
+  user_resp_id: string;
   estabelecimento_id: number;
   estabelecimento_tipo_id: number;
   escritorio_id: number;

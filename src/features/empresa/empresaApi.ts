@@ -31,7 +31,7 @@ export async function listEmpresasCadastro(search: string) {
 export async function saveEmpresaCadastro(values: EmpresaCadastroInsert) {
   const payload = {
     ...values,
-    user_resp_id: toNumber(values.user_resp_id),
+    user_resp_id: values.user_resp_id || "",
     estabelecimento_id: toNumber(values.estabelecimento_id, 1),
     estabelecimento_tipo_id: toNumber(values.estabelecimento_tipo_id, 1),
     escritorio_id: toNumber(values.escritorio_id),

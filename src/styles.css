@@ -97,6 +97,10 @@ button, .secondary-button { border: 1px solid #1b6b50; background: #1f7a5b; colo
 .list-summary { color: #657383; font-size: 0.86rem; margin: -2px 0 10px; }
 
 .form-panel { border: 0; border-radius: 0; padding: 18px; display: grid; gap: 14px; }
+.tabs { display: flex; gap: 6px; border-bottom: 1px solid #d7dee5; padding-bottom: 8px; overflow-x: auto; }
+.tabs button { background: #fff; border-color: #cbd5dd; color: #465563; min-height: 34px; white-space: nowrap; }
+.tabs button.active { background: #1f7a5b; border-color: #1b6b50; color: #fff; }
+.tab-empty { min-height: 180px; display: grid; place-items: center; border: 1px dashed #cbd5dd; border-radius: 6px; }
 .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .form-grid.compact { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 label { display: grid; gap: 6px; color: #465563; font-weight: 650; }
