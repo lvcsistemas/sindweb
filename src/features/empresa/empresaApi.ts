@@ -3,6 +3,27 @@ import type { EmpresaCadastro, EmpresaCadastroInsert } from "../../types/databas
 
 const supabaseUnsafe = supabase as any;
 
+export type CnpjConsulta = {
+  cnpj: string;
+  razao_social?: string | null;
+  nome_fantasia?: string | null;
+  descricao_situacao_cadastral?: string | null;
+  data_inicio_atividade?: string | null;
+  ddd_telefone_1?: string | null;
+  ddd_telefone_2?: string | null;
+  email?: string | null;
+  logradouro?: string | null;
+  numero?: string | null;
+  complemento?: string | null;
+  bairro?: string | null;
+  municipio?: string | null;
+  uf?: string | null;
+  cep?: string | null;
+  cnae_fiscal?: number | string | null;
+  cnae_fiscal_descricao?: string | null;
+  capital_social?: number | string | null;
+};
+
 function onlyDigits(value: string | null | undefined) {
   return value?.replace(/\D/g, "") || null;
 }
@@ -102,4 +123,18 @@ export async function uploadEmpresaLogo(empresaId: number, file: File) {
 export function getEmpresaLogoUrl(path: string | null | undefined) {
   if (!path) return null;
   return supabase.storage.from("empresas-logos").getPublicUrl(path).data.publicUrl;
+}
+
+export async function consultarCnpj(cnpj: string) {
+  const digits = cnpj.replace(/\D/g, "");
+  if (digits.length !== 14) throw new Error("Informe um CNPJ com 14 digitos.");
+
+  const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${digits}`);
+  const payload = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(payload?.message ?? "Nao foi possivel consultar esse CNPJ.");
+  }
+
+  return payload as CnpjConsulta;
 }

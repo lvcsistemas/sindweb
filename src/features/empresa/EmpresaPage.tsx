@@ -4,9 +4,11 @@ import { Building2, Camera, Plus, Save, Search, Trash2 } from "lucide-react";
 import { Breadcrumb } from "../../shared/Breadcrumb";
 import type { EmpresaCadastro, EmpresaCadastroInsert } from "../../types/database";
 import { listUsuarios } from "../usuarios/usuariosApi";
-import { deleteEmpresaCadastro, getEmpresaLogoUrl, listEmpresasCadastro, saveEmpresaCadastro, uploadEmpresaLogo } from "./empresaApi";
+import { consultarCnpj, deleteEmpresaCadastro, getEmpresaLogoUrl, listEmpresasCadastro, saveEmpresaCadastro, uploadEmpresaLogo } from "./empresaApi";
+import type { CnpjConsulta } from "./empresaApi";
 
 type EmpresaTab = "dados" | "associados" | "contribuicoes" | "financeiro";
+type NovoEmpresaStep = "tipo" | "cnpj" | "revisao";
 
 function onlyDigits(value: string | null | undefined) {
   return value?.replace(/\D/g, "") ?? "";
@@ -31,6 +33,37 @@ function formatCei(value: string) {
 
 function formatCeiCnpj(value: string, tipo: number) {
   return tipo === 2 ? formatCei(value) : formatCnpj(value);
+}
+
+function firstText(...values: Array<string | null | undefined>) {
+  return values.find((value) => value && value.trim())?.trim() ?? "";
+}
+
+function mapCnpjConsultaToForm(data: CnpjConsulta): EmpresaCadastroInsert {
+  const razaoSocial = firstText(data.razao_social);
+  const nomeFantasia = firstText(data.nome_fantasia, data.razao_social);
+
+  return {
+    ...emptyForm,
+    tipo_cei_cnpj: 1,
+    dt_inicio_atividades: data.data_inicio_atividade ?? "",
+    ativo: data.descricao_situacao_cadastral ? (data.descricao_situacao_cadastral.toUpperCase() === "ATIVA" ? "S" : "N") : emptyForm.ativo,
+    razao_social: razaoSocial,
+    nm_fantasia: nomeFantasia,
+    cei_cnpj: formatCnpj(data.cnpj),
+    email1: data.email ?? "",
+    tel1: onlyDigits(data.ddd_telefone_1),
+    tel2: onlyDigits(data.ddd_telefone_2),
+    endereco: data.logradouro ?? "",
+    numero: data.numero ?? "",
+    complemento: data.complemento ?? "",
+    bairro: data.bairro ?? "",
+    cidade: data.municipio ?? "",
+    uf: data.uf ?? emptyForm.uf,
+    cep: onlyDigits(data.cep),
+    capital_social: Number(data.capital_social ?? 0) || 0,
+    obs: data.cnae_fiscal_descricao ? `CNAE fiscal: ${data.cnae_fiscal ?? ""} - ${data.cnae_fiscal_descricao}` : ""
+  };
 }
 
 const emptyForm: EmpresaCadastroInsert = {
@@ -80,6 +113,10 @@ export function EmpresaPage() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [novoStep, setNovoStep] = useState<NovoEmpresaStep | null>(null);
+  const [cnpjInput, setCnpjInput] = useState("");
+  const [cnpjData, setCnpjData] = useState<CnpjConsulta | null>(null);
+  const [cnpjMessage, setCnpjMessage] = useState<string | null>(null);
 
   const empresasQuery = useQuery({ queryKey: ["empresas-cadastro", search], queryFn: () => listEmpresasCadastro(search) });
   const usuariosQuery = useQuery({ queryKey: ["usuarios"], queryFn: listUsuarios });
@@ -175,15 +212,64 @@ export function EmpresaPage() {
     onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel excluir a empresa.")
   });
 
+  const cnpjMutation = useMutation({
+    mutationFn: consultarCnpj,
+    onSuccess: (data) => {
+      setCnpjData(data);
+      setCnpjMessage(null);
+      setNovoStep("revisao");
+    },
+    onError: (error) => setCnpjMessage(error instanceof Error ? error.message : "Nao foi possivel consultar esse CNPJ.")
+  });
+
   const totalLabel = useMemo(() => `${empresas.length} registro${empresas.length === 1 ? "" : "s"}`, [empresas.length]);
 
   function handleNew() {
+    setSelectedId(null);
+    setCreatingNew(false);
+    setActiveTab("dados");
+    setMessage(null);
+    setCnpjMessage(null);
+    setCnpjData(null);
+    setCnpjInput("");
+    setLogoFile(null);
+    setNovoStep("tipo");
+  }
+
+  function startManualNew(tipo: number) {
+    setSelectedId(null);
+    setCreatingNew(true);
+    setActiveTab("dados");
+    setMessage(null);
+    setCnpjMessage(null);
+    setCnpjData(null);
+    setLogoFile(null);
+    setForm({ ...emptyForm, tipo_cei_cnpj: tipo, cei_cnpj: "" });
+    setNovoStep(null);
+  }
+
+  function handleCnpjSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setCnpjMessage(null);
+    cnpjMutation.mutate(cnpjInput);
+  }
+
+  function fillFormFromCnpj() {
+    if (!cnpjData) return;
     setSelectedId(null);
     setCreatingNew(true);
     setActiveTab("dados");
     setMessage(null);
     setLogoFile(null);
-    setForm(emptyForm);
+    setForm(mapCnpjConsultaToForm(cnpjData));
+    setNovoStep(null);
+  }
+
+  function closeNovoDialog() {
+    setNovoStep(null);
+    setCnpjMessage(null);
+    setCnpjData(null);
+    setCnpjInput("");
   }
 
   function handleSelect(item: EmpresaCadastro) {
@@ -223,6 +309,61 @@ export function EmpresaPage() {
         </div>
         <button onClick={handleNew}><Plus size={16} /> Novo</button>
       </section>
+
+      {novoStep ? <div className="modal-backdrop" role="presentation">
+        <div className="modal-panel" role="dialog" aria-modal="true" aria-label="Novo cadastro de empresa">
+          {novoStep === "tipo" ? <>
+            <div>
+              <h2>Novo cadastro</h2>
+              <p>Selecione o tipo de documento da empresa.</p>
+            </div>
+            <div className="choice-grid">
+              <button type="button" onClick={() => setNovoStep("cnpj")}>CNPJ</button>
+              <button type="button" className="secondary-button" onClick={() => startManualNew(2)}>CEI</button>
+            </div>
+            <div className="modal-actions">
+              <button type="button" className="secondary-button" onClick={closeNovoDialog}>Cancelar</button>
+            </div>
+          </> : null}
+
+          {novoStep === "cnpj" ? <form className="modal-form" onSubmit={handleCnpjSearch}>
+            <div>
+              <h2>Consultar CNPJ</h2>
+              <p>Informe o CNPJ para buscar os dados cadastrais.</p>
+            </div>
+            <label className="field">
+              <input value={cnpjInput} maxLength={18} onChange={(event) => setCnpjInput(formatCnpj(event.target.value))} placeholder=" " autoFocus />
+              <span>CNPJ</span>
+            </label>
+            {cnpjMessage ? <div className="form-error">{cnpjMessage}</div> : null}
+            <div className="modal-actions">
+              <button type="button" className="secondary-button" onClick={() => startManualNew(1)}>Preencher manualmente</button>
+              <button type="button" className="secondary-button" onClick={closeNovoDialog}>Cancelar</button>
+              <button type="submit" disabled={cnpjMutation.isPending}>{cnpjMutation.isPending ? "Buscando..." : "Buscar"}</button>
+            </div>
+          </form> : null}
+
+          {novoStep === "revisao" && cnpjData ? <>
+            <div>
+              <h2>Dados encontrados</h2>
+              <p>Revise antes de preencher o cadastro.</p>
+            </div>
+            <div className="lookup-summary">
+              <div><span>Razao social</span><strong>{firstText(cnpjData.razao_social) || "-"}</strong></div>
+              <div><span>Nome fantasia</span><strong>{firstText(cnpjData.nome_fantasia, cnpjData.razao_social) || "-"}</strong></div>
+              <div><span>CNPJ</span><strong>{formatCnpj(cnpjData.cnpj)}</strong></div>
+              <div><span>Cidade/UF</span><strong>{firstText(cnpjData.municipio) || "-"} / {cnpjData.uf ?? "-"}</strong></div>
+              <div><span>E-mail</span><strong>{cnpjData.email || "-"}</strong></div>
+              <div><span>Telefone</span><strong>{onlyDigits(cnpjData.ddd_telefone_1) || "-"}</strong></div>
+            </div>
+            <div className="modal-actions">
+              <button type="button" className="secondary-button" onClick={() => setNovoStep("cnpj")}>Nova consulta</button>
+              <button type="button" className="secondary-button" onClick={closeNovoDialog}>Cancelar</button>
+              <button type="button" onClick={fillFormFromCnpj}>Preencher cadastro</button>
+            </div>
+          </> : null}
+        </div>
+      </div> : null}
 
       <section className={`split-view ${formOpen ? "" : "list-only"}`}>
         <div className="list-panel">
