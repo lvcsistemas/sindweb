@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Building2, Camera, Plus, Save, Search, Trash2 } from "lucide-react";
 import { Breadcrumb } from "../../shared/Breadcrumb";
 import type { EmpresaCadastro, EmpresaCadastroInsert } from "../../types/database";
+import { listAuxiliares } from "../auxiliares/auxiliaresApi";
 import { listContribuicoes } from "../contribuicao/contribuicaoApi";
 import { listUsuarios } from "../usuarios/usuariosApi";
 import { addEmpresaContribuicao, consultarCnpj, deleteEmpresaCadastro, deleteEmpresaContribuicao, getEmpresaLogoUrl, listEmpresaAssociados, listEmpresaContribuicoes, listEmpresasCadastro, saveEmpresaCadastro, uploadEmpresaLogo } from "./empresaApi";
@@ -140,6 +141,8 @@ export function EmpresaPage() {
   const empresasQuery = useQuery({ queryKey: ["empresas-cadastro", search], queryFn: () => listEmpresasCadastro(search) });
   const usuariosQuery = useQuery({ queryKey: ["usuarios"], queryFn: listUsuarios });
   const contribuicoesQuery = useQuery({ queryKey: ["contribuicoes-options"], queryFn: () => listContribuicoes("") });
+  const estabelecimentosQuery = useQuery({ queryKey: ["auxiliares", "estabelecimento"], queryFn: () => listAuxiliares("estabelecimento", "") });
+  const estabelecimentoTiposQuery = useQuery({ queryKey: ["auxiliares", "estabelecimento_tipo"], queryFn: () => listAuxiliares("estabelecimento_tipo", "") });
   const empresaContribuicoesQuery = useQuery({
     queryKey: ["empresa-contribuicoes", selectedId],
     queryFn: () => listEmpresaContribuicoes(selectedId ?? 0),
@@ -153,6 +156,10 @@ export function EmpresaPage() {
   const empresas = empresasQuery.data ?? [];
   const usuarios = usuariosQuery.data ?? [];
   const contribuicoes = contribuicoesQuery.data ?? [];
+  const estabelecimentos = (estabelecimentosQuery.data ?? []).filter((item) => item.ativo === "S");
+  const estabelecimentoTipos = (estabelecimentoTiposQuery.data ?? []).filter((item) => item.ativo === "S");
+  const defaultEstabelecimentoId = estabelecimentos[0]?.id ?? emptyForm.estabelecimento_id;
+  const defaultEstabelecimentoTipoId = estabelecimentoTipos[0]?.id ?? emptyForm.estabelecimento_tipo_id;
   const empresaContribuicoes = empresaContribuicoesQuery.data ?? [];
   const empresaAssociados = empresaAssociadosQuery.data ?? [];
   const selected = empresas.find((item) => item.id === selectedId) ?? null;
@@ -296,7 +303,13 @@ export function EmpresaPage() {
     setCnpjMessage(null);
     setCnpjData(null);
     setLogoFile(null);
-    setForm({ ...emptyForm, tipo_cei_cnpj: tipo, cei_cnpj: "" });
+    setForm({
+      ...emptyForm,
+      estabelecimento_id: defaultEstabelecimentoId,
+      estabelecimento_tipo_id: defaultEstabelecimentoTipoId,
+      tipo_cei_cnpj: tipo,
+      cei_cnpj: ""
+    });
     setNovoStep(null);
   }
 
@@ -313,7 +326,11 @@ export function EmpresaPage() {
     setActiveTab("dados");
     setMessage(null);
     setLogoFile(null);
-    setForm(mapCnpjConsultaToForm(cnpjData));
+    setForm({
+      ...mapCnpjConsultaToForm(cnpjData),
+      estabelecimento_id: defaultEstabelecimentoId,
+      estabelecimento_tipo_id: defaultEstabelecimentoTipoId
+    });
     setNovoStep(null);
   }
 
@@ -528,19 +545,15 @@ export function EmpresaPage() {
                 </label>
                 <label className="field">
                   <select value={form.estabelecimento_id} onChange={(event) => setForm({ ...form, estabelecimento_id: Number(event.target.value) })}>
-                    <option value={1}>AUTONOMOS</option>
-                    <option value={2}>EMPREGADOS</option>
-                    <option value={3}>PATRONAL/EMPREGADOR</option>
-                    <option value={4}>PROFISSIONAL LIBERAL</option>
+                    <option value={0}>Selecione</option>
+                    {estabelecimentos.map((item) => <option key={item.id} value={item.id}>{item.nome}</option>)}
                   </select>
                   <span>Estabelecimento</span>
                 </label>
                 <label className="field">
                   <select value={form.estabelecimento_tipo_id} onChange={(event) => setForm({ ...form, estabelecimento_tipo_id: Number(event.target.value) })}>
-                    <option value={1}>FILIAL</option>
-                    <option value={2}>OUTROS</option>
-                    <option value={3}>PRINCIPAL</option>
-                    <option value={4}>UNICO</option>
+                    <option value={0}>Selecione</option>
+                    {estabelecimentoTipos.map((item) => <option key={item.id} value={item.id}>{item.nome}</option>)}
                   </select>
                   <span>Tipo estabelecimento</span>
                 </label>
