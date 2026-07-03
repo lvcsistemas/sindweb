@@ -1,5 +1,5 @@
 import { supabase } from "../../lib/supabase";
-import type { EmpresaCadastro, EmpresaCadastroInsert, EmpresaContribuicaoLista } from "../../types/database";
+import type { EmpresaAssociadoLista, EmpresaCadastro, EmpresaCadastroInsert, EmpresaContribuicaoLista } from "../../types/database";
 
 const supabaseUnsafe = supabase as any;
 
@@ -110,6 +110,17 @@ export async function saveEmpresaCadastro(values: EmpresaCadastroInsert) {
 export async function deleteEmpresaCadastro(id: number) {
   const { error } = await supabaseUnsafe.from("empresas").delete().eq("id", id);
   if (error) throw error;
+}
+
+export async function listEmpresaAssociados(empresaId: number) {
+  const { data, error } = await supabase
+    .from("associados")
+    .select("id, ativo, matricula, nome, cpf, tel1, email")
+    .eq("empresa_id", empresaId)
+    .order("nome", { ascending: true });
+
+  if (error) throw error;
+  return data as EmpresaAssociadoLista[];
 }
 
 export async function listEmpresaContribuicoes(empresaId: number) {

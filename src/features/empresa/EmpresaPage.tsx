@@ -5,7 +5,7 @@ import { Breadcrumb } from "../../shared/Breadcrumb";
 import type { EmpresaCadastro, EmpresaCadastroInsert } from "../../types/database";
 import { listContribuicoes } from "../contribuicao/contribuicaoApi";
 import { listUsuarios } from "../usuarios/usuariosApi";
-import { addEmpresaContribuicao, consultarCnpj, deleteEmpresaCadastro, deleteEmpresaContribuicao, getEmpresaLogoUrl, listEmpresaContribuicoes, listEmpresasCadastro, saveEmpresaCadastro, uploadEmpresaLogo } from "./empresaApi";
+import { addEmpresaContribuicao, consultarCnpj, deleteEmpresaCadastro, deleteEmpresaContribuicao, getEmpresaLogoUrl, listEmpresaAssociados, listEmpresaContribuicoes, listEmpresasCadastro, saveEmpresaCadastro, uploadEmpresaLogo } from "./empresaApi";
 import type { CnpjConsulta } from "./empresaApi";
 
 type EmpresaTab = "dados" | "associados" | "contribuicoes" | "financeiro";
@@ -34,6 +34,14 @@ function formatCei(value: string) {
 
 function formatCeiCnpj(value: string, tipo: number) {
   return tipo === 2 ? formatCei(value) : formatCnpj(value);
+}
+
+function formatCpf(value: string | null | undefined) {
+  const digits = onlyDigits(value).slice(0, 11);
+  return digits
+    .replace(/^(\d{3})(\d)/, "$1.$2")
+    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1-$2");
 }
 
 function firstText(...values: Array<string | null | undefined>) {
@@ -137,10 +145,16 @@ export function EmpresaPage() {
     queryFn: () => listEmpresaContribuicoes(selectedId ?? 0),
     enabled: Boolean(selectedId)
   });
+  const empresaAssociadosQuery = useQuery({
+    queryKey: ["empresa-associados", selectedId],
+    queryFn: () => listEmpresaAssociados(selectedId ?? 0),
+    enabled: Boolean(selectedId)
+  });
   const empresas = empresasQuery.data ?? [];
   const usuarios = usuariosQuery.data ?? [];
   const contribuicoes = contribuicoesQuery.data ?? [];
   const empresaContribuicoes = empresaContribuicoesQuery.data ?? [];
+  const empresaAssociados = empresaAssociadosQuery.data ?? [];
   const selected = empresas.find((item) => item.id === selectedId) ?? null;
   const formOpen = creatingNew || Boolean(selectedId);
 
@@ -325,9 +339,10 @@ export function EmpresaPage() {
     saveMutation.mutate(form);
   }
 
-  function handleDelete() {
-    if (!form.id) return;
-    deleteMutation.mutate(form.id);
+  function handleDeleteEmpresa(id: number) {
+    if (!window.confirm("Deseja excluir esta empresa?")) return;
+    setMessage(null);
+    deleteMutation.mutate(id);
   }
 
   function handleTipoCeiCnpjChange(value: number) {
@@ -423,14 +438,34 @@ export function EmpresaPage() {
           <div className="record-list">
             {empresasQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
             {empresas.map((item) => (
-              <button key={item.id} className={`record-row ${item.id === selectedId ? "selected" : ""}`} onClick={() => handleSelect(item)}>
+              <div
+                key={item.id}
+                className={`record-row with-action ${item.id === selectedId ? "selected" : ""}`}
+                onClick={() => handleSelect(item)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") handleSelect(item);
+                }}
+                role="button"
+                tabIndex={0}
+              >
                 <div className="avatar">{getEmpresaLogoUrl(item.logo_path) ? <img src={getEmpresaLogoUrl(item.logo_path) ?? ""} alt="" /> : <Building2 size={19} />}</div>
                 <div>
                   <strong>{item.nm_fantasia}</strong>
-                  <span>{item.razao_social} - {item.cei_cnpj} - {item.cidade ?? "Sem cidade"}</span>
+                  <span>{formatCeiCnpj(item.cei_cnpj, item.tipo_cei_cnpj)}</span>
                 </div>
-                <small className={item.ativo === "S" ? "status-ok" : "status-muted"}>{item.ativo === "S" ? "Ativa" : "Inativa"}</small>
-              </button>
+                <button
+                  type="button"
+                  className="icon-button danger-icon"
+                  title="Excluir empresa"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleDeleteEmpresa(item.id);
+                  }}
+                  disabled={deleteMutation.isPending}
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
             ))}
             {!empresasQuery.isLoading && empresas.length === 0 ? <div className="empty-state">Nenhuma empresa encontrada.</div> : null}
           </div>
@@ -547,7 +582,36 @@ export function EmpresaPage() {
               <label className="field"><textarea rows={3} value={form.obs ?? ""} onChange={(event) => setForm({ ...form, obs: event.target.value })} placeholder=" " /><span>Observacao</span></label>
             </> : null}
 
-            {activeTab === "associados" ? <div className="empty-state tab-empty">Nenhum associado vinculado nesta tela.</div> : null}
+            {activeTab === "associados" ? <div className="related-panel">
+              {!selectedId ? <div className="empty-state tab-empty">Salve a empresa antes de consultar associados.</div> : <div className="data-table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Matricula</th>
+                      <th>Nome</th>
+                      <th>CPF</th>
+                      <th>Telefone</th>
+                      <th>E-mail</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {empresaAssociados.map((associado) => (
+                      <tr key={associado.id}>
+                        <td>{associado.matricula ?? "-"}</td>
+                        <td>{associado.nome}</td>
+                        <td>{formatCpf(associado.cpf)}</td>
+                        <td>{associado.tel1 ?? "-"}</td>
+                        <td>{associado.email ?? "-"}</td>
+                        <td className={associado.ativo ? "status-ok" : "status-muted"}>{associado.ativo ? "Ativo" : "Inativo"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {empresaAssociadosQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
+                {!empresaAssociadosQuery.isLoading && empresaAssociados.length === 0 ? <div className="empty-state">Nenhum associado vinculado.</div> : null}
+              </div>}
+            </div> : null}
             {activeTab === "contribuicoes" ? <div className="related-panel">
               {!selectedId ? <div className="empty-state tab-empty">Salve a empresa antes de adicionar contribuicoes.</div> : <>
                 <div className="related-toolbar">
@@ -566,7 +630,7 @@ export function EmpresaPage() {
                 </div>
 
                 <div className="data-table-wrap">
-                  <table className="data-table">
+                  <table className="data-table clickable-rows">
                     <thead>
                       <tr>
                         <th>Tipo</th>
@@ -598,7 +662,6 @@ export function EmpresaPage() {
             {message ? <div className={saveMutation.isError || deleteMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
 
             <div className="form-actions">
-              {form.id ? <button type="button" className="danger-button" onClick={handleDelete} disabled={deleteMutation.isPending}><Trash2 size={16} /> Excluir</button> : null}
               {activeTab === "dados" ? <button type="submit" disabled={saveMutation.isPending}><Save size={16} /> {saveMutation.isPending ? "Salvando..." : "Salvar"}</button> : null}
             </div>
           </form>

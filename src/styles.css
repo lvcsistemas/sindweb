@@ -84,10 +84,12 @@ button, .secondary-button { border: 1px solid #1b6b50; background: #1f7a5b; colo
 .search-box input { border: 0; outline: 0; width: 100%; }
 .record-list { display: grid; gap: 8px; max-height: calc(100vh - 185px); overflow: auto; }
 .record-row { width: 100%; border: 1px solid #dbe2e8; background: #fff; color: #17202a; border-radius: 6px; padding: 10px; display: grid; grid-template-columns: 42px 1fr auto; gap: 10px; text-align: left; align-items: center; }
+.record-row.with-action { grid-template-columns: 42px minmax(0, 1fr) 36px; }
 .record-row.simple { grid-template-columns: 1fr; }
 .record-row.selected { border-color: #1f7a5b; background: #edf8f3; }
 .record-row strong { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .record-row span { display: block; color: #657383; font-size: 0.86rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.danger-icon { border-color: #f0c7bf; color: #9d3429; background: #fff3f0; }
 .avatar { width: 42px; height: 42px; border-radius: 50%; background: #dce8e4; color: #1f5e49; display: grid; place-items: center; font-weight: 800; overflow: hidden; }
 .avatar.large { width: 76px; height: 76px; }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -122,8 +124,8 @@ textarea { resize: vertical; }
 .data-table { width: 100%; border-collapse: collapse; min-width: 680px; background: #fff; }
 .data-table th, .data-table td { padding: 10px 12px; border-bottom: 1px solid #e5ebf0; text-align: left; vertical-align: middle; }
 .data-table th { color: #465563; background: #f8fafb; font-size: 0.82rem; text-transform: uppercase; }
-.data-table tbody tr { cursor: pointer; }
-.data-table tbody tr:hover { background: #edf8f3; }
+.data-table.clickable-rows tbody tr { cursor: pointer; }
+.data-table.clickable-rows tbody tr:hover { background: #edf8f3; }
 .data-table tbody tr:last-child td { border-bottom: 0; }
 .numeric-cell { text-align: right; white-space: nowrap; }
 .modal-backdrop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 18px; background: rgba(23, 32, 42, 0.42); }

@@ -85,6 +85,8 @@ export type AssociadoLista = Pick<Associado, "id" | "ativo" | "matricula" | "nom
   situacao_nome: string | null;
 };
 
+export type EmpresaAssociadoLista = Pick<Associado, "id" | "ativo" | "matricula" | "nome" | "cpf" | "tel1" | "email">;
+
 export type AssociadoOption = Pick<Associado, "id" | "nome" | "cpf">;
 
 export type AssociadoDependente = {
