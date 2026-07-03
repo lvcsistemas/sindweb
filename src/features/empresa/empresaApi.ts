@@ -90,3 +90,16 @@ export async function deleteEmpresaCadastro(id: number) {
   const { error } = await supabaseUnsafe.from("empresas").delete().eq("id", id);
   if (error) throw error;
 }
+
+export async function uploadEmpresaLogo(empresaId: number, file: File) {
+  const extension = file.name.split(".").pop() ?? "jpg";
+  const path = `${empresaId}/${crypto.randomUUID()}.${extension}`;
+  const { error } = await supabase.storage.from("empresas-logos").upload(path, file, { upsert: false });
+  if (error) throw error;
+  return path;
+}
+
+export function getEmpresaLogoUrl(path: string | null | undefined) {
+  if (!path) return null;
+  return supabase.storage.from("empresas-logos").getPublicUrl(path).data.publicUrl;
+}

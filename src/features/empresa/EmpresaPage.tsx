@@ -1,10 +1,10 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Save, Search, Trash2 } from "lucide-react";
+import { Building2, Camera, Plus, Save, Search, Trash2 } from "lucide-react";
 import { Breadcrumb } from "../../shared/Breadcrumb";
 import type { EmpresaCadastro, EmpresaCadastroInsert } from "../../types/database";
 import { listUsuarios } from "../usuarios/usuariosApi";
-import { deleteEmpresaCadastro, listEmpresasCadastro, saveEmpresaCadastro } from "./empresaApi";
+import { deleteEmpresaCadastro, getEmpresaLogoUrl, listEmpresasCadastro, saveEmpresaCadastro, uploadEmpresaLogo } from "./empresaApi";
 
 type EmpresaTab = "dados" | "associados" | "contribuicoes" | "financeiro";
 
@@ -66,6 +66,7 @@ const emptyForm: EmpresaCadastroInsert = {
   uf: "RJ",
   cep: "",
   capital_social: 0,
+  logo_path: null,
   obs: ""
 };
 
@@ -76,6 +77,8 @@ export function EmpresaPage() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [creatingNew, setCreatingNew] = useState(false);
   const [form, setForm] = useState<EmpresaCadastroInsert>(emptyForm);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   const empresasQuery = useQuery({ queryKey: ["empresas-cadastro", search], queryFn: () => listEmpresasCadastro(search) });
@@ -125,15 +128,35 @@ export function EmpresaPage() {
       uf: selected.uf,
       cep: selected.cep ?? "",
       capital_social: selected.capital_social,
+      logo_path: selected.logo_path,
       obs: selected.obs ?? ""
     });
+    setLogoFile(null);
   }, [selected]);
 
+  useEffect(() => {
+    if (!logoFile) {
+      setLogoPreview(getEmpresaLogoUrl(form.logo_path));
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(logoFile);
+    setLogoPreview(previewUrl);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [form.logo_path, logoFile]);
+
   const saveMutation = useMutation({
-    mutationFn: saveEmpresaCadastro,
+    mutationFn: async (values: EmpresaCadastroInsert) => {
+      const saved = await saveEmpresaCadastro(values);
+      if (!logoFile) return saved;
+
+      const logoPath = await uploadEmpresaLogo(saved.id, logoFile);
+      return saveEmpresaCadastro({ ...values, id: saved.id, logo_path: logoPath });
+    },
     onSuccess: async (saved) => {
       setSelectedId(saved.id);
       setCreatingNew(false);
+      setLogoFile(null);
       setMessage("Empresa salva com sucesso.");
       await queryClient.invalidateQueries({ queryKey: ["empresas-cadastro"] });
     },
@@ -159,6 +182,7 @@ export function EmpresaPage() {
     setCreatingNew(true);
     setActiveTab("dados");
     setMessage(null);
+    setLogoFile(null);
     setForm(emptyForm);
   }
 
@@ -167,6 +191,7 @@ export function EmpresaPage() {
     setCreatingNew(false);
     setActiveTab("dados");
     setMessage(null);
+    setLogoFile(null);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -206,11 +231,13 @@ export function EmpresaPage() {
           <div className="record-list">
             {empresasQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
             {empresas.map((item) => (
-              <button key={item.id} className={`record-row simple ${item.id === selectedId ? "selected" : ""}`} onClick={() => handleSelect(item)}>
+              <button key={item.id} className={`record-row ${item.id === selectedId ? "selected" : ""}`} onClick={() => handleSelect(item)}>
+                <div className="avatar">{getEmpresaLogoUrl(item.logo_path) ? <img src={getEmpresaLogoUrl(item.logo_path) ?? ""} alt="" /> : <Building2 size={19} />}</div>
                 <div>
                   <strong>{item.razao_social}</strong>
                   <span>{item.cei_cnpj} - {item.cidade ?? "Sem cidade"} - {item.ativo === "S" ? "Ativa" : "Inativa"}</span>
                 </div>
+                <small className={item.ativo === "S" ? "status-ok" : "status-muted"}>{item.ativo === "S" ? "Ativa" : "Inativa"}</small>
               </button>
             ))}
             {!empresasQuery.isLoading && empresas.length === 0 ? <div className="empty-state">Nenhuma empresa encontrada.</div> : null}
@@ -254,6 +281,14 @@ export function EmpresaPage() {
               <div className="form-grid">
                 <label className="field"><input value={form.razao_social} maxLength={100} onChange={(event) => setForm({ ...form, razao_social: event.target.value })} placeholder=" " required /><span>Razao social</span></label>
                 <label className="field"><input value={form.nm_fantasia} maxLength={50} onChange={(event) => setForm({ ...form, nm_fantasia: event.target.value })} placeholder=" " required /><span>Nome fantasia</span></label>
+              </div>
+
+              <div className="photo-field">
+                <div className="avatar large">{logoPreview ? <img src={logoPreview} alt="" /> : <Building2 size={30} />}</div>
+                <label className="secondary-button">
+                  <Camera size={16} /> Logomarca
+                  <input type="file" accept="image/*" onChange={(event) => setLogoFile(event.target.files?.[0] ?? null)} />
+                </label>
               </div>
 
               <div className="form-grid compact">

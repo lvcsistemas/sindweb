@@ -150,6 +150,7 @@ export type EmpresaCadastro = {
   uf: string;
   cep: string | null;
   capital_social: number;
+  logo_path: string | null;
   obs: string | null;
   created_at: string;
   updated_at: string;
