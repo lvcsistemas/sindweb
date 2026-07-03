@@ -526,7 +526,15 @@ export function EmpresaPage() {
                   </select>
                   <span>Usuario responsavel</span>
                 </label>
-                <label className="field"><input type="number" min={0} value={form.estabelecimento_id} onChange={(event) => setForm({ ...form, estabelecimento_id: Number(event.target.value) })} placeholder=" " /><span>Estabelecimento</span></label>
+                <label className="field">
+                  <select value={form.estabelecimento_id} onChange={(event) => setForm({ ...form, estabelecimento_id: Number(event.target.value) })}>
+                    <option value={1}>AUTONOMOS</option>
+                    <option value={2}>EMPREGADOS</option>
+                    <option value={3}>PATRONAL/EMPREGADOR</option>
+                    <option value={4}>PROFISSIONAL LIBERAL</option>
+                  </select>
+                  <span>Estabelecimento</span>
+                </label>
                 <label className="field">
                   <select value={form.estabelecimento_tipo_id} onChange={(event) => setForm({ ...form, estabelecimento_tipo_id: Number(event.target.value) })}>
                     <option value={1}>FILIAL</option>
