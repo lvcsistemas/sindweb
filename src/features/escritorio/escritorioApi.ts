@@ -9,7 +9,7 @@ function onlyDigits(value: string | null | undefined) {
 
 export async function listEscritorios(search: string) {
   let query = supabaseUnsafe
-    .from("escritorio")
+    .from("escritorios")
     .select("*")
     .order("razao_social", { ascending: true });
 
@@ -46,7 +46,7 @@ export async function saveEscritorio(values: EscritorioInsert) {
 
   if (payload.id) {
     const { data, error } = await supabaseUnsafe
-      .from("escritorio")
+      .from("escritorios")
       .update(payload)
       .eq("id", payload.id)
       .select()
@@ -56,7 +56,7 @@ export async function saveEscritorio(values: EscritorioInsert) {
   }
 
   const { data, error } = await supabaseUnsafe
-    .from("escritorio")
+    .from("escritorios")
     .insert(payload)
     .select()
     .single();
@@ -65,6 +65,6 @@ export async function saveEscritorio(values: EscritorioInsert) {
 }
 
 export async function deleteEscritorio(id: number) {
-  const { error } = await supabaseUnsafe.from("escritorio").delete().eq("id", id);
+  const { error } = await supabaseUnsafe.from("escritorios").delete().eq("id", id);
   if (error) throw error;
 }

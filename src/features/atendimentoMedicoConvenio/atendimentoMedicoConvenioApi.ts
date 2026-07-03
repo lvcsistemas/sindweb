@@ -9,7 +9,7 @@ function onlyDigits(value: string | null | undefined) {
 
 export async function listAtendimentoMedicoConvenios(search: string) {
   let query = supabaseUnsafe
-    .from("atendimento_medico_convenio")
+    .from("atendimento_medico_convenios")
     .select("*")
     .order("nm_convenio", { ascending: true });
 
@@ -46,7 +46,7 @@ export async function saveAtendimentoMedicoConvenio(values: AtendimentoMedicoCon
 
   if (payload.id) {
     const { data, error } = await supabaseUnsafe
-      .from("atendimento_medico_convenio")
+      .from("atendimento_medico_convenios")
       .update(payload)
       .eq("id", payload.id)
       .select()
@@ -56,7 +56,7 @@ export async function saveAtendimentoMedicoConvenio(values: AtendimentoMedicoCon
   }
 
   const { data, error } = await supabaseUnsafe
-    .from("atendimento_medico_convenio")
+    .from("atendimento_medico_convenios")
     .insert(payload)
     .select()
     .single();
@@ -65,6 +65,6 @@ export async function saveAtendimentoMedicoConvenio(values: AtendimentoMedicoCon
 }
 
 export async function deleteAtendimentoMedicoConvenio(id: number) {
-  const { error } = await supabaseUnsafe.from("atendimento_medico_convenio").delete().eq("id", id);
+  const { error } = await supabaseUnsafe.from("atendimento_medico_convenios").delete().eq("id", id);
   if (error) throw error;
 }

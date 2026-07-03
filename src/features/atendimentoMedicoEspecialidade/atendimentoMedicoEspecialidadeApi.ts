@@ -14,7 +14,7 @@ export const ATENDIMENTO_MEDICO_ESPECIALIDADE_TIPOS = [
 
 export async function listAtendimentoMedicoEspecialidades(search: string) {
   let query = supabaseUnsafe
-    .from("atendimento_medico_especialidade")
+    .from("atendimento_medico_especialidades")
     .select("*")
     .order("tipo", { ascending: true })
     .order("nm_especialidade", { ascending: true });
@@ -38,7 +38,7 @@ export async function saveAtendimentoMedicoEspecialidade(values: AtendimentoMedi
 
   if (payload.id) {
     const { data, error } = await supabaseUnsafe
-      .from("atendimento_medico_especialidade")
+      .from("atendimento_medico_especialidades")
       .update(payload)
       .eq("id", payload.id)
       .select()
@@ -48,7 +48,7 @@ export async function saveAtendimentoMedicoEspecialidade(values: AtendimentoMedi
   }
 
   const { data, error } = await supabaseUnsafe
-    .from("atendimento_medico_especialidade")
+    .from("atendimento_medico_especialidades")
     .insert(payload)
     .select()
     .single();
@@ -57,6 +57,6 @@ export async function saveAtendimentoMedicoEspecialidade(values: AtendimentoMedi
 }
 
 export async function deleteAtendimentoMedicoEspecialidade(id: number) {
-  const { error } = await supabaseUnsafe.from("atendimento_medico_especialidade").delete().eq("id", id);
+  const { error } = await supabaseUnsafe.from("atendimento_medico_especialidades").delete().eq("id", id);
   if (error) throw error;
 }

@@ -14,7 +14,7 @@ function toNumber(value: number | string | null | undefined, fallback = 0) {
 
 export async function listEmpresasCadastro(search: string) {
   let query = supabaseUnsafe
-    .from("empresa")
+    .from("empresas")
     .select("*")
     .order("razao_social", { ascending: true });
 
@@ -68,7 +68,7 @@ export async function saveEmpresaCadastro(values: EmpresaCadastroInsert) {
 
   if (payload.id) {
     const { data, error } = await supabaseUnsafe
-      .from("empresa")
+      .from("empresas")
       .update(payload)
       .eq("id", payload.id)
       .select()
@@ -78,7 +78,7 @@ export async function saveEmpresaCadastro(values: EmpresaCadastroInsert) {
   }
 
   const { data, error } = await supabaseUnsafe
-    .from("empresa")
+    .from("empresas")
     .insert(payload)
     .select()
     .single();
@@ -87,6 +87,6 @@ export async function saveEmpresaCadastro(values: EmpresaCadastroInsert) {
 }
 
 export async function deleteEmpresaCadastro(id: number) {
-  const { error } = await supabaseUnsafe.from("empresa").delete().eq("id", id);
+  const { error } = await supabaseUnsafe.from("empresas").delete().eq("id", id);
   if (error) throw error;
 }

@@ -9,7 +9,7 @@ function onlyDigits(value: string | null | undefined) {
 
 export async function listLocaisTrabalho(search: string) {
   let query = supabaseUnsafe
-    .from("local_trabalho")
+    .from("locais_trabalho")
     .select("*")
     .order("nome", { ascending: true });
 
@@ -43,7 +43,7 @@ export async function saveLocalTrabalho(values: LocalTrabalhoInsert) {
 
   if (payload.id) {
     const { data, error } = await supabaseUnsafe
-      .from("local_trabalho")
+      .from("locais_trabalho")
       .update(payload)
       .eq("id", payload.id)
       .select()
@@ -53,7 +53,7 @@ export async function saveLocalTrabalho(values: LocalTrabalhoInsert) {
   }
 
   const { data, error } = await supabaseUnsafe
-    .from("local_trabalho")
+    .from("locais_trabalho")
     .insert(payload)
     .select()
     .single();
@@ -62,6 +62,6 @@ export async function saveLocalTrabalho(values: LocalTrabalhoInsert) {
 }
 
 export async function deleteLocalTrabalho(id: number) {
-  const { error } = await supabaseUnsafe.from("local_trabalho").delete().eq("id", id);
+  const { error } = await supabaseUnsafe.from("locais_trabalho").delete().eq("id", id);
   if (error) throw error;
 }

@@ -5,7 +5,7 @@ const supabaseUnsafe = supabase as any;
 
 export async function listContribuicoes(search: string) {
   let query = supabaseUnsafe
-    .from("contribuicao")
+    .from("contribuicoes")
     .select("*")
     .order("tipo", { ascending: true });
 
@@ -31,7 +31,7 @@ export async function saveContribuicao(values: ContribuicaoInsert) {
 
   if (payload.id) {
     const { data, error } = await supabaseUnsafe
-      .from("contribuicao")
+      .from("contribuicoes")
       .update(payload)
       .eq("id", payload.id)
       .select()
@@ -41,7 +41,7 @@ export async function saveContribuicao(values: ContribuicaoInsert) {
   }
 
   const { data, error } = await supabaseUnsafe
-    .from("contribuicao")
+    .from("contribuicoes")
     .insert(payload)
     .select()
     .single();
@@ -50,6 +50,6 @@ export async function saveContribuicao(values: ContribuicaoInsert) {
 }
 
 export async function deleteContribuicao(id: number) {
-  const { error } = await supabaseUnsafe.from("contribuicao").delete().eq("id", id);
+  const { error } = await supabaseUnsafe.from("contribuicoes").delete().eq("id", id);
   if (error) throw error;
 }

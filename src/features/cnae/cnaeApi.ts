@@ -5,7 +5,7 @@ const supabaseUnsafe = supabase as any;
 
 export async function listCnaes(search: string) {
   let query = supabaseUnsafe
-    .from("cnae")
+    .from("cnaes")
     .select("*")
     .order("codigo_cnae", { ascending: true });
 
@@ -28,7 +28,7 @@ export async function saveCnae(values: CnaeInsert) {
 
   if (payload.id) {
     const { data, error } = await supabaseUnsafe
-      .from("cnae")
+      .from("cnaes")
       .update(payload)
       .eq("id", payload.id)
       .select()
@@ -38,7 +38,7 @@ export async function saveCnae(values: CnaeInsert) {
   }
 
   const { data, error } = await supabaseUnsafe
-    .from("cnae")
+    .from("cnaes")
     .insert(payload)
     .select()
     .single();
@@ -47,6 +47,6 @@ export async function saveCnae(values: CnaeInsert) {
 }
 
 export async function deleteCnae(id: number) {
-  const { error } = await supabaseUnsafe.from("cnae").delete().eq("id", id);
+  const { error } = await supabaseUnsafe.from("cnaes").delete().eq("id", id);
   if (error) throw error;
 }

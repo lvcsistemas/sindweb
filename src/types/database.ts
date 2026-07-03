@@ -4,17 +4,15 @@ export type Database = {
   public: {
     Tables: {
       associados: { Row: Associado; Insert: AssociadoInsert; Update: Partial<AssociadoInsert> };
-      atendimento_medico_convenio: { Row: AtendimentoMedicoConvenio; Insert: AtendimentoMedicoConvenioInsert; Update: Partial<AtendimentoMedicoConvenioInsert> };
-      atendimento_medico_especialidade: { Row: AtendimentoMedicoEspecialidade; Insert: AtendimentoMedicoEspecialidadeInsert; Update: Partial<AtendimentoMedicoEspecialidadeInsert> };
       auxiliares: { Row: Auxiliar; Insert: AuxiliarInsert; Update: Partial<AuxiliarInsert> };
-      cnae: { Row: Cnae; Insert: CnaeInsert; Update: Partial<CnaeInsert> };
-      contribuicao: { Row: Contribuicao; Insert: ContribuicaoInsert; Update: Partial<ContribuicaoInsert> };
-      empresa: { Row: EmpresaCadastro; Insert: EmpresaCadastroInsert; Update: Partial<EmpresaCadastroInsert> };
-      empresas: { Row: Empresa; Insert: EmpresaInsert; Update: Partial<EmpresaInsert> };
-      escritorio: { Row: Escritorio; Insert: EscritorioInsert; Update: Partial<EscritorioInsert> };
-      local_trabalho: { Row: LocalTrabalho; Insert: LocalTrabalhoInsert; Update: Partial<LocalTrabalhoInsert> };
+      atendimento_medico_convenios: { Row: AtendimentoMedicoConvenio; Insert: AtendimentoMedicoConvenioInsert; Update: Partial<AtendimentoMedicoConvenioInsert> };
+      atendimento_medico_especialidades: { Row: AtendimentoMedicoEspecialidade; Insert: AtendimentoMedicoEspecialidadeInsert; Update: Partial<AtendimentoMedicoEspecialidadeInsert> };
+      cnaes: { Row: Cnae; Insert: CnaeInsert; Update: Partial<CnaeInsert> };
+      contribuicoes: { Row: Contribuicao; Insert: ContribuicaoInsert; Update: Partial<ContribuicaoInsert> };
+      empresas: { Row: EmpresaCadastro; Insert: EmpresaCadastroInsert; Update: Partial<EmpresaCadastroInsert> };
+      escritorios: { Row: Escritorio; Insert: EscritorioInsert; Update: Partial<EscritorioInsert> };
+      locais_trabalho: { Row: LocalTrabalho; Insert: LocalTrabalhoInsert; Update: Partial<LocalTrabalhoInsert> };
       lookup_items: { Row: LookupItem; Insert: Omit<LookupItem, "id" | "created_at">; Update: Partial<Omit<LookupItem, "id" | "created_at">> };
-      module_permissions: { Row: ModulePermission; Insert: Omit<ModulePermission, "id" | "created_at">; Update: Partial<Omit<ModulePermission, "id" | "created_at">> };
     };
     Views: {
       associados_lista: { Row: AssociadoLista };
@@ -262,12 +260,3 @@ export type LookupItem = {
   created_at: string;
 };
 
-export type ModulePermission = {
-  id: number;
-  user_id: string;
-  module_key: string;
-  can_access: boolean;
-  can_save: boolean;
-  can_delete: boolean;
-  created_at: string;
-};

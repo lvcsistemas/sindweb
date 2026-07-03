@@ -34,13 +34,30 @@ export async function saveAssociado(values: AssociadoFormValues) {
 }
 
 export async function listEmpresas() {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseUnsafe
     .from("empresas")
-    .select("id, legacy_id, nome_fantasia, razao_social, cnpj, ativo, created_at, updated_at")
-    .eq("ativo", true)
-    .order("nome_fantasia");
+    .select("id, nm_fantasia, razao_social, cei_cnpj, ativo, created_at, updated_at")
+    .eq("ativo", "S")
+    .order("nm_fantasia");
   if (error) throw error;
-  return data as Empresa[];
+  return (data as Array<{
+    id: number;
+    nm_fantasia: string;
+    razao_social: string | null;
+    cei_cnpj: string | null;
+    ativo: string;
+    created_at: string;
+    updated_at: string;
+  }>).map((empresa) => ({
+    id: empresa.id,
+    legacy_id: null,
+    nome_fantasia: empresa.nm_fantasia,
+    razao_social: empresa.razao_social,
+    cnpj: empresa.cei_cnpj,
+    ativo: empresa.ativo === "S",
+    created_at: empresa.created_at,
+    updated_at: empresa.updated_at
+  })) as Empresa[];
 }
 
 export async function listLookup(kind: string) {
