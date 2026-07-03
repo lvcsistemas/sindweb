@@ -234,8 +234,8 @@ export function EmpresaPage() {
               <button key={item.id} className={`record-row ${item.id === selectedId ? "selected" : ""}`} onClick={() => handleSelect(item)}>
                 <div className="avatar">{getEmpresaLogoUrl(item.logo_path) ? <img src={getEmpresaLogoUrl(item.logo_path) ?? ""} alt="" /> : <Building2 size={19} />}</div>
                 <div>
-                  <strong>{item.razao_social}</strong>
-                  <span>{item.cei_cnpj} - {item.cidade ?? "Sem cidade"} - {item.ativo === "S" ? "Ativa" : "Inativa"}</span>
+                  <strong>{item.nm_fantasia}</strong>
+                  <span>{item.razao_social} - {item.cei_cnpj} - {item.cidade ?? "Sem cidade"}</span>
                 </div>
                 <small className={item.ativo === "S" ? "status-ok" : "status-muted"}>{item.ativo === "S" ? "Ativa" : "Inativa"}</small>
               </button>
