@@ -109,15 +109,15 @@ export function AuxiliaresPage() {
     setMessage(null);
   }
 
+  function handleDeleteFromList(id: number, nome: string) {
+    if (!window.confirm(`Deseja excluir "${nome}"?`)) return;
+    deleteMutation.mutate(id);
+  }
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage(null);
     saveMutation.mutate({ ...form, grupo: grupoConfig!.key });
-  }
-
-  function handleDelete() {
-    if (!form.id) return;
-    deleteMutation.mutate(form.id);
   }
 
   return (
@@ -138,12 +138,17 @@ export function AuxiliaresPage() {
           <div className="record-list">
             {auxiliaresQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
             {auxiliares.map((item) => (
-              <button key={item.id} className={`record-row simple ${item.id === selectedId ? "selected" : ""}`} onClick={() => handleSelect(item)}>
-                <div>
-                  <strong>{item.nome}</strong>
-                  <span>Ordem {item.ordem} · {item.ativo === "S" ? "Ativo" : "Inativo"}</span>
-                </div>
-              </button>
+              <div key={item.id} className={`record-row ${item.id === selectedId ? "selected" : ""}`}>
+                <button className="record-row-content" onClick={() => handleSelect(item)}>
+                  <div>
+                    <strong>{item.nome}</strong>
+                    <span>Ordem {item.ordem} · {item.ativo === "S" ? "Ativo" : "Inativo"}</span>
+                  </div>
+                </button>
+                <button className="record-row-action" onClick={() => handleDeleteFromList(item.id, item.nome)} title="Excluir">
+                  <Trash2 size={16} />
+                </button>
+              </div>
             ))}
             {!auxiliaresQuery.isLoading && auxiliares.length === 0 ? <div className="empty-state">Nenhum auxiliar encontrado.</div> : null}
           </div>
@@ -172,7 +177,6 @@ export function AuxiliaresPage() {
             {message ? <div className={saveMutation.isError || deleteMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
 
             <div className="form-actions">
-              {form.id ? <button type="button" className="danger-button" onClick={handleDelete} disabled={deleteMutation.isPending}><Trash2 size={16} /> Excluir</button> : null}
               <button type="submit" disabled={saveMutation.isPending}><Save size={16} /> {saveMutation.isPending ? "Salvando..." : "Salvar"}</button>
             </div>
           </form>
