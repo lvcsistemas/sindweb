@@ -460,7 +460,7 @@ export function EmpresaPage() {
       <section className="module-header">
         <div>
           <h1>Empresas</h1>
-          <p>Cadastro de empresas, documentos, contatos e dados comerciais.</p>
+          <p>Cadastro de Empresas.</p>
         </div>
         <button onClick={handleNew}><Plus size={16} /> Novo</button>
       </section>
@@ -542,9 +542,7 @@ export function EmpresaPage() {
                   <strong>{item.nm_fantasia}</strong>
                   <span>{formatCeiCnpj(item.cei_cnpj, item.tipo_cei_cnpj)}</span>
                 </div>
-                <button
-                  type="button"
-                  className="icon-button danger-icon"
+                <button type="button" className="icon-button danger-icon"
                   title="Excluir Empresa"
                   onClick={(event) => {
                     event.stopPropagation();

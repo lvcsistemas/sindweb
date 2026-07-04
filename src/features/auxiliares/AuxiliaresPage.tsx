@@ -139,13 +139,21 @@ export function AuxiliaresPage() {
             {auxiliaresQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
             {auxiliares.map((item) => (
               <div key={item.id} className={`record-row ${item.id === selectedId ? "selected" : ""}`}>
-                <button className="record-row-content" onClick={() => handleSelect(item)}>
+                <button className="record-row-content" 
+                  onClick={() => handleSelect(item)}>
                   <div>
                     <strong>{item.nome}</strong>
                     <span>Ordem {item.ordem} · {item.ativo === "S" ? "Ativo" : "Inativo"}</span>
                   </div>
                 </button>
-                <button className="record-row-action" onClick={() => handleDeleteFromList(item.id, item.nome)} title="Excluir">
+                <button type="button" className="icon-button danger-icon" 
+                  title="Excluir" 
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleDeleteFromList(item.id, item.nome);
+                  }}
+                  disabled={deleteMutation.isPending}
+                  >
                   <Trash2 size={16} />
                 </button>
               </div>
