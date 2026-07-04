@@ -89,6 +89,10 @@ button, .secondary-button { border: 1px solid #1b6b50; background: #1f7a5b; colo
 .record-row.selected { border-color: #1f7a5b; background: #edf8f3; }
 .record-row strong { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .record-row span { display: block; color: #657383; font-size: 0.86rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.record-row:has(.record-row-content) { display: flex; align-items: center; gap: 10px; }
+.record-row-content { flex: 1; min-width: 0; text-align: left; }
+.record-row-action { background: none; border: 0; color: #9d3429; cursor: pointer; padding: 4px; display: grid; place-items: center; border-radius: 4px; }
+.record-row-action:hover { background: #fff3f0; }
 .danger-icon { border-color: #f0c7bf; color: #9d3429; background: #fff3f0; }
 .avatar { width: 42px; height: 42px; border-radius: 50%; background: #dce8e4; color: #1f5e49; display: grid; place-items: center; font-weight: 800; overflow: hidden; }
 .avatar.large { width: 76px; height: 76px; }
