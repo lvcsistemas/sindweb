@@ -139,7 +139,7 @@ export function AuxiliaresPage() {
             {auxiliaresQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
             {auxiliares.map((item) => (
               <div key={item.id}
-                className={`record-row with-action ${item.id === selectedId ? "selected" : ""}`}
+                className={`record-row ${item.id === selectedId ? "selected" : ""}`}
                 onClick={() => handleSelect(item)}
                 role="button"
                 tabIndex={0}
@@ -147,13 +147,11 @@ export function AuxiliaresPage() {
                   if (event.key === "Enter" || event.key === " ") {
                     handleSelect(item);
                   }
-                }}
-              >
+                }}>
                 <div>
                   <strong>{item.nome}</strong>
                   <span>Ordem {item.ordem} · {item.ativo === "S" ? "Ativo" : "Inativo"}</span>
                 </div>
-                
                 <button className="icon-button danger-icon" 
                   title="Excluir" 
                   onClick={(event) => {
@@ -164,7 +162,7 @@ export function AuxiliaresPage() {
                   <Trash2 size={16} />
                 </button>
               </div>
-              
+
             ))}
             {!auxiliaresQuery.isLoading && auxiliares.length === 0 ? <div className="empty-state">Nenhum auxiliar encontrado.</div> : null}
           </div>
