@@ -108,7 +108,9 @@ export function AtendimentoMedicoEspecialidadePage() {
           <div className="record-list">
             {especialidadesQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
             {especialidades.map((item) => (
-              <button key={item.id} className={`record-row simple ${item.id === selectedId ? "selected" : ""}`} onClick={() => handleSelect(item)}>
+              <button key={item.id} 
+                className={`record-row simple ${item.id === selectedId ? "selected" : ""}`} 
+                onClick={() => handleSelect(item)}>
                 <div>
                   <strong>{item.nm_especialidade}</strong>
                   <span>{item.tipo}</span>
