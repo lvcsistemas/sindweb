@@ -139,7 +139,7 @@ export function AuxiliaresPage() {
             {auxiliaresQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
             {auxiliares.map((item) => (
               <div key={item.id}
-                className={`record-row ${item.id === selectedId ? "selected" : ""}`}
+                className={`record-row my-action ${item.id === selectedId ? "selected" : ""}`}
                 onClick={() => handleSelect(item)}
                 role="button"
                 tabIndex={0}
