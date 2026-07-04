@@ -131,6 +131,11 @@ export function EscritorioPage() {
     deleteMutation.mutate(form.id);
   }
 
+  function handleDeleteFromList(id: number, nome: string) {
+    if (!window.confirm(`Deseja excluir "${nome}"?`)) return;
+    deleteMutation.mutate(id);
+  }
+
   return (
     <main className="module-page">
       <Breadcrumb items={[{ label: "Cadastros" }, { label: "Escritórios" }]} />
@@ -149,12 +154,30 @@ export function EscritorioPage() {
           <div className="record-list">
             {escritoriosQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
             {escritorios.map((item) => (
-              <button key={item.id} className={`record-row simple ${item.id === selectedId ? "selected" : ""}`} onClick={() => handleSelect(item)}>
+              <div key={item.id} 
+                className={`record-row my-action ${item.id === selectedId ? "selected" : ""}`} 
+                onClick={() => handleSelect(item)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    handleSelect(item);
+                  }
+                }}>
                 <div>
                   <strong>{item.razao_social}</strong>
                   <span>{formatCpfCnpj(item.cpf_cnpj)} - {item.cidade ?? "Sem cidade"} - {item.nm_contato ?? "Sem contato"}</span>
                 </div>
-              </button>
+                <button className="icon-button danger-icon" 
+                  title="Excluir" 
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleDeleteFromList(item.id, item.razao_social);
+                  }}
+                  disabled={deleteMutation.isPending}>
+                  <Trash2 size={16} />
+                </button>
+              </div>
             ))}
             {!escritoriosQuery.isLoading && escritorios.length === 0 ? <div className="empty-state">Nenhum escritório encontrado.</div> : null}
           </div>
@@ -204,7 +227,6 @@ export function EscritorioPage() {
             {message ? <div className={saveMutation.isError || deleteMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
 
             <div className="form-actions">
-              {form.id ? <button type="button" className="danger-button" onClick={handleDelete} disabled={deleteMutation.isPending}><Trash2 size={16} /> Excluir</button> : null}
               <button type="submit" disabled={saveMutation.isPending}><Save size={16} /> {saveMutation.isPending ? "Salvando..." : "Salvar"}</button>
             </div>
           </form>
