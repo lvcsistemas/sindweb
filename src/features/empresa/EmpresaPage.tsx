@@ -541,16 +541,7 @@ export function EmpresaPage() {
                   <strong>{item.nm_fantasia}</strong>
                   <span>{formatCeiCnpj(item.cei_cnpj, item.tipo_cei_cnpj)}</span>
                 </div>
-                <button type="button" className="icon-button danger-icon"
-                  title="Excluir Empresa"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleDeleteEmpresa(item.id);
-                  }}
-                  disabled={deleteMutation.isPending}
-                >
-                  <Trash2 size={16} />
-                </button>
+                
               </div>
             ))}
             {!empresasQuery.isLoading && empresas.length === 0 ? <div className="empty-state">Nenhuma empresa encontrada.</div> : null}
