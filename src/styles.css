@@ -104,10 +104,10 @@ button, .secondary-button { border: 1px solid #1b6b50; background: #1f7a5b; colo
 .empty-state { color: #657383; padding: 18px; text-align: center; }
 .list-summary { color: #657383; font-size: 0.86rem; margin: -2px 0 10px; }
 
-.record-row:has(.danger-icon) { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-.record-row:has(.danger-icon) > div:first-child { flex: 1; min-width: 0; }
-.record-row:has(.danger-icon) > div:first-child strong,
-.record-row:has(.danger-icon) > div:first-child span { white-space: normal; overflow: visible; text-overflow: clip; }
+.record-row.my-action { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.record-row.my-action > div:first-child { flex: 1; min-width: 0; }
+.record-row.my-action > div:first-child strong,
+.record-row.my-action > div:first-child span { white-space: normal; overflow: visible; text-overflow: clip; }
 
 .form-panel { border: 0; border-radius: 0; padding: 18px; display: grid; gap: 14px; }
 .tabs { display: flex; gap: 6px; border-bottom: 1px solid #d7dee5; padding-bottom: 8px; overflow-x: auto; }
