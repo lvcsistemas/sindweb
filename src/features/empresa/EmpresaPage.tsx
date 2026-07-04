@@ -527,8 +527,7 @@ export function EmpresaPage() {
           <div className="record-list">
             {empresasQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
             {empresas.map((item) => (
-              <div
-                key={item.id}
+              <div key={item.id}
                 className={`record-row with-action ${item.id === selectedId ? "selected" : ""}`}
                 onClick={() => handleSelect(item)}
                 onKeyDown={(event) => {
