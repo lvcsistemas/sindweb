@@ -85,6 +85,11 @@ export function CnaePage() {
     deleteMutation.mutate(form.id);
   }
 
+  function handleDeleteFromList(id: number, nome: string) {
+    if (!window.confirm(`Deseja excluir "${nome}"?`)) return;
+    deleteMutation.mutate(id);
+  }
+
   return (
     <main className="module-page">
       <Breadcrumb items={[{ label: "Cadastros" }, { label: "CNAE" }]} />
@@ -103,12 +108,30 @@ export function CnaePage() {
           <div className="record-list">
             {cnaesQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
             {cnaes.map((item) => (
-              <button key={item.id} className={`record-row simple ${item.id === selectedId ? "selected" : ""}`} onClick={() => handleSelect(item)}>
+              <div key={item.id} 
+                className={`record-row my-action ${item.id === selectedId ? "selected" : ""}`} 
+                onClick={() => handleSelect(item)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    handleSelect(item);
+                  }
+                }}>
                 <div>
                   <strong>{item.codigo_cnae}</strong>
                   <span>{item.descricao}</span>
                 </div>
-              </button>
+                <button className="icon-button danger-icon" 
+                  title="Excluir" 
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleDeleteFromList(item.id, item.codigo_cnae);
+                  }}
+                  disabled={deleteMutation.isPending}>
+                  <Trash2 size={16} />
+                </button>
+              </div>
             ))}
             {!cnaesQuery.isLoading && cnaes.length === 0 ? <div className="empty-state">Nenhum CNAE encontrado.</div> : null}
           </div>
@@ -128,7 +151,6 @@ export function CnaePage() {
             {message ? <div className={saveMutation.isError || deleteMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
 
             <div className="form-actions">
-              {form.id ? <button type="button" className="danger-button" onClick={handleDelete} disabled={deleteMutation.isPending}><Trash2 size={16} /> Excluir</button> : null}
               <button type="submit" disabled={saveMutation.isPending}><Save size={16} /> {saveMutation.isPending ? "Salvando..." : "Salvar"}</button>
             </div>
           </form>

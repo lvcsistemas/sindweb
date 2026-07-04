@@ -85,11 +85,6 @@ export function AtendimentoMedicoEspecialidadePage() {
     saveMutation.mutate(form);
   }
 
-  function handleDelete() {
-    if (!form.id) return;
-    deleteMutation.mutate(form.id);
-  }
-
   function handleDeleteFromList(id: number, nome: string) {
     if (!window.confirm(`Deseja excluir "${nome}"?`)) return;
     deleteMutation.mutate(id);
@@ -158,7 +153,6 @@ export function AtendimentoMedicoEspecialidadePage() {
             {message ? <div className={saveMutation.isError || deleteMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
 
             <div className="form-actions">
-              {form.id ? <button type="button" className="danger-button" onClick={handleDelete} disabled={deleteMutation.isPending}><Trash2 size={16} /> Excluir</button> : null}
               <button type="submit" disabled={saveMutation.isPending}><Save size={16} /> {saveMutation.isPending ? "Salvando..." : "Salvar"}</button>
             </div>
           </form>
