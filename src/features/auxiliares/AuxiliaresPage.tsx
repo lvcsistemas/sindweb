@@ -26,6 +26,7 @@ export function AuxiliaresPage() {
   const [form, setForm] = useState<AuxiliarInsert>(() => emptyForm(grupoConfig?.key ?? ""));
   const [message, setMessage] = useState<string | null>(null);
   const nomeRef = useRef<HTMLInputElement>(null);
+  const novoBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (creatingNew) {
@@ -74,6 +75,7 @@ export function AuxiliaresPage() {
       setCreatingNew(false);
       setMessage("Auxiliar salvo com sucesso.");
       await queryClient.invalidateQueries({ queryKey: ["auxiliares", grupoConfig?.key] });
+      novoBtnRef.current?.focus();
     },
     onError: (error) => setMessage(error instanceof Error ? error.message : "Não foi possível salvar o auxiliar.")
   });
@@ -128,7 +130,7 @@ export function AuxiliaresPage() {
           <h1>{grupoConfig.label}</h1>
           <p>Cadastro auxiliar para carregar seleções do sistema.</p>
         </div>
-        <button onClick={handleNew}><Plus size={16} /> Novo</button>
+        <button ref={novoBtnRef} onClick={handleNew}><Plus size={16} /> Novo</button>
       </section>
 
       <section className={`split-view ${formOpen ? "" : "list-only"}`}>
