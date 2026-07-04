@@ -90,6 +90,11 @@ export function AtendimentoMedicoEspecialidadePage() {
     deleteMutation.mutate(form.id);
   }
 
+  function handleDeleteFromList(id: number, nome: string) {
+    if (!window.confirm(`Deseja excluir "${nome}"?`)) return;
+    deleteMutation.mutate(id);
+  }
+
   return (
     <main className="module-page">
       <Breadcrumb items={[{ label: "Cadastros" }, { label: "Atendimento Médico Especialidades" }]} />
@@ -108,14 +113,30 @@ export function AtendimentoMedicoEspecialidadePage() {
           <div className="record-list">
             {especialidadesQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
             {especialidades.map((item) => (
-              <button key={item.id} 
-                className={`record-row simple ${item.id === selectedId ? "selected" : ""}`} 
-                onClick={() => handleSelect(item)}>
+              <div key={item.id} 
+                className={`record-row my-action ${item.id === selectedId ? "selected" : ""}`} 
+                onClick={() => handleSelect(item)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    handleSelect(item);
+                  }
+                }}>
                 <div>
                   <strong>{item.nm_especialidade}</strong>
                   <span>{item.tipo}</span>
                 </div>
-              </button>
+                <button className="icon-button danger-icon" 
+                  title="Excluir" 
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleDeleteFromList(item.id, item.nm_especialidade);
+                  }}
+                  disabled={deleteMutation.isPending}>
+                  <Trash2 size={16} />
+                </button>  
+              </div>
             ))}
             {!especialidadesQuery.isLoading && especialidades.length === 0 ? <div className="empty-state">Nenhuma especialidade encontrada.</div> : null}
           </div>

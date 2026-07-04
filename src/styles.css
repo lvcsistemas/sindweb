@@ -83,7 +83,7 @@ button, .secondary-button { border: 1px solid #1b6b50; background: #1f7a5b; colo
 .search-box { height: 42px; display: flex; align-items: center; gap: 8px; border: 1px solid #cbd5dd; border-radius: 6px; padding: 0 12px; margin-bottom: 12px; }
 .search-box input { border: 0; outline: 0; width: 100%; }
 .record-list { display: grid; gap: 8px; max-height: calc(100vh - 185px); overflow: auto; }
-.record-row { width: 100%; border: 1px solid #dbe2e8; background: #fff; color: #17202a; border-radius: 6px; padding: 10px; display: grid; grid-template-columns: 42px 1fr auto; gap: 10px; text-align: left; align-items: center; }
+.record-row { width: 100%; border: 1px solid #dbe2e8; background: #fff; color: #17202a; border-radius: 6px; padding: 10px; display: grid; grid-template-columns: 42px 1fr auto; gap: 10px; text-align: left; align-items: center; cursor: pointer; }
 .record-row.with-action { grid-template-columns: 42px minmax(0, 1fr) 36px; }
 .record-row.simple { grid-template-columns: 1fr; }
 .record-row.selected { border-color: #1f7a5b; background: #edf8f3; }
