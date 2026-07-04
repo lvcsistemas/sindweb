@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Save, Search, Trash2 } from "lucide-react";
@@ -25,6 +25,13 @@ export function AuxiliaresPage() {
   const [creatingNew, setCreatingNew] = useState(false);
   const [form, setForm] = useState<AuxiliarInsert>(() => emptyForm(grupoConfig?.key ?? ""));
   const [message, setMessage] = useState<string | null>(null);
+  const nomeRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (creatingNew) {
+      nomeRef.current?.focus();
+    }
+  }, [creatingNew]);
 
   useEffect(() => {
     if (!grupoConfig) return;
@@ -158,7 +165,7 @@ export function AuxiliaresPage() {
               </label>
             </div>
             <label className="field">
-              <input value={form.nome} maxLength={100} onChange={(event) => setForm({ ...form, nome: event.target.value })} placeholder=" " required />
+              <input ref={nomeRef} value={form.nome} maxLength={100} onChange={(event) => setForm({ ...form, nome: event.target.value })} placeholder=" " required />
               <span>Nome</span>
             </label>
 
