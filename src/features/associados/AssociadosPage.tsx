@@ -67,7 +67,7 @@ export function AssociadosPage() {
               <AssociadoForm associado={associadoQuery.data ?? null} onSaved={(id) => { setSelectedId(id); setDetailOpen(true); }} />
             </> : null}
             {activeTab === "dependentes" ? <AssociadoDependentesTab associadoId={selectedId} /> : null}
-          </> : <div className="form-panel"><div className="empty-state tab-empty">Selecione um associado ou clique em Novo para iniciar o cadastro.</div></div>}
+          </> : null}
         </div>
       </section>
     </main>
