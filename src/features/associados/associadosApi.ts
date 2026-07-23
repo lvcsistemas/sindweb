@@ -1,5 +1,5 @@
 import { supabase } from "../../lib/supabase";
-import type { Associado, AssociadoLista, Auxiliar, Empresa, LookupItem } from "../../types/database";
+import type { Associado, AssociadoLista, Auxiliar, Empresa, LocalTrabalho } from "../../types/database";
 import type { AssociadoFormValues } from "./associadosSchema";
 
 const supabaseUnsafe = supabase as any;
@@ -33,22 +33,16 @@ export async function saveAssociado(values: AssociadoFormValues) {
   return data as number;
 }
 
-export async function listEmpresas() {
-  const { data, error } = await supabaseUnsafe
-    .from("empresas")
-    .select("id, nm_fantasia, razao_social, cei_cnpj, ativo, created_at, updated_at")
-    .eq("ativo", "S")
-    .order("nm_fantasia");
-  if (error) throw error;
-  return (data as Array<{
-    id: number;
-    nm_fantasia: string;
-    razao_social: string | null;
-    cei_cnpj: string | null;
-    ativo: string;
-    created_at: string;
-    updated_at: string;
-  }>).map((empresa) => ({
+function mapEmpresaOption(empresa: {
+  id: number;
+  nm_fantasia: string;
+  razao_social: string | null;
+  cei_cnpj: string | null;
+  ativo: string;
+  created_at: string;
+  updated_at: string;
+}) {
+  return {
     id: empresa.id,
     legacy_id: null,
     nome_fantasia: empresa.nm_fantasia,
@@ -57,18 +51,35 @@ export async function listEmpresas() {
     ativo: empresa.ativo === "S",
     created_at: empresa.created_at,
     updated_at: empresa.updated_at
-  })) as Empresa[];
+  } as Empresa;
 }
 
-export async function listLookup(kind: string) {
-  const { data, error } = await supabase
-    .from("lookup_items")
-    .select("*")
-    .eq("kind", kind)
-    .eq("active", true)
-    .order("label");
+export async function listEmpresas(search = "") {
+  let query = supabaseUnsafe
+    .from("empresas")
+    .select("id, nm_fantasia, razao_social, cei_cnpj, ativo, created_at, updated_at")
+    .eq("ativo", "S")
+    .order("nm_fantasia")
+    .limit(30);
+
+  const term = search.trim();
+  if (term) {
+    query = query.or(`nm_fantasia.ilike.%${term}%,razao_social.ilike.%${term}%,cei_cnpj.ilike.%${term}%`);
+  }
+
+  const { data, error } = await query;
   if (error) throw error;
-  return data as LookupItem[];
+  return (data as Parameters<typeof mapEmpresaOption>[0][]).map(mapEmpresaOption);
+}
+
+export async function getEmpresaOption(id: number) {
+  const { data, error } = await supabaseUnsafe
+    .from("empresas")
+    .select("id, nm_fantasia, razao_social, cei_cnpj, ativo, created_at, updated_at")
+    .eq("id", id)
+    .single();
+  if (error) throw error;
+  return mapEmpresaOption(data as Parameters<typeof mapEmpresaOption>[0]);
 }
 
 export async function listAuxiliaresOptions(grupo: string) {
@@ -81,6 +92,16 @@ export async function listAuxiliaresOptions(grupo: string) {
     .order("nome", { ascending: true });
   if (error) throw error;
   return data as Auxiliar[];
+}
+
+export async function listLocaisTrabalhoOptions() {
+  const { data, error } = await supabaseUnsafe
+    .from("locais_trabalho")
+    .select("*")
+    .order("nome", { ascending: true })
+    .limit(500);
+  if (error) throw error;
+  return data as LocalTrabalho[];
 }
 
 export async function uploadAssociadoFoto(associadoId: number, file: File) {

@@ -53,8 +53,10 @@ export const associadoSchema = z.object({
   ctps_serie: emptyToNull,
   ctps_uf: z.string().trim().max(2).transform((value) => value.toUpperCase() || null),
   salario: z.coerce.number().min(0).nullable().optional(),
+  secao: emptyToNull,
+  turno: emptyToNull,
   posto_trabalho: emptyToNull,
-  masterclin: z.string().trim().max(1).transform((value) => value.toUpperCase() || null),
+  masterclin: z.string().trim().max(3).transform((value) => value.toUpperCase() || null),
   observacao: emptyToNull,
   foto_path: z.string().nullable().optional()
 });

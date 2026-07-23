@@ -152,6 +152,11 @@ textarea { resize: vertical; }
 .form-grid.identificacao-parents-grid { grid-template-columns: repeat(2, minmax(220px, 1fr)); }
 .form-grid.identificacao-rg-grid { grid-template-columns: minmax(140px, 1fr) minmax(150px, 170px) minmax(170px, 1fr) minmax(70px, 90px); }
 .form-grid.identificacao-titulo-grid, .form-grid.identificacao-ctps-grid { grid-template-columns: repeat(3, minmax(150px, 1fr)); }
+.form-grid.classe-empresa-grid { grid-template-columns: minmax(180px, 260px) minmax(260px, 1fr); }
+.form-grid.classe-matricula-grid { grid-template-columns: minmax(150px, 1fr) minmax(120px, 140px) minmax(150px, 170px) minmax(150px, 170px); }
+.form-grid.classe-local-pagamento-grid { grid-template-columns: minmax(260px, 1fr); }
+.form-grid.classe-local-trabalho-grid { grid-template-columns: minmax(260px, 1fr) minmax(160px, 220px); }
+.form-grid.classe-profissional-grid { grid-template-columns: minmax(130px, 150px) minmax(180px, 1fr) minmax(180px, 1fr) minmax(140px, 170px); }
 .related-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: stretch; }
 .data-table-wrap { width: 100%; overflow-x: auto; border: 1px solid #d7dee5; border-radius: 8px; }
 .data-table { width: 100%; border-collapse: collapse; min-width: 680px; background: #fff; }
@@ -188,6 +193,7 @@ textarea { resize: vertical; }
   .form-grid.residence-cep-grid, .form-grid.residence-address-grid, .form-grid.residence-city-grid { grid-template-columns: 1fr; }
   .form-grid.contatos-phone-grid, .form-grid.contatos-email-grid { grid-template-columns: 1fr; }
   .form-grid.identificacao-birth-grid, .form-grid.identificacao-civil-grid, .form-grid.identificacao-parents-grid, .form-grid.identificacao-rg-grid, .form-grid.identificacao-titulo-grid, .form-grid.identificacao-ctps-grid { grid-template-columns: 1fr; }
+  .form-grid.classe-empresa-grid, .form-grid.classe-matricula-grid, .form-grid.classe-local-pagamento-grid, .form-grid.classe-local-trabalho-grid, .form-grid.classe-profissional-grid { grid-template-columns: 1fr; }
   .related-toolbar { grid-template-columns: 1fr; }
   .choice-grid, .lookup-summary div { grid-template-columns: 1fr; }
   .topbar { padding: 10px 14px; min-height: 56px; flex-wrap: wrap; justify-content: flex-start; }

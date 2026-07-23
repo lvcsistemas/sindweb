@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Minus, Plus, Save, Upload } from "lucide-react";
 import type { Associado } from "../../types/database";
 import { associadoSchema, type AssociadoFormValues } from "./associadosSchema";
-import { listAuxiliaresOptions, listEmpresas, listLookup, saveAssociado, uploadAssociadoFoto } from "./associadosApi";
+import { getEmpresaOption, listAuxiliaresOptions, listEmpresas, listLocaisTrabalhoOptions, saveAssociado, uploadAssociadoFoto } from "./associadosApi";
 
 const defaultValues: AssociadoFormValues = {
   ativo: true,
@@ -54,6 +54,8 @@ const defaultValues: AssociadoFormValues = {
   ctps_serie: "",
   ctps_uf: "",
   salario: 0,
+  secao: "",
+  turno: "",
   posto_trabalho: "",
   masterclin: "",
   observacao: "",
@@ -134,6 +136,8 @@ function toValues(associado: Associado | null): AssociadoFormValues {
     ctps_serie: associado.ctps_serie ?? "",
     ctps_uf: associado.ctps_uf ?? "",
     salario: associado.salario ?? 0,
+    secao: associado.secao ?? "",
+    turno: associado.turno ?? "",
     posto_trabalho: associado.posto_trabalho ?? "",
     masterclin: associado.masterclin ?? "",
     observacao: associado.observacao ?? "",
@@ -150,14 +154,27 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
     Identificação: false,
     Classe: false
   });
-  const { data: empresas = [] } = useQuery({ queryKey: ["empresas"], queryFn: listEmpresas });
+  const [empresaSearch, setEmpresaSearch] = useState("");
+  const { data: empresas = [] } = useQuery({ queryKey: ["empresas", empresaSearch], queryFn: () => listEmpresas(empresaSearch) });
   const { data: situacoes = [] } = useQuery({ queryKey: ["auxiliares", "situacao"], queryFn: () => listAuxiliaresOptions("situacao") });
-  const { data: locaisTrabalho = [] } = useQuery({ queryKey: ["lookup", "local_trabalho"], queryFn: () => listLookup("local_trabalho") });
-  const { data: locaisPagamento = [] } = useQuery({ queryKey: ["lookup", "local_pagamento"], queryFn: () => listLookup("local_pagamento") });
+  const { data: locaisTrabalho = [] } = useQuery({ queryKey: ["locais-trabalho"], queryFn: listLocaisTrabalhoOptions });
+  const { data: locaisPagamento = [] } = useQuery({ queryKey: ["auxiliares", "locais_pagamento"], queryFn: () => listAuxiliaresOptions("locais_pagamento") });
+  const { data: funcoes = [] } = useQuery({ queryKey: ["auxiliares", "funcao"], queryFn: () => listAuxiliaresOptions("funcao") });
+  const { data: escolaridades = [] } = useQuery({ queryKey: ["auxiliares", "escolaridade"], queryFn: () => listAuxiliaresOptions("escolaridade") });
 
   const form = useForm<AssociadoFormValues>({ resolver: zodResolver(associadoSchema), defaultValues: toValues(associado) });
   const isNew = !associado?.id;
   const gerarMatricula = form.watch("gerar_matricula");
+  const selectedEmpresaId = form.watch("empresa_id");
+  const { data: selectedEmpresa } = useQuery({
+    queryKey: ["empresa-option", selectedEmpresaId],
+    queryFn: () => getEmpresaOption(Number(selectedEmpresaId)),
+    enabled: Boolean(selectedEmpresaId)
+  });
+  const empresaOptions = useMemo(() => {
+    if (!selectedEmpresa) return empresas;
+    return [selectedEmpresa, ...empresas.filter((empresa) => empresa.id !== selectedEmpresa.id)];
+  }, [empresas, selectedEmpresa]);
 
   useEffect(() => {
     form.reset(toValues(associado));
@@ -225,18 +242,7 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
         <label className="field"><input {...form.register("cpf")} placeholder=" " /><span>CPF</span></label>
       </div>
       <div className="form-grid">
-        <label className="field"><select {...form.register("empresa_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{empresas.map((empresa) => <option key={empresa.id} value={empresa.id}>{empresa.nome_fantasia}</option>)}</select><span>Empresa</span></label>
-      </div>
-      <div className="form-grid">
-        <label className="field"><select {...form.register("local_trabalho_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{locaisTrabalho.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select><span>Local Trabalho</span></label>
-        <label className="field"><select {...form.register("local_pagamento_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{locaisPagamento.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select><span>Local Pagamento</span></label>
-      </div>
-      <div className="form-grid compact">
         <label className="field"><input type="date" {...form.register("data_admissao")} placeholder=" " /><span>Admissão</span></label>
-        <label className="field"><input type="date" {...form.register("data_categoria")} placeholder=" " /><span>Categoria</span></label>
-      </div>
-      <div className="form-grid">
-        <label className="field"><input type="number" step="0.01" {...form.register("salario")} placeholder=" " /><span>Salário</span></label>
       </div>
       <label className="field"><textarea rows={3} {...form.register("observacao")} placeholder=" " /><span>Observação</span></label>
       <div className="detail-card-stack">
@@ -326,6 +332,42 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
                     <label className="field"><input {...form.register("ctps")} placeholder=" " /><span>CTPS</span></label>
                     <label className="field"><input {...form.register("ctps_serie")} placeholder=" " /><span>Série da CTPS</span></label>
                     <label className="field"><input maxLength={2} {...form.register("ctps_uf")} placeholder=" " /><span>UF da CTPS</span></label>
+                  </div>
+                </> : null}
+                {card === "Classe" ? <>
+                  <div className="form-grid classe-empresa-grid">
+                    <label className="field"><input value={empresaSearch} onChange={(event) => setEmpresaSearch(event.target.value)} placeholder=" " /><span>Buscar Empresa</span></label>
+                    <label className="field"><select {...form.register("empresa_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{empresaOptions.map((empresa) => <option key={empresa.id} value={empresa.id}>{empresa.nome_fantasia}{empresa.cnpj ? ` - ${empresa.cnpj}` : ""}</option>)}</select><span>Empresa</span></label>
+                  </div>
+                  <div className="form-grid classe-matricula-grid">
+                    <label className="field"><input {...form.register("matricula_empresa")} placeholder=" " /><span>Matrícula Empresa</span></label>
+                    <label className="field"><select {...form.register("masterclin")}><option value="">Selecione</option><option value="SIM">SIM</option><option value="NAO">NÃO</option></select><span>Masterclin</span></label>
+                    <label className="field"><input type="date" {...form.register("data_categoria")} placeholder=" " /><span>Data Categoria</span></label>
+                    <label className="field"><input type="date" {...form.register("data_ficha")} placeholder=" " /><span>Ficha Enviada</span></label>
+                  </div>
+                  <div className="form-grid classe-local-pagamento-grid">
+                    <label className="field"><select {...form.register("local_pagamento_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{locaisPagamento.map((item) => <option key={item.id} value={item.id}>{item.nome}</option>)}</select><span>Local de Pagamento</span></label>
+                  </div>
+                  <div className="form-grid classe-local-trabalho-grid">
+                    <label className="field"><select {...form.register("local_trabalho_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{locaisTrabalho.map((item) => <option key={item.id} value={item.id}>{item.nome}</option>)}</select><span>Local de Trabalho</span></label>
+                    <label className="field"><input {...form.register("secao")} placeholder=" " /><span>Seção</span></label>
+                  </div>
+                  <div className="form-grid classe-profissional-grid">
+                    <label className="field">
+                      <select {...form.register("turno")}>
+                        <option value="">Selecione</option>
+                        <option value="MANHA">MANHA</option>
+                        <option value="TARDE">TARDE</option>
+                        <option value="NOITE">NOITE</option>
+                        <option value="DIURNO">DIURNO</option>
+                        <option value="NOTURNO">NOTURNO</option>
+                        <option value="DIARISTA">DIARISTA</option>
+                      </select>
+                      <span>Turno</span>
+                    </label>
+                    <label className="field"><select {...form.register("funcao_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{funcoes.map((item) => <option key={item.id} value={item.id}>{item.nome}</option>)}</select><span>Função</span></label>
+                    <label className="field"><select {...form.register("escolaridade_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{escolaridades.map((item) => <option key={item.id} value={item.id}>{item.nome}</option>)}</select><span>Escolaridade</span></label>
+                    <label className="field"><input type="number" step="0.01" {...form.register("salario")} placeholder=" " /><span>Salário</span></label>
                   </div>
                 </> : null}
               </div> : null}

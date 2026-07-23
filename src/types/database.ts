@@ -78,6 +78,8 @@ export type Associado = {
   ctps_serie: string | null;
   ctps_uf: string | null;
   salario: number | null;
+  secao: string | null;
+  turno: string | null;
   posto_trabalho: string | null;
   masterclin: string | null;
   observacao: string | null;
