@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { BriefcaseBusiness, Building2, ChevronRight, Coins, FileText, Folder, Handshake, ListTree, LogOut, MapPin, Menu, Stethoscope, UserCog, UsersRound } from "lucide-react";
+import { BriefcaseBusiness, Building2, ChevronRight, Coins, FileText, Folder, Handshake, ListTree, LogOut, MapPin, Menu, Settings, Stethoscope, UserCog, UsersRound } from "lucide-react";
 import { useAuth } from "../features/auth/AuthProvider";
 import { AUXILIAR_GRUPOS } from "../features/auxiliares/auxiliaresConfig";
 
@@ -63,6 +63,7 @@ export function AppShell() {
               </div>
             ) : null}
           </div>
+          <NavLink className="nav-leaf direct" to="/config"><Settings size={17} /> Config</NavLink>
         </nav>
       </aside>
       <div className="workspace">

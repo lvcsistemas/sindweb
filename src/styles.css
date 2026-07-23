@@ -130,6 +130,7 @@ textarea { resize: vertical; }
 .form-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 8px; }
 .photo-field { display: flex; align-items: center; gap: 14px; padding-top: 2px; }
 .related-panel { display: grid; gap: 14px; }
+.single-form-view { max-width: 560px; }
 .related-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: stretch; }
 .data-table-wrap { width: 100%; overflow-x: auto; border: 1px solid #d7dee5; border-radius: 8px; }
 .data-table { width: 100%; border-collapse: collapse; min-width: 680px; background: #fff; }

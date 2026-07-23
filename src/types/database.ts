@@ -9,6 +9,7 @@ export type Database = {
       atendimento_medico_convenios: { Row: AtendimentoMedicoConvenio; Insert: AtendimentoMedicoConvenioInsert; Update: Partial<AtendimentoMedicoConvenioInsert> };
       atendimento_medico_especialidades: { Row: AtendimentoMedicoEspecialidade; Insert: AtendimentoMedicoEspecialidadeInsert; Update: Partial<AtendimentoMedicoEspecialidadeInsert> };
       cnaes: { Row: Cnae; Insert: CnaeInsert; Update: Partial<CnaeInsert> };
+      config: { Row: Config; Insert: ConfigInsert; Update: Partial<ConfigInsert> };
       contribuicoes: { Row: Contribuicao; Insert: ContribuicaoInsert; Update: Partial<ContribuicaoInsert> };
       empresas: { Row: EmpresaCadastro; Insert: EmpresaCadastroInsert; Update: Partial<EmpresaCadastroInsert> };
       empresas_contribuicoes: { Row: EmpresaContribuicao; Insert: EmpresaContribuicaoInsert; Update: Partial<EmpresaContribuicaoInsert> };
@@ -173,6 +174,16 @@ export type Contribuicao = {
 };
 
 export type ContribuicaoInsert = Omit<Contribuicao, "id" | "created_at" | "updated_at"> & { id?: number };
+
+export type Config = {
+  id: number;
+  ultima_matricula: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ConfigInsert = Omit<Config, "id" | "created_at" | "updated_at"> & { id?: number };
+export type ConfigUpdate = Pick<Config, "ultima_matricula">;
 
 export type EmpresaContribuicao = {
   id: number;
