@@ -241,9 +241,7 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
         <label className="field"><input {...form.register("nome")} placeholder=" " /><span>Nome do Associado</span></label>
         <label className="field"><input {...form.register("cpf")} placeholder=" " /><span>CPF</span></label>
       </div>
-      <div className="form-grid">
-        <label className="field"><input type="date" {...form.register("data_admissao")} placeholder=" " /><span>Admissão</span></label>
-      </div>
+      
       <label className="field"><textarea rows={3} {...form.register("observacao")} placeholder=" " /><span>Observação</span></label>
       <div className="detail-card-stack">
         {detalheCards.map((card) => {
@@ -368,6 +366,9 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
                     <label className="field"><select {...form.register("funcao_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{funcoes.map((item) => <option key={item.id} value={item.id}>{item.nome}</option>)}</select><span>Função</span></label>
                     <label className="field"><select {...form.register("escolaridade_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{escolaridades.map((item) => <option key={item.id} value={item.id}>{item.nome}</option>)}</select><span>Escolaridade</span></label>
                     <label className="field"><input type="number" step="0.01" {...form.register("salario")} placeholder=" " /><span>Salário</span></label>
+                  </div>
+                  <div className="form-grid">
+                    <label className="field"><input type="date" {...form.register("data_admissao")} placeholder=" " /><span>Admissão</span></label>
                   </div>
                 </> : null}
               </div> : null}
