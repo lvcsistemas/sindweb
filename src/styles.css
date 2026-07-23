@@ -118,6 +118,8 @@ button, .secondary-button { border: 1px solid #1b6b50; background: #1f7a5b; colo
 .form-grid.compact { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .form-grid.matricula-grid { grid-template-columns: minmax(180px, 240px) max-content; align-items: end; }
 .form-grid.matricula-grid.single { grid-template-columns: minmax(180px, 240px); }
+.form-grid.associado-status-grid { grid-template-columns: minmax(150px, 190px) max-content minmax(170px, 1fr) minmax(150px, 170px); align-items: end; }
+.form-grid.associado-status-grid.existing { grid-template-columns: minmax(150px, 190px) minmax(170px, 1fr) minmax(150px, 170px); }
 label { display: grid; gap: 6px; color: #465563; font-weight: 650; }
 .field { position: relative; display: block; }
 .field input, .field select, .field textarea { padding-top: 18px; padding-bottom: 5px; }
@@ -172,6 +174,7 @@ textarea { resize: vertical; }
   .dashboard-page, .module-page { padding: 14px; }
   .dashboard-header, .module-header { align-items: stretch; flex-direction: column; }
   .form-grid, .form-grid.compact { grid-template-columns: 1fr; }
+  .form-grid.associado-status-grid, .form-grid.associado-status-grid.existing { grid-template-columns: 1fr; }
   .related-toolbar { grid-template-columns: 1fr; }
   .choice-grid, .lookup-summary div { grid-template-columns: 1fr; }
   .topbar { padding: 10px 14px; min-height: 56px; flex-wrap: wrap; justify-content: flex-start; }

@@ -1,5 +1,5 @@
 import { supabase } from "../../lib/supabase";
-import type { Associado, AssociadoLista, Empresa, LookupItem } from "../../types/database";
+import type { Associado, AssociadoLista, Auxiliar, Empresa, LookupItem } from "../../types/database";
 import type { AssociadoFormValues } from "./associadosSchema";
 
 const supabaseUnsafe = supabase as any;
@@ -69,6 +69,18 @@ export async function listLookup(kind: string) {
     .order("label");
   if (error) throw error;
   return data as LookupItem[];
+}
+
+export async function listAuxiliaresOptions(grupo: string) {
+  const { data, error } = await supabaseUnsafe
+    .from("auxiliares")
+    .select("*")
+    .eq("grupo", grupo)
+    .eq("ativo", "S")
+    .order("ordem", { ascending: true })
+    .order("nome", { ascending: true });
+  if (error) throw error;
+  return data as Auxiliar[];
 }
 
 export async function uploadAssociadoFoto(associadoId: number, file: File) {

@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Minus, Plus, Save, Upload } from "lucide-react";
 import type { Associado } from "../../types/database";
 import { associadoSchema, type AssociadoFormValues } from "./associadosSchema";
-import { listEmpresas, listLookup, saveAssociado, uploadAssociadoFoto } from "./associadosApi";
+import { listAuxiliaresOptions, listEmpresas, listLookup, saveAssociado, uploadAssociadoFoto } from "./associadosApi";
 
 const defaultValues: AssociadoFormValues = {
   ativo: true,
@@ -110,7 +110,7 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
     Classe: false
   });
   const { data: empresas = [] } = useQuery({ queryKey: ["empresas"], queryFn: listEmpresas });
-  const { data: situacoes = [] } = useQuery({ queryKey: ["lookup", "situacao"], queryFn: () => listLookup("situacao") });
+  const { data: situacoes = [] } = useQuery({ queryKey: ["auxiliares", "situacao"], queryFn: () => listAuxiliaresOptions("situacao") });
   const { data: locaisTrabalho = [] } = useQuery({ queryKey: ["lookup", "local_trabalho"], queryFn: () => listLookup("local_trabalho") });
   const { data: locaisPagamento = [] } = useQuery({ queryKey: ["lookup", "local_pagamento"], queryFn: () => listLookup("local_pagamento") });
 
@@ -151,9 +151,11 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
 
   return (
     <form className="form-panel" onSubmit={form.handleSubmit((values) => saveMutation.mutate(values))}>
-      <div className={`form-grid matricula-grid ${isNew ? "" : "single"}`}>
+      <div className={`form-grid associado-status-grid ${isNew ? "" : "existing"}`}>
         <label className="field"><input {...form.register("matricula")} placeholder=" " disabled={isNew && gerarMatricula} /><span>Matrícula</span></label>
         {isNew ? <label className="check"><input type="checkbox" {...form.register("gerar_matricula")} /> Gerar Matricula?</label> : null}
+        <label className="field"><select {...form.register("situacao_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{situacoes.map((item) => <option key={item.id} value={item.id}>{item.nome}</option>)}</select><span>Situação</span></label>
+        <label className="field"><input type="date" {...form.register("data_situacao")} placeholder=" " /><span>Data Situação</span></label>
       </div>
       <label className="field"><input {...form.register("nome")} placeholder=" " /><span>Nome do Associado</span></label>
       <div className="form-grid">
@@ -161,7 +163,6 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
       </div>
       <div className="form-grid">
         <label className="field"><select {...form.register("empresa_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{empresas.map((empresa) => <option key={empresa.id} value={empresa.id}>{empresa.nome_fantasia}</option>)}</select><span>Empresa</span></label>
-        <label className="field"><select {...form.register("situacao_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{situacoes.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select><span>Situação</span></label>
       </div>
       <div className="form-grid">
         <label className="field"><select {...form.register("local_trabalho_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{locaisTrabalho.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select><span>Local Trabalho</span></label>
