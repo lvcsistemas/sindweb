@@ -42,7 +42,7 @@ export function AssociadosPage() {
         <button onClick={() => { setSelectedId(null); setActiveTab("dados"); setDetailOpen(true); }}><Plus size={16} /> Novo</button>
       </section>
 
-      <section className="split-view">
+      <section className={`split-view ${detailOpen ? "" : "list-only"}`}>
         <div className="list-panel">
           <label className="search-box"><Search size={16} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por nome, CPF ou matrícula" /></label>
           <div className="record-list">
@@ -54,8 +54,8 @@ export function AssociadosPage() {
           </div>
         </div>
 
-        <div className="detail-panel">
-          {detailOpen ? <>
+        {detailOpen ? <div className="detail-panel">
+          <>
             <div className="form-panel detail-tabs">
               <div className="tabs" role="tablist" aria-label="Associado">
                 <button type="button" className={activeTab === "dados" ? "active" : ""} onClick={() => setActiveTab("dados")}>Dados</button>
@@ -67,8 +67,8 @@ export function AssociadosPage() {
               <AssociadoForm associado={associadoQuery.data ?? null} onSaved={(id) => { setSelectedId(id); setDetailOpen(true); }} />
             </> : null}
             {activeTab === "dependentes" ? <AssociadoDependentesTab associadoId={selectedId} /> : null}
-          </> : null}
-        </div>
+          </>
+        </div> : null}
       </section>
     </main>
   );
