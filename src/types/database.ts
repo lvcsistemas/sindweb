@@ -52,6 +52,7 @@ export type Associado = {
   data_ficha: string | null;
   data_recadastro: string | null;
   endereco: string | null;
+  numero: string | null;
   complemento: string | null;
   bairro: string | null;
   cidade: string | null;

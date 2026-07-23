@@ -26,6 +26,7 @@ const defaultValues: AssociadoFormValues = {
   data_situacao: "",
   data_ficha: "",
   endereco: "",
+  numero: "",
   complemento: "",
   bairro: "",
   cidade: "",
@@ -55,6 +56,15 @@ function toInputDate(value: string | null) {
   return value ? value.slice(0, 10) : "";
 }
 
+function onlyDigits(value: string | null | undefined) {
+  return value?.replace(/\D/g, "") ?? "";
+}
+
+function formatCep(value: string) {
+  const digits = onlyDigits(value).slice(0, 8);
+  return digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits;
+}
+
 function toValues(associado: Associado | null): AssociadoFormValues {
   if (!associado) return defaultValues;
   return {
@@ -77,6 +87,7 @@ function toValues(associado: Associado | null): AssociadoFormValues {
     data_situacao: toInputDate(associado.data_situacao),
     data_ficha: toInputDate(associado.data_ficha),
     endereco: associado.endereco ?? "",
+    numero: associado.numero ?? "",
     complemento: associado.complemento ?? "",
     bairro: associado.bairro ?? "",
     cidade: associado.cidade ?? "",
@@ -148,6 +159,28 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
   });
 
   const errorList = useMemo(() => Object.values(form.formState.errors).map((error) => error.message).filter(Boolean), [form.formState.errors]);
+  const cepField = form.register("cep");
+
+  async function handleCepBlur() {
+    const cep = onlyDigits(form.getValues("cep"));
+    const enderecoAtual = String(form.getValues("endereco") ?? "").trim();
+    if (cep.length !== 8 || enderecoAtual) return;
+
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      if (!response.ok) return;
+      const data = await response.json() as { erro?: boolean; logradouro?: string; bairro?: string; localidade?: string; uf?: string };
+      if (data.erro) return;
+
+      form.setValue("cep", formatCep(cep), { shouldDirty: true });
+      if (data.logradouro) form.setValue("endereco", data.logradouro.toUpperCase(), { shouldDirty: true });
+      if (data.bairro) form.setValue("bairro", data.bairro.toUpperCase(), { shouldDirty: true });
+      if (data.localidade) form.setValue("cidade", data.localidade.toUpperCase(), { shouldDirty: true });
+      if (data.uf) form.setValue("uf", data.uf.toUpperCase(), { shouldDirty: true });
+    } catch {
+      // Consulta de CEP e apenas uma ajuda; o preenchimento manual continua livre.
+    }
+  }
 
   return (
     <form className="form-panel" onSubmit={form.handleSubmit((values) => saveMutation.mutate(values))}>
@@ -182,12 +215,6 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
         <label className="field"><select {...form.register("sexo")}><option value="">Selecione</option><option value="M">Masculino</option><option value="F">Feminino</option></select><span>Sexo</span></label>
         <label className="field"><input type="number" step="0.01" {...form.register("salario")} placeholder=" " /><span>Salário</span></label>
       </div>
-      <label className="field"><input {...form.register("endereco")} placeholder=" " /><span>Endereço</span></label>
-      <div className="form-grid compact">
-        <label className="field"><input {...form.register("bairro")} placeholder=" " /><span>Bairro</span></label>
-        <label className="field"><input {...form.register("cidade")} placeholder=" " /><span>Cidade</span></label>
-        <label className="field"><input maxLength={2} {...form.register("uf")} placeholder=" " /><span>UF</span></label>
-      </div>
       <label className="field"><textarea rows={3} {...form.register("observacao")} placeholder=" " /><span>Observação</span></label>
       <div className="detail-card-stack">
         {detalheCards.map((card) => {
@@ -200,7 +227,32 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
                   {isOpen ? <Minus size={16} /> : <Plus size={16} />}
                 </button>
               </div>
-              {isOpen ? <div className="detail-card-body" /> : null}
+              {isOpen ? <div className="detail-card-body">
+                {card === "Residência" ? <>
+                  <div className="form-grid residence-cep-grid">
+                    <label className="field">
+                      <input
+                        {...cepField}
+                        maxLength={9}
+                        placeholder=" "
+                        onChange={(event) => form.setValue("cep", formatCep(event.target.value), { shouldDirty: true })}
+                        onBlur={(event) => { void cepField.onBlur(event); void handleCepBlur(); }}
+                      />
+                      <span>CEP</span>
+                    </label>
+                  </div>
+                  <div className="form-grid residence-address-grid">
+                    <label className="field"><input {...form.register("endereco")} placeholder=" " /><span>Endereço</span></label>
+                    <label className="field"><input {...form.register("numero")} placeholder=" " /><span>Número</span></label>
+                    <label className="field"><input {...form.register("complemento")} placeholder=" " /><span>Complemento</span></label>
+                  </div>
+                  <div className="form-grid residence-city-grid">
+                    <label className="field"><input {...form.register("bairro")} placeholder=" " /><span>Bairro</span></label>
+                    <label className="field"><input {...form.register("cidade")} placeholder=" " /><span>Cidade</span></label>
+                    <label className="field"><input maxLength={2} {...form.register("uf")} placeholder=" " /><span>UF</span></label>
+                  </div>
+                </> : null}
+              </div> : null}
             </section>
           );
         })}

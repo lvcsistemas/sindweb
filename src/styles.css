@@ -141,7 +141,10 @@ textarea { resize: vertical; }
 .detail-card-title { min-height: 42px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 10px 6px 14px; color: #33434f; }
 .detail-card-title strong { font-size: 0.95rem; }
 .detail-card-title .icon-button { width: 30px; height: 30px; min-height: 30px; flex: 0 0 auto; }
-.detail-card-body { min-height: 42px; border-top: 1px solid #e5ebf0; background: #f8fafb; padding: 12px; }
+.detail-card-body { display: grid; gap: 12px; min-height: 42px; border-top: 1px solid #e5ebf0; background: #f8fafb; padding: 12px; }
+.form-grid.residence-cep-grid { grid-template-columns: minmax(140px, 180px); }
+.form-grid.residence-address-grid { grid-template-columns: minmax(220px, 1fr) minmax(100px, 140px) minmax(160px, 220px); }
+.form-grid.residence-city-grid { grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) minmax(70px, 90px); }
 .related-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: stretch; }
 .data-table-wrap { width: 100%; overflow-x: auto; border: 1px solid #d7dee5; border-radius: 8px; }
 .data-table { width: 100%; border-collapse: collapse; min-width: 680px; background: #fff; }
@@ -175,6 +178,7 @@ textarea { resize: vertical; }
   .dashboard-header, .module-header { align-items: stretch; flex-direction: column; }
   .form-grid, .form-grid.compact { grid-template-columns: 1fr; }
   .form-grid.associado-status-grid, .form-grid.associado-status-grid.existing { grid-template-columns: 1fr; }
+  .form-grid.residence-cep-grid, .form-grid.residence-address-grid, .form-grid.residence-city-grid { grid-template-columns: 1fr; }
   .related-toolbar { grid-template-columns: 1fr; }
   .choice-grid, .lookup-summary div { grid-template-columns: 1fr; }
   .topbar { padding: 10px 14px; min-height: 56px; flex-wrap: wrap; justify-content: flex-start; }

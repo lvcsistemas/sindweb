@@ -25,6 +25,7 @@ export const associadoSchema = z.object({
   data_situacao: optionalDate,
   data_ficha: optionalDate,
   endereco: emptyToNull,
+  numero: emptyToNull,
   complemento: emptyToNull,
   bairro: emptyToNull,
   cidade: emptyToNull,
