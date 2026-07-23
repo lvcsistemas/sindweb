@@ -9,6 +9,7 @@ import { listEmpresas, listLookup, saveAssociado, uploadAssociadoFoto } from "./
 
 const defaultValues: AssociadoFormValues = {
   ativo: true,
+  gerar_matricula: false,
   nome: "",
   cpf: "",
   matricula: "",
@@ -56,6 +57,7 @@ function toValues(associado: Associado | null): AssociadoFormValues {
   return {
     id: associado.id,
     ativo: associado.ativo,
+    gerar_matricula: false,
     nome: associado.nome,
     cpf: associado.cpf,
     matricula: associado.matricula ?? "",
@@ -104,11 +106,19 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
   const { data: locaisPagamento = [] } = useQuery({ queryKey: ["lookup", "local_pagamento"], queryFn: () => listLookup("local_pagamento") });
 
   const form = useForm<AssociadoFormValues>({ resolver: zodResolver(associadoSchema), defaultValues: toValues(associado) });
+  const isNew = !associado?.id;
+  const gerarMatricula = form.watch("gerar_matricula");
 
   useEffect(() => {
     form.reset(toValues(associado));
     setSavedId(associado?.id ?? null);
   }, [associado, form]);
+
+  useEffect(() => {
+    if (isNew && gerarMatricula) {
+      form.setValue("matricula", "");
+    }
+  }, [form, gerarMatricula, isNew]);
 
   const saveMutation = useMutation({
     mutationFn: saveAssociado,
@@ -133,8 +143,8 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
   return (
     <form className="form-panel" onSubmit={form.handleSubmit((values) => saveMutation.mutate(values))}>
       <div className="form-grid compact">
-        <label className="check"><input type="checkbox" {...form.register("ativo")} /> Ativo</label>
-        <label className="field"><input {...form.register("matricula")} placeholder=" " /><span>Matrícula</span></label>
+        <label className="field"><input {...form.register("matricula")} placeholder=" " disabled={isNew && gerarMatricula} /><span>Matrícula</span></label>
+        {isNew ? <label className="check"><input type="checkbox" {...form.register("gerar_matricula")} /> Gerar Matricula?</label> : null}
         <label className="field"><input {...form.register("cpf")} placeholder=" " /><span>CPF</span></label>
       </div>
       <label className="field"><input {...form.register("nome")} placeholder=" " /><span>Nome do Associado</span></label>

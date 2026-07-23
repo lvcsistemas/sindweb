@@ -8,6 +8,7 @@ const optionalNumber = z.coerce.number().int().positive().nullable().optional();
 export const associadoSchema = z.object({
   id: z.number().optional(),
   ativo: z.boolean().default(true),
+  gerar_matricula: z.boolean().default(false),
   nome: z.string().trim().min(3, "Informe o nome do associado.").transform((value) => value.toUpperCase()),
   cpf: z.string().trim().refine(isValidCpf, "CPF inválido.").transform(normalizeCpf),
   matricula: emptyToNull,
