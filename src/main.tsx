@@ -13,7 +13,6 @@ import { AuxiliaresPage } from "./features/auxiliares/AuxiliaresPage";
 import { CnaePage } from "./features/cnae/CnaePage";
 import { ContribuicaoPage } from "./features/contribuicao/ContribuicaoPage";
 import { DashboardPage } from "./features/dashboard/DashboardPage";
-import { DependentesPage } from "./features/dependentes/DependentesPage";
 import { EmpresaPage } from "./features/empresa/EmpresaPage";
 import { EscritorioPage } from "./features/escritorio/EscritorioPage";
 import { LocalTrabalhoPage } from "./features/localTrabalho/LocalTrabalhoPage";
@@ -34,7 +33,6 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <DashboardPage /> },
       { path: "associados", element: <AssociadosPage /> },
-      { path: "dependentes", element: <DependentesPage /> },
       { path: "empresas", element: <EmpresaPage /> },
       { path: "atendimento-medico-convenios", element: <AtendimentoMedicoConvenioPage /> },
       { path: "atendimento-medico-especialidades", element: <AtendimentoMedicoEspecialidadePage /> },

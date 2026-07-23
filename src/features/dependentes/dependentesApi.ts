@@ -23,6 +23,17 @@ export async function listDependentes(search: string) {
   return data as AssociadoDependente[];
 }
 
+export async function listDependentesByAssociado(associadoId: number) {
+  const { data, error } = await supabaseUnsafe
+    .from("associados_dependentes")
+    .select("*")
+    .eq("associado_id", associadoId)
+    .order("nm_dependente", { ascending: true });
+
+  if (error) throw error;
+  return data as AssociadoDependente[];
+}
+
 export async function listAssociadosOptions() {
   const { data, error } = await supabaseUnsafe
     .from("associados")
