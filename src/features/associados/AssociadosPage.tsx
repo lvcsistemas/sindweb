@@ -7,7 +7,7 @@ import { deleteDependente, listDependentesByAssociado, saveDependente } from "..
 import { getAssociado, getFotoUrl, listAssociados } from "./associadosApi";
 import { AssociadoForm } from "./AssociadoForm";
 
-type AssociadoTab = "cadastro" | "dependentes";
+type AssociadoTab = "dados" | "dependentes";
 
 const emptyDependenteForm: AssociadoDependenteInsert = {
   associado_id: 0,
@@ -24,7 +24,8 @@ const emptyDependenteForm: AssociadoDependenteInsert = {
 export function AssociadosPage() {
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<AssociadoTab>("cadastro");
+  const [activeTab, setActiveTab] = useState<AssociadoTab>("dados");
+  const [detailOpen, setDetailOpen] = useState(false);
   const associadosQuery = useQuery({ queryKey: ["associados", search], queryFn: () => listAssociados(search) });
   const associadoQuery = useQuery({ queryKey: ["associado", selectedId], queryFn: () => getAssociado(selectedId!), enabled: Boolean(selectedId) });
 
@@ -36,9 +37,9 @@ export function AssociadosPage() {
       <section className="module-header">
         <div>
           <h1>Associados</h1>
-          <p>Cadastro inicial migrado do LSIND desktop.</p>
+          <p>Cadastro de Associados.</p>
         </div>
-        <button onClick={() => { setSelectedId(null); setActiveTab("cadastro"); }}><Plus size={16} /> Novo</button>
+        <button onClick={() => { setSelectedId(null); setActiveTab("dados"); setDetailOpen(true); }}><Plus size={16} /> Novo</button>
       </section>
 
       <section className="split-view">
@@ -47,24 +48,26 @@ export function AssociadosPage() {
           <div className="record-list">
             {associadosQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
             {associados.map((associado) => (
-              <AssociadoRow key={associado.id} associado={associado} selected={associado.id === selectedId} onClick={() => { setSelectedId(associado.id); setActiveTab("cadastro"); }} />
+              <AssociadoRow key={associado.id} associado={associado} selected={associado.id === selectedId} onClick={() => { setSelectedId(associado.id); setActiveTab("dados"); setDetailOpen(true); }} />
             ))}
             {!associadosQuery.isLoading && associados.length === 0 ? <div className="empty-state">Nenhum associado encontrado.</div> : null}
           </div>
         </div>
 
         <div className="detail-panel">
-          <div className="form-panel detail-tabs">
-            <div className="tabs" role="tablist" aria-label="Associado">
-              <button type="button" className={activeTab === "cadastro" ? "active" : ""} onClick={() => setActiveTab("cadastro")}>Cadastro</button>
-              <button type="button" className={activeTab === "dependentes" ? "active" : ""} onClick={() => setActiveTab("dependentes")}>Dependentes</button>
+          {detailOpen ? <>
+            <div className="form-panel detail-tabs">
+              <div className="tabs" role="tablist" aria-label="Associado">
+                <button type="button" className={activeTab === "dados" ? "active" : ""} onClick={() => setActiveTab("dados")}>Dados</button>
+                <button type="button" className={activeTab === "dependentes" ? "active" : ""} onClick={() => setActiveTab("dependentes")}>Dependentes</button>
+              </div>
             </div>
-          </div>
-          {activeTab === "cadastro" ? <>
-            {associadoQuery.isFetching ? <div className="empty-state">Abrindo cadastro...</div> : null}
-            <AssociadoForm associado={associadoQuery.data ?? null} onSaved={(id) => setSelectedId(id)} />
-          </> : null}
-          {activeTab === "dependentes" ? <AssociadoDependentesTab associadoId={selectedId} /> : null}
+            {activeTab === "dados" ? <>
+              {associadoQuery.isFetching ? <div className="empty-state">Abrindo cadastro...</div> : null}
+              <AssociadoForm associado={associadoQuery.data ?? null} onSaved={(id) => { setSelectedId(id); setDetailOpen(true); }} />
+            </> : null}
+            {activeTab === "dependentes" ? <AssociadoDependentesTab associadoId={selectedId} /> : null}
+          </> : <div className="form-panel"><div className="empty-state tab-empty">Selecione um associado ou clique em Novo para iniciar o cadastro.</div></div>}
         </div>
       </section>
     </main>
