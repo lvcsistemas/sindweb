@@ -25,6 +25,8 @@ const defaultValues: AssociadoFormValues = {
   data_admissao: "",
   data_situacao: "",
   data_ficha: "",
+  naturalidade: "",
+  nacionalidade: "",
   endereco: "",
   numero: "",
   complemento: "",
@@ -37,11 +39,20 @@ const defaultValues: AssociadoFormValues = {
   tel3: "",
   email: "",
   rg: "",
+  rg_data_emissao: "",
+  rg_orgao_emissor: "",
+  rg_uf: "",
   sexo: "",
   estado_civil: "",
   pis: "",
+  nome_pai: "",
+  nome_mae: "",
+  titulo_eleitor: "",
+  titulo_zona: "",
+  titulo_secao: "",
   ctps: "",
   ctps_serie: "",
+  ctps_uf: "",
   salario: 0,
   posto_trabalho: "",
   masterclin: "",
@@ -94,6 +105,8 @@ function toValues(associado: Associado | null): AssociadoFormValues {
     data_admissao: toInputDate(associado.data_admissao),
     data_situacao: toInputDate(associado.data_situacao),
     data_ficha: toInputDate(associado.data_ficha),
+    naturalidade: associado.naturalidade ?? "",
+    nacionalidade: associado.nacionalidade ?? "",
     endereco: associado.endereco ?? "",
     numero: associado.numero ?? "",
     complemento: associado.complemento ?? "",
@@ -106,11 +119,20 @@ function toValues(associado: Associado | null): AssociadoFormValues {
     tel3: associado.tel3 ?? "",
     email: associado.email ?? "",
     rg: associado.rg ?? "",
+    rg_data_emissao: toInputDate(associado.rg_data_emissao),
+    rg_orgao_emissor: associado.rg_orgao_emissor ?? "",
+    rg_uf: associado.rg_uf ?? "",
     sexo: associado.sexo ?? "",
     estado_civil: associado.estado_civil ?? "",
     pis: associado.pis ?? "",
+    nome_pai: associado.nome_pai ?? "",
+    nome_mae: associado.nome_mae ?? "",
+    titulo_eleitor: associado.titulo_eleitor ?? "",
+    titulo_zona: associado.titulo_zona ?? "",
+    titulo_secao: associado.titulo_secao ?? "",
     ctps: associado.ctps ?? "",
     ctps_serie: associado.ctps_serie ?? "",
+    ctps_uf: associado.ctps_uf ?? "",
     salario: associado.salario ?? 0,
     posto_trabalho: associado.posto_trabalho ?? "",
     masterclin: associado.masterclin ?? "",
@@ -210,13 +232,10 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
         <label className="field"><select {...form.register("local_pagamento_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{locaisPagamento.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select><span>Local Pagamento</span></label>
       </div>
       <div className="form-grid compact">
-        <label className="field"><input type="date" {...form.register("data_nascimento")} placeholder=" " /><span>Nascimento</span></label>
         <label className="field"><input type="date" {...form.register("data_admissao")} placeholder=" " /><span>Admissão</span></label>
         <label className="field"><input type="date" {...form.register("data_categoria")} placeholder=" " /><span>Categoria</span></label>
       </div>
-      <div className="form-grid compact">
-        <label className="field"><input {...form.register("rg")} placeholder=" " /><span>RG</span></label>
-        <label className="field"><select {...form.register("sexo")}><option value="">Selecione</option><option value="M">Masculino</option><option value="F">Feminino</option></select><span>Sexo</span></label>
+      <div className="form-grid">
         <label className="field"><input type="number" step="0.01" {...form.register("salario")} placeholder=" " /><span>Salário</span></label>
       </div>
       <label className="field"><textarea rows={3} {...form.register("observacao")} placeholder=" " /><span>Observação</span></label>
@@ -264,6 +283,49 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
                   </div>
                   <div className="form-grid contatos-email-grid">
                     <label className="field"><input {...form.register("email")} placeholder=" " /><span>E-mail</span></label>
+                  </div>
+                </> : null}
+                {card === "Identificação" ? <>
+                  <div className="form-grid identificacao-birth-grid">
+                    <label className="field"><input type="date" {...form.register("data_nascimento")} placeholder=" " /><span>Data de Nascimento</span></label>
+                    <label className="field"><input {...form.register("naturalidade")} placeholder=" " /><span>Naturalidade</span></label>
+                    <label className="field"><input {...form.register("nacionalidade")} placeholder=" " /><span>Nacionalidade</span></label>
+                    <label className="field"><select {...form.register("sexo")}><option value="">Selecione</option><option value="M">Masculino</option><option value="F">Feminino</option></select><span>Sexo</span></label>
+                  </div>
+                  <div className="form-grid identificacao-civil-grid">
+                    <label className="field">
+                      <select {...form.register("estado_civil")}>
+                        <option value="">Selecione</option>
+                        <option value="CASADO(A)">CASADO(A)</option>
+                        <option value="SOLTEIRO(A)">SOLTEIRO(A)</option>
+                        <option value="VIUVO(A)">VIUVO(A)</option>
+                        <option value="DIVORCIADO(A)">DIVORCIADO(A)</option>
+                        <option value="AMASIADO(A)">AMASIADO(A)</option>
+                        <option value="OUTROS">OUTROS</option>
+                      </select>
+                      <span>Estado Civil</span>
+                    </label>
+                    <label className="field"><input {...form.register("pis")} placeholder=" " /><span>PIS</span></label>
+                  </div>
+                  <div className="form-grid identificacao-parents-grid">
+                    <label className="field"><input {...form.register("nome_pai")} placeholder=" " /><span>Nome do Pai</span></label>
+                    <label className="field"><input {...form.register("nome_mae")} placeholder=" " /><span>Nome da Mãe</span></label>
+                  </div>
+                  <div className="form-grid identificacao-rg-grid">
+                    <label className="field"><input {...form.register("rg")} placeholder=" " /><span>RG</span></label>
+                    <label className="field"><input type="date" {...form.register("rg_data_emissao")} placeholder=" " /><span>Data Emissão RG</span></label>
+                    <label className="field"><input {...form.register("rg_orgao_emissor")} placeholder=" " /><span>Órgão Emissor RG</span></label>
+                    <label className="field"><input maxLength={2} {...form.register("rg_uf")} placeholder=" " /><span>UF RG</span></label>
+                  </div>
+                  <div className="form-grid identificacao-titulo-grid">
+                    <label className="field"><input {...form.register("titulo_eleitor")} placeholder=" " /><span>Título de Eleitor</span></label>
+                    <label className="field"><input {...form.register("titulo_zona")} placeholder=" " /><span>Zona do Título</span></label>
+                    <label className="field"><input {...form.register("titulo_secao")} placeholder=" " /><span>Seção do Título</span></label>
+                  </div>
+                  <div className="form-grid identificacao-ctps-grid">
+                    <label className="field"><input {...form.register("ctps")} placeholder=" " /><span>CTPS</span></label>
+                    <label className="field"><input {...form.register("ctps_serie")} placeholder=" " /><span>Série da CTPS</span></label>
+                    <label className="field"><input maxLength={2} {...form.register("ctps_uf")} placeholder=" " /><span>UF da CTPS</span></label>
                   </div>
                 </> : null}
               </div> : null}

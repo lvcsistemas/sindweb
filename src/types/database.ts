@@ -51,6 +51,8 @@ export type Associado = {
   data_situacao: string | null;
   data_ficha: string | null;
   data_recadastro: string | null;
+  naturalidade: string | null;
+  nacionalidade: string | null;
   endereco: string | null;
   numero: string | null;
   complemento: string | null;
@@ -64,8 +66,17 @@ export type Associado = {
   email: string | null;
   site: string | null;
   pis: string | null;
+  nome_pai: string | null;
+  nome_mae: string | null;
+  rg_data_emissao: string | null;
+  rg_orgao_emissor: string | null;
+  rg_uf: string | null;
+  titulo_eleitor: string | null;
+  titulo_zona: string | null;
+  titulo_secao: string | null;
   ctps: string | null;
   ctps_serie: string | null;
+  ctps_uf: string | null;
   salario: number | null;
   posto_trabalho: string | null;
   masterclin: string | null;
