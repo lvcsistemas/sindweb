@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Save, Upload } from "lucide-react";
+import { Minus, Plus, Save, Upload } from "lucide-react";
 import type { Associado } from "../../types/database";
 import { associadoSchema, type AssociadoFormValues } from "./associadosSchema";
 import { listEmpresas, listLookup, saveAssociado, uploadAssociadoFoto } from "./associadosApi";
@@ -47,6 +47,9 @@ const defaultValues: AssociadoFormValues = {
   observacao: "",
   foto_path: null
 };
+
+const detalheCards = ["Residência", "Contatos", "Identificação", "Classe"] as const;
+type DetalheCard = typeof detalheCards[number];
 
 function toInputDate(value: string | null) {
   return value ? value.slice(0, 10) : "";
@@ -100,6 +103,12 @@ function toValues(associado: Associado | null): AssociadoFormValues {
 export function AssociadoForm({ associado, onSaved }: { associado: Associado | null; onSaved: (id: number) => void }) {
   const queryClient = useQueryClient();
   const [savedId, setSavedId] = useState<number | null>(associado?.id ?? null);
+  const [openCards, setOpenCards] = useState<Record<DetalheCard, boolean>>({
+    Residência: false,
+    Contatos: false,
+    Identificação: false,
+    Classe: false
+  });
   const { data: empresas = [] } = useQuery({ queryKey: ["empresas"], queryFn: listEmpresas });
   const { data: situacoes = [] } = useQuery({ queryKey: ["lookup", "situacao"], queryFn: () => listLookup("situacao") });
   const { data: locaisTrabalho = [] } = useQuery({ queryKey: ["lookup", "local_trabalho"], queryFn: () => listLookup("local_trabalho") });
@@ -179,6 +188,22 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
         <label className="field"><input maxLength={2} {...form.register("uf")} placeholder=" " /><span>UF</span></label>
       </div>
       <label className="field"><textarea rows={3} {...form.register("observacao")} placeholder=" " /><span>Observação</span></label>
+      <div className="detail-card-stack">
+        {detalheCards.map((card) => {
+          const isOpen = openCards[card];
+          return (
+            <section className="detail-card" key={card}>
+              <div className="detail-card-title">
+                <strong>{card}</strong>
+                <button type="button" className="icon-button" aria-label={isOpen ? `Fechar ${card}` : `Abrir ${card}`} onClick={() => setOpenCards((current) => ({ ...current, [card]: !current[card] }))}>
+                  {isOpen ? <Minus size={16} /> : <Plus size={16} />}
+                </button>
+              </div>
+              {isOpen ? <div className="detail-card-body" /> : null}
+            </section>
+          );
+        })}
+      </div>
       {errorList.length ? <div className="form-error">{errorList.join(" ")}</div> : null}
       {saveMutation.error ? <div className="form-error">{saveMutation.error.message}</div> : null}
       {photoMutation.error ? <div className="form-error">{photoMutation.error.message}</div> : null}
