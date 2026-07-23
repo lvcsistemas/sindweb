@@ -157,8 +157,8 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
         <label className="field"><select {...form.register("situacao_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{situacoes.map((item) => <option key={item.id} value={item.id}>{item.nome}</option>)}</select><span>Situação</span></label>
         <label className="field"><input type="date" {...form.register("data_situacao")} placeholder=" " /><span>Data Situação</span></label>
       </div>
-      <label className="field"><input {...form.register("nome")} placeholder=" " /><span>Nome do Associado</span></label>
       <div className="form-grid">
+        <label className="field"><input {...form.register("nome")} placeholder=" " /><span>Nome do Associado</span></label>
         <label className="field"><input {...form.register("cpf")} placeholder=" " /><span>CPF</span></label>
       </div>
       <div className="form-grid">
