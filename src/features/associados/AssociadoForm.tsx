@@ -65,6 +65,14 @@ function formatCep(value: string) {
   return digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits;
 }
 
+function formatTelefone(value: string) {
+  const digits = onlyDigits(value).slice(0, 11);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+}
+
 function toValues(associado: Associado | null): AssociadoFormValues {
   if (!associado) return defaultValues;
   return {
@@ -206,10 +214,6 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
         <label className="field"><input type="date" {...form.register("data_admissao")} placeholder=" " /><span>Admissão</span></label>
         <label className="field"><input type="date" {...form.register("data_categoria")} placeholder=" " /><span>Categoria</span></label>
       </div>
-      <div className="form-grid">
-        <label className="field"><input {...form.register("tel1")} placeholder=" " /><span>Telefone</span></label>
-        <label className="field"><input {...form.register("email")} placeholder=" " /><span>E-mail</span></label>
-      </div>
       <div className="form-grid compact">
         <label className="field"><input {...form.register("rg")} placeholder=" " /><span>RG</span></label>
         <label className="field"><select {...form.register("sexo")}><option value="">Selecione</option><option value="M">Masculino</option><option value="F">Feminino</option></select><span>Sexo</span></label>
@@ -250,6 +254,16 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
                     <label className="field"><input {...form.register("bairro")} placeholder=" " /><span>Bairro</span></label>
                     <label className="field"><input {...form.register("cidade")} placeholder=" " /><span>Cidade</span></label>
                     <label className="field"><input maxLength={2} {...form.register("uf")} placeholder=" " /><span>UF</span></label>
+                  </div>
+                </> : null}
+                {card === "Contatos" ? <>
+                  <div className="form-grid contatos-phone-grid">
+                    <label className="field"><input value={form.watch("tel1") ?? ""} maxLength={15} onChange={(event) => form.setValue("tel1", formatTelefone(event.target.value), { shouldDirty: true })} placeholder=" " /><span>Telefone 1</span></label>
+                    <label className="field"><input value={form.watch("tel2") ?? ""} maxLength={15} onChange={(event) => form.setValue("tel2", formatTelefone(event.target.value), { shouldDirty: true })} placeholder=" " /><span>Telefone 2</span></label>
+                    <label className="field"><input value={form.watch("tel3") ?? ""} maxLength={15} onChange={(event) => form.setValue("tel3", formatTelefone(event.target.value), { shouldDirty: true })} placeholder=" " /><span>Telefone 3</span></label>
+                  </div>
+                  <div className="form-grid contatos-email-grid">
+                    <label className="field"><input {...form.register("email")} placeholder=" " /><span>E-mail</span></label>
                   </div>
                 </> : null}
               </div> : null}

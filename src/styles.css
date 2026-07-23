@@ -145,6 +145,8 @@ textarea { resize: vertical; }
 .form-grid.residence-cep-grid { grid-template-columns: minmax(140px, 180px); }
 .form-grid.residence-address-grid { grid-template-columns: minmax(220px, 1fr) minmax(100px, 140px) minmax(160px, 220px); }
 .form-grid.residence-city-grid { grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) minmax(70px, 90px); }
+.form-grid.contatos-phone-grid { grid-template-columns: repeat(3, minmax(150px, 1fr)); }
+.form-grid.contatos-email-grid { grid-template-columns: minmax(260px, 1fr); }
 .related-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: stretch; }
 .data-table-wrap { width: 100%; overflow-x: auto; border: 1px solid #d7dee5; border-radius: 8px; }
 .data-table { width: 100%; border-collapse: collapse; min-width: 680px; background: #fff; }
@@ -179,6 +181,7 @@ textarea { resize: vertical; }
   .form-grid, .form-grid.compact { grid-template-columns: 1fr; }
   .form-grid.associado-status-grid, .form-grid.associado-status-grid.existing { grid-template-columns: 1fr; }
   .form-grid.residence-cep-grid, .form-grid.residence-address-grid, .form-grid.residence-city-grid { grid-template-columns: 1fr; }
+  .form-grid.contatos-phone-grid, .form-grid.contatos-email-grid { grid-template-columns: 1fr; }
   .related-toolbar { grid-template-columns: 1fr; }
   .choice-grid, .lookup-summary div { grid-template-columns: 1fr; }
   .topbar { padding: 10px 14px; min-height: 56px; flex-wrap: wrap; justify-content: flex-start; }
