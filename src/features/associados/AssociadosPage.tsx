@@ -294,10 +294,6 @@ function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }
             </select>
             <span>Estado civil</span>
           </label>
-          
-        </div>
-
-        <div className="form-grid compact">
           <label className="field">
             <select value={form.sexo} onChange={(event) => setForm({ ...form, sexo: event.target.value })}>
               <option value="M">Masculino</option>
@@ -305,6 +301,9 @@ function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }
             </select>
             <span>Sexo</span>
           </label>
+        </div>
+
+        <div className="form-grid">
           <label className="field"><input value={form.telefone ?? ""} maxLength={15} onChange={(event) => setForm({ ...form, telefone: formatTelefone(event.target.value) })} placeholder=" " /><span>Telefone</span></label>
         </div>
 
