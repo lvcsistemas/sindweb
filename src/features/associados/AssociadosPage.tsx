@@ -269,8 +269,22 @@ function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }
         <div className="form-grid">
           <label className="field"><input value={form.nm_dependente} maxLength={50} onChange={(event) => setForm({ ...form, nm_dependente: event.target.value })} placeholder=" " required /><span>Nome dependente</span></label>
           <label className="field"><input value={form.dt_nascimento} maxLength={10} onChange={(event) => setForm({ ...form, dt_nascimento: formatDateBr(event.target.value) })} placeholder=" " required /><span>Nascimento</span></label>
-          <label className="field"><input value={form.cpf ?? ""} maxLength={14} onChange={(event) => setForm({ ...form, cpf: formatCpf(event.target.value) })} placeholder=" " /><span>CPF</span></label>
         </div>
+
+        <div className="form-grid">
+          <label className="field">
+            <select value={form.parentesco} onChange={(event) => setForm({ ...form, parentesco: event.target.value })} required>
+              <option value="PAI">PAI</option>
+              <option value="MAE">MÃE</option>
+              <option value="COMPANHEIRO(A)">COMPANHEIRO(A)</option>
+              <option value="ENTEADO(A)">ENTEADO(A)</option>
+              <option value="FILHO(A)">FILHO(A)</option>
+              <option value="ESPOSO(A)">ESPOSO(A)</option>
+            </select>
+            <span>Parentesco</span>
+          </label>
+          <label className="field"><input value={form.cpf ?? ""} maxLength={14} onChange={(event) => setForm({ ...form, cpf: formatCpf(event.target.value) })} placeholder=" " /><span>CPF</span></label>
+        </div>    
 
         <div className="form-grid">
           <label className="field">
@@ -280,7 +294,7 @@ function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }
             </select>
             <span>Estado civil</span>
           </label>
-          <label className="field"><input value={form.parentesco} maxLength={15} onChange={(event) => setForm({ ...form, parentesco: event.target.value })} placeholder=" " required /><span>Parentesco</span></label>
+          
         </div>
 
         <div className="form-grid compact">
