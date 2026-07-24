@@ -1,5 +1,5 @@
 import { supabase } from "../../lib/supabase";
-import type { Associado, AssociadoLista, Auxiliar, Empresa, LocalTrabalho } from "../../types/database";
+import type { Associado, AssociadoContribuicaoLista, AssociadoLista, Auxiliar, Empresa, LocalTrabalho } from "../../types/database";
 import type { AssociadoFormValues } from "./associadosSchema";
 
 const supabaseUnsafe = supabase as any;
@@ -25,6 +25,44 @@ export async function getAssociado(id: number) {
   const { data, error } = await supabase.from("associados").select("*").eq("id", id).single();
   if (error) throw error;
   return data as Associado;
+}
+
+export async function listAssociadoContribuicoes(associadoId: number) {
+  const { data, error } = await supabaseUnsafe
+    .from("associados_contribuicoes")
+    .select(`
+      id,
+      associado_id,
+      contribuicao_id,
+      created_at,
+      dt_pg,
+      contribuicao:contribuicoes!associados_contribuicoes_contribuicao_id_fkey (
+        tipo,
+        nm_contribuicao,
+        valor_base
+      )
+    `)
+    .eq("associado_id", associadoId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data as AssociadoContribuicaoLista[];
+}
+
+export async function addAssociadoContribuicao(associadoId: number, contribuicaoId: number) {
+  const { data, error } = await supabaseUnsafe
+    .from("associados_contribuicoes")
+    .insert({ associado_id: associadoId, contribuicao_id: contribuicaoId })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteAssociadoContribuicao(id: number) {
+  const { error } = await supabaseUnsafe.from("associados_contribuicoes").delete().eq("id", id);
+  if (error) throw error;
 }
 
 export async function saveAssociado(values: AssociadoFormValues) {

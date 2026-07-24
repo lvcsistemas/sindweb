@@ -3,8 +3,9 @@ import { useMutation, useQuery, useQueryClient }    from "@tanstack/react-query"
 import { Plus, Save, Search, Trash2, UserRound }    from "lucide-react";
 import type { AssociadoDependente, AssociadoDependenteInsert, AssociadoLista } from "../../types/database";
 import { Breadcrumb }                               from "../../shared/Breadcrumb";
+import { listContribuicoes }                        from "../contribuicao/contribuicaoApi";
 import { deleteDependente, listDependentesByAssociado, saveDependente } from "../dependentes/dependentesApi";
-import { getAssociado, getFotoUrl, listAssociados } from "./associadosApi";
+import { addAssociadoContribuicao, deleteAssociadoContribuicao, getAssociado, getFotoUrl, listAssociadoContribuicoes, listAssociados } from "./associadosApi";
 import { AssociadoForm }                            from "./AssociadoForm";
 
 type AssociadoTab = "dados" | "dependentes" | "contribuicoes" | "financeiro";
@@ -78,6 +79,15 @@ function displayValue(value: string | null | undefined) {
   return value?.trim() ? value : "-";
 }
 
+function formatCurrency(value: number | string | null | undefined) {
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(value ?? 0));
+}
+
+function formatDateTime(value: string | null | undefined) {
+  if (!value) return "-";
+  return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
+}
+
 export function AssociadosPage() {
   const [search, setSearch]         = useState("");
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -126,10 +136,110 @@ export function AssociadosPage() {
               <AssociadoForm associado={associadoQuery.data ?? null} onSaved={(id) => { setSelectedId(id); setDetailOpen(true); }} />
             </> : null}
             {activeTab === "dependentes" ? <AssociadoDependentesTab associadoId={selectedId} /> : null}
+            {activeTab === "contribuicoes" ? <AssociadoContribuicoesTab associadoId={selectedId} /> : null}
+            {activeTab === "financeiro" ? <div className="form-panel"><div className="empty-state tab-empty">Nenhum lançamento financeiro vinculado nesta tela.</div></div> : null}
           </>
         </div> : null}
       </section>
     </main>
+  );
+}
+
+function AssociadoContribuicoesTab({ associadoId }: { associadoId: number | null }) {
+  const queryClient = useQueryClient();
+  const [selectedContribuicaoId, setSelectedContribuicaoId] = useState("");
+  const [message, setMessage] = useState<string | null>(null);
+
+  const contribuicoesQuery = useQuery({ queryKey: ["contribuicoes-options"], queryFn: () => listContribuicoes("") });
+  const associadoContribuicoesQuery = useQuery({
+    queryKey: ["associado-contribuicoes", associadoId],
+    queryFn: () => listAssociadoContribuicoes(associadoId ?? 0),
+    enabled: Boolean(associadoId)
+  });
+
+  const contribuicoes = contribuicoesQuery.data ?? [];
+  const associadoContribuicoes = associadoContribuicoesQuery.data ?? [];
+
+  const addContribuicaoMutation = useMutation({
+    mutationFn: ({ associadoId, contribuicaoId }: { associadoId: number; contribuicaoId: number }) => addAssociadoContribuicao(associadoId, contribuicaoId),
+    onSuccess: async () => {
+      setSelectedContribuicaoId("");
+      setMessage("Contribuição adicionada com sucesso.");
+      await queryClient.invalidateQueries({ queryKey: ["associado-contribuicoes", associadoId] });
+    },
+    onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel adicionar a contribuicao.")
+  });
+
+  const deleteContribuicaoMutation = useMutation({
+    mutationFn: deleteAssociadoContribuicao,
+    onSuccess: async () => {
+      setMessage("Contribuição removida com sucesso.");
+      await queryClient.invalidateQueries({ queryKey: ["associado-contribuicoes", associadoId] });
+    },
+    onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel remover a contribuicao.")
+  });
+
+  function handleAddContribuicao() {
+    if (!associadoId || !selectedContribuicaoId) return;
+    setMessage(null);
+    addContribuicaoMutation.mutate({ associadoId, contribuicaoId: Number(selectedContribuicaoId) });
+  }
+
+  function handleDeleteContribuicao(id: number) {
+    if (!window.confirm("Deseja excluir esta contribuição do associado?")) return;
+    setMessage(null);
+    deleteContribuicaoMutation.mutate(id);
+  }
+
+  return (
+    <div className="form-panel">
+      <div className="related-panel">
+        {!associadoId ? <div className="empty-state tab-empty">Salve ou selecione um associado antes de adicionar contribuições.</div> : <>
+          <div className="related-toolbar">
+            <label className="field">
+              <select value={selectedContribuicaoId} onChange={(event) => setSelectedContribuicaoId(event.target.value)}>
+                <option value="">Selecione</option>
+                {contribuicoes.map((contribuicao) => (
+                  <option key={contribuicao.id} value={contribuicao.id}>{contribuicao.tipo} • {contribuicao.nm_contribuicao}</option>
+                ))}
+              </select>
+              <span>Contribuição</span>
+            </label>
+            <button type="button" onClick={handleAddContribuicao} disabled={!selectedContribuicaoId || addContribuicaoMutation.isPending}>
+              <Plus size={16} /> Adicionar
+            </button>
+          </div>
+
+          <div className="data-table-wrap">
+            <table className="data-table clickable-rows">
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Contribuição</th>
+                  <th>Valor</th>
+                  <th>Pagamento</th>
+                  <th>Incluído</th>
+                </tr>
+              </thead>
+              <tbody>
+                {associadoContribuicoes.map((item) => (
+                  <tr key={item.id} onClick={() => handleDeleteContribuicao(item.id)} tabIndex={0}>
+                    <td>{item.contribuicao?.tipo ?? "-"}</td>
+                    <td>{item.contribuicao?.nm_contribuicao ?? "-"}</td>
+                    <td className="numeric-cell">{formatCurrency(item.contribuicao?.valor_base)}</td>
+                    <td>{formatDateTime(item.dt_pg)}</td>
+                    <td>{formatDateTime(item.created_at)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {associadoContribuicoesQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
+            {!associadoContribuicoesQuery.isLoading && associadoContribuicoes.length === 0 ? <div className="empty-state">Nenhuma contribuição vinculada.</div> : null}
+          </div>
+          {message ? <div className={addContribuicaoMutation.isError || deleteContribuicaoMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
+        </>}
+      </div>
+    </div>
   );
 }
 

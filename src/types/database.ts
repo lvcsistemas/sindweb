@@ -4,6 +4,7 @@ export type Database = {
   public: {
     Tables: {
       associados: { Row: Associado; Insert: AssociadoInsert; Update: Partial<AssociadoInsert> };
+      associados_contribuicoes: { Row: AssociadoContribuicao; Insert: AssociadoContribuicaoInsert; Update: Partial<AssociadoContribuicaoInsert> };
       associados_dependentes: { Row: AssociadoDependente; Insert: AssociadoDependenteInsert; Update: Partial<AssociadoDependenteInsert> };
       auxiliares: { Row: Auxiliar; Insert: AuxiliarInsert; Update: Partial<AuxiliarInsert> };
       atendimento_medico_convenios: { Row: AtendimentoMedicoConvenio; Insert: AtendimentoMedicoConvenioInsert; Update: Partial<AtendimentoMedicoConvenioInsert> };
@@ -120,6 +121,23 @@ export type AssociadoDependente = {
 };
 
 export type AssociadoDependenteInsert = Omit<AssociadoDependente, "id" | "created_at" | "updated_at"> & { id?: number };
+
+export type AssociadoContribuicao = {
+  id: number;
+  associado_id: number;
+  contribuicao_id: number;
+  created_at: string;
+  dt_pg: string | null;
+};
+
+export type AssociadoContribuicaoInsert = Omit<AssociadoContribuicao, "id" | "created_at"> & {
+  id?: number;
+  created_at?: string;
+};
+
+export type AssociadoContribuicaoLista = AssociadoContribuicao & {
+  contribuicao: Pick<Contribuicao, "tipo" | "nm_contribuicao" | "valor_base"> | null;
+};
 
 export type Empresa = {
   id: number;
