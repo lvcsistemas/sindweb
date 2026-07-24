@@ -45,6 +45,19 @@ function parseDateBr(value: string | null | undefined) {
   return `${digits.slice(4, 8)}-${digits.slice(2, 4)}-${digits.slice(0, 2)}`;
 }
 
+function calculateAge(value: string | null | undefined) {
+  if (!value) return null;
+  const dateValue = /^\d{4}-\d{2}-\d{2}/.test(value) ? value.slice(0, 10) : parseDateBr(value);
+  const birthDate = new Date(`${dateValue}T00:00:00`);
+  if (Number.isNaN(birthDate.getTime())) return null;
+
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const birthdayThisYear = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+  if (today < birthdayThisYear) age -= 1;
+  return age >= 0 ? age : null;
+}
+
 function formatCpf(value: string | null | undefined) {
   const digits = onlyDigits(value).slice(0, 11);
   if (digits.length <= 3) return digits;
@@ -62,7 +75,7 @@ function formatTelefone(value: string | null | undefined) {
 }
 
 function displayValue(value: string | null | undefined) {
-  return value?.trim() ? value : "•";
+  return value?.trim() ? value : "-";
 }
 
 export function AssociadosPage() {
@@ -230,6 +243,7 @@ function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }
               <th>Nome</th>
               <th>Parentesco</th>
               <th>Nascimento</th>
+              <th>Idade</th>
               <th>CPF</th>
               <th>Telefone</th>
             </tr>
@@ -240,6 +254,7 @@ function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }
                 <td>{item.nm_dependente}</td>
                 <td>{item.parentesco}</td>
                 <td>{displayValue(formatDateBr(item.dt_nascimento))}</td>
+                <td>{calculateAge(item.dt_nascimento) ?? "-"}</td>
                 <td>{displayValue(formatCpf(item.cpf))}</td>
                 <td>{displayValue(formatTelefone(item.telefone))}</td>
               </tr>

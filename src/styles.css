@@ -135,6 +135,7 @@ textarea { resize: vertical; }
 .form-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 8px; }
 .photo-field { display: flex; align-items: center; gap: 14px; padding-top: 2px; }
 .related-panel { display: grid; gap: 14px; }
+.related-form { display: grid; gap: 14px; padding-top: 14px; border-top: 1px solid #e5ebf0; }
 .single-form-view { max-width: 560px; }
 .detail-card-stack { display: grid; gap: 10px; }
 .detail-card { border: 1px solid #d7dee5; border-radius: 8px; background: #fff; overflow: hidden; }
