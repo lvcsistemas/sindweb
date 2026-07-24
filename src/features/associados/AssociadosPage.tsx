@@ -243,7 +243,7 @@ function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }
 
 function AssociadoRow({ associado, selected, onClick }: { associado: AssociadoLista; selected: boolean; onClick: () => void }) {
   const fotoUrl = getFotoUrl(associado.foto_path);
-  const matriculaLabel = associado.matricula ? `Matrícula ${associado.matricula}` : "Sem matrícula";
+  const matriculaLabel = associado.matricula ? `Matrícula: ${associado.matricula}` : "Sem matrícula";
   const situacaoLabel = associado.situacao_nome ?? "Sem situação";
   return (
     <button className={`record-row ${selected ? "selected" : ""}`} onClick={onClick}>
