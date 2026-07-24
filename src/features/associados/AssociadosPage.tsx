@@ -243,14 +243,16 @@ function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }
 
 function AssociadoRow({ associado, selected, onClick }: { associado: AssociadoLista; selected: boolean; onClick: () => void }) {
   const fotoUrl = getFotoUrl(associado.foto_path);
+  const matriculaLabel = associado.matricula ? `Matrícula ${associado.matricula}` : "Sem matrícula";
+  const situacaoLabel = associado.situacao_nome ?? "Sem situação";
   return (
     <button className={`record-row ${selected ? "selected" : ""}`} onClick={onClick}>
       <div className="avatar">{fotoUrl ? <img src={fotoUrl} alt="" /> : <UserRound size={19} />}</div>
       <div>
         <strong>{associado.nome}</strong>
-        <span>{associado.matricula ?? "Sem matrícula"} · {associado.empresa_nome ?? "Sem empresa"}</span>
+        <span>{matriculaLabel} � {associado.empresa_nome ?? "Sem empresa"}</span>
       </div>
-      <small className={associado.ativo ? "status-ok" : "status-muted"}>{associado.ativo ? "Ativo" : "Inativo"}</small>
+      <small className={associado.situacao_nome ? "status-ok" : "status-muted"}>{situacaoLabel}</small>
     </button>
   );
 }
