@@ -250,7 +250,7 @@ function AssociadoRow({ associado, selected, onClick }: { associado: AssociadoLi
       <div className="avatar">{fotoUrl ? <img src={fotoUrl} alt="" /> : <UserRound size={19} />}</div>
       <div>
         <strong>{associado.nome}</strong>
-        <span>{matriculaLabel} • {associado.empresa_nome ?? "Sem empresa"}</span>
+        <span>{matriculaLabel} â€¢ {associado.empresa_nome ?? "Sem empresa"}</span>
       </div>
       <small className={associado.situacao_nome ? "status-ok" : "status-muted"}>{situacaoLabel}</small>
     </button>
