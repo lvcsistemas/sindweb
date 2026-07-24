@@ -269,6 +269,14 @@ function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }
         <div className="form-grid">
           <label className="field"><input value={form.nm_dependente} maxLength={50} onChange={(event) => setForm({ ...form, nm_dependente: event.target.value })} placeholder=" " required /><span>Nome dependente</span></label>
           <label className="field"><input value={form.dt_nascimento} maxLength={10} onChange={(event) => setForm({ ...form, dt_nascimento: formatDateBr(event.target.value) })} placeholder=" " required /><span>Nascimento</span></label>
+          <label className="field">
+            <select value={form.estado_civil} onChange={(event) => setForm({ ...form, estado_civil: event.target.value })} required>
+              <option value="">Selecione</option>
+              {estadoCivilOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+            </select>
+            <span>Estado civil</span>
+          </label>
+          <label className="field"><input value={form.parentesco} maxLength={15} onChange={(event) => setForm({ ...form, parentesco: event.target.value })} placeholder=" " required /><span>Parentesco</span></label>
         </div>
 
         <div className="form-grid compact">
@@ -281,17 +289,6 @@ function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }
             <span>Sexo</span>
           </label>
           <label className="field"><input value={form.telefone ?? ""} maxLength={15} onChange={(event) => setForm({ ...form, telefone: formatTelefone(event.target.value) })} placeholder=" " /><span>Telefone</span></label>
-        </div>
-
-        <div className="form-grid">
-          <label className="field">
-            <select value={form.estado_civil} onChange={(event) => setForm({ ...form, estado_civil: event.target.value })} required>
-              <option value="">Selecione</option>
-              {estadoCivilOptions.map((option) => <option key={option} value={option}>{option}</option>)}
-            </select>
-            <span>Estado civil</span>
-          </label>
-          <label className="field"><input value={form.parentesco} maxLength={15} onChange={(event) => setForm({ ...form, parentesco: event.target.value })} placeholder=" " required /><span>Parentesco</span></label>
         </div>
 
         <label className="field"><textarea rows={3} value={form.obs ?? ""} onChange={(event) => setForm({ ...form, obs: event.target.value })} placeholder=" " /><span>Observacao</span></label>
