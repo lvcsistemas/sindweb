@@ -1,33 +1,33 @@
-import { FormEvent, useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Save, Search, Trash2 } from "lucide-react";
+import { FormEvent, useEffect, useState }           from "react";
+import { useMutation, useQuery, useQueryClient }    from "@tanstack/react-query";
+import { Plus, Save, Search, Trash2 }               from "lucide-react";
 import type { AssociadoDependente, AssociadoDependenteInsert, AssociadoLista } from "../../types/database";
-import { Breadcrumb } from "../../shared/Breadcrumb";
+import { Breadcrumb }                               from "../../shared/Breadcrumb";
 import { deleteDependente, listDependentesByAssociado, saveDependente } from "../dependentes/dependentesApi";
 import { getAssociado, getFotoUrl, listAssociados } from "./associadosApi";
-import { AssociadoForm } from "./AssociadoForm";
+import { AssociadoForm }                            from "./AssociadoForm";
 
-type AssociadoTab = "dados" | "dependentes" | "contruibuicoes" | "financeiro";
+type AssociadoTab = "dados" | "dependentes" | "contribuicoes" | "financeiro";
 
 const emptyDependenteForm: AssociadoDependenteInsert = {
-  associado_id: 0,
-  dt_nascimento: "",
-  nm_dependente: "",
-  cpf: "",
-  sexo: "M",
-  estado_civil: "",
-  parentesco: "",
-  telefone: "",
-  obs: ""
+  associado_id  : 0,
+  dt_nascimento : "",
+  nm_dependente : "",
+  cpf           : "",
+  sexo          : "M",
+  estado_civil  : "",
+  parentesco    : "",
+  telefone      : "",
+  obs           : ""
 };
 
 export function AssociadosPage() {
-  const [search, setSearch] = useState("");
+  const [search, setSearch]         = useState("");
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<AssociadoTab>("dados");
+  const [activeTab, setActiveTab]   = useState<AssociadoTab>("dados");
   const [detailOpen, setDetailOpen] = useState(false);
-  const associadosQuery = useQuery({ queryKey: ["associados", search], queryFn: () => listAssociados(search) });
-  const associadoQuery = useQuery({ queryKey: ["associado", selectedId], queryFn: () => getAssociado(selectedId!), enabled: Boolean(selectedId) });
+  const associadosQuery             = useQuery({ queryKey: ["associados", search], queryFn: () => listAssociados(search) });
+  const associadoQuery              = useQuery({ queryKey: ["associado", selectedId], queryFn: () => getAssociado(selectedId!), enabled: Boolean(selectedId) });
 
   const associados = associadosQuery.data ?? [];
 
@@ -58,8 +58,10 @@ export function AssociadosPage() {
           <>
             <div className="form-panel detail-tabs">
               <div className="tabs" role="tablist" aria-label="Associado">
-                <button type="button" className={activeTab === "dados" ? "active" : ""} onClick={() => setActiveTab("dados")}>Dados</button>
-                <button type="button" className={activeTab === "dependentes" ? "active" : ""} onClick={() => setActiveTab("dependentes")}>Dependentes</button>
+                <button type="button" className={activeTab === "dados"          ? "active" : ""} onClick={() => setActiveTab("dados")}>Dados</button>
+                <button type="button" className={activeTab === "dependentes"    ? "active" : ""} onClick={() => setActiveTab("dependentes")}>Dependentes</button>
+                <button type="button" className={activeTab === "contribuicoes"  ? "active" : ""} onClick={() => setActiveTab("contribuicoes")}>Contribuições</button>
+                <button type="button" className={activeTab === "financeiro"     ? "active" : ""} onClick={() => setActiveTab("financeiro")}>Financeiro</button>
               </div>
             </div>
             {activeTab === "dados" ? <>
@@ -75,11 +77,11 @@ export function AssociadosPage() {
 }
 
 function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }) {
-  const queryClient = useQueryClient();
+  const queryClient                   = useQueryClient();
   const [selectedDependenteId, setSelectedDependenteId] = useState<number | null>(null);
   const [creatingNew, setCreatingNew] = useState(false);
-  const [form, setForm] = useState<AssociadoDependenteInsert>(emptyDependenteForm);
-  const [message, setMessage] = useState<string | null>(null);
+  const [form, setForm]               = useState<AssociadoDependenteInsert>(emptyDependenteForm);
+  const [message, setMessage]         = useState<string | null>(null);
 
   const dependentesQuery = useQuery({
     queryKey: ["associado-dependentes", associadoId],
@@ -87,8 +89,8 @@ function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }
     enabled: Boolean(associadoId)
   });
   const dependentes = dependentesQuery.data ?? [];
-  const selected = dependentes.find((item) => item.id === selectedDependenteId) ?? null;
-  const formOpen = creatingNew || Boolean(selectedDependenteId);
+  const selected    = dependentes.find((item) => item.id === selectedDependenteId) ?? null;
+  const formOpen    = creatingNew || Boolean(selectedDependenteId);
 
   useEffect(() => {
     if (!associadoId) {
@@ -104,16 +106,16 @@ function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }
     }
 
     setForm({
-      id: selected.id,
-      associado_id: selected.associado_id,
-      dt_nascimento: selected.dt_nascimento,
-      nm_dependente: selected.nm_dependente,
-      cpf: selected.cpf ?? "",
-      sexo: selected.sexo,
-      estado_civil: selected.estado_civil,
-      parentesco: selected.parentesco,
-      telefone: selected.telefone ?? "",
-      obs: selected.obs ?? ""
+      id            : selected.id,
+      associado_id  : selected.associado_id,
+      dt_nascimento : selected.dt_nascimento,
+      nm_dependente : selected.nm_dependente,
+      cpf           : selected.cpf ?? "",
+      sexo          : selected.sexo,
+      estado_civil  : selected.estado_civil,
+      parentesco    : selected.parentesco,
+      telefone      : selected.telefone ?? "",
+      obs           : selected.obs ?? ""
     });
   }, [associadoId, selected]);
 
@@ -176,7 +178,6 @@ function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }
         <div className="list-summary">{dependentes.length} registro{dependentes.length === 1 ? "" : "s"}</div>
         <button type="button" onClick={handleNew}><Plus size={16} /> Novo</button>
       </div>
-
       <div className="data-table-wrap">
         <table className="data-table clickable-rows">
           <thead>

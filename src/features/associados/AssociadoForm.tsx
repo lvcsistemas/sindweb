@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Minus, Plus, Save, Upload } from "lucide-react";
-import type { Associado } from "../../types/database";
+import { useEffect, useMemo, useState }           from "react";
+import { useMutation, useQuery, useQueryClient }  from "@tanstack/react-query";
+import { useForm }                                from "react-hook-form";
+import { zodResolver }                            from "@hookform/resolvers/zod";
+import { Minus, Plus, Save, Upload }              from "lucide-react";
+import type { Associado }                         from "../../types/database";
 import { associadoSchema, type AssociadoFormValues } from "./associadosSchema";
 import { getEmpresaOption, listAuxiliaresOptions, listEmpresas, listLocaisTrabalhoOptions, saveAssociado, uploadAssociadoFoto } from "./associadosApi";
 
@@ -89,59 +89,59 @@ function formatTelefone(value: string) {
 function toValues(associado: Associado | null): AssociadoFormValues {
   if (!associado) return defaultValues;
   return {
-    id: associado.id,
-    ativo: associado.ativo,
-    gerar_matricula: false,
-    nome: associado.nome,
-    cpf: associado.cpf,
-    matricula: associado.matricula ?? "",
-    matricula_empresa: associado.matricula_empresa ?? "",
-    empresa_id: associado.empresa_id,
-    situacao_id: associado.situacao_id,
-    local_trabalho_id: associado.local_trabalho_id,
+    id                : associado.id,
+    ativo             : associado.ativo,
+    gerar_matricula   : false,
+    nome              : associado.nome,
+    cpf               : associado.cpf,
+    matricula         : associado.matricula ?? "",
+    matricula_empresa : associado.matricula_empresa ?? "",
+    empresa_id        : associado.empresa_id,
+    situacao_id       : associado.situacao_id,
+    local_trabalho_id : associado.local_trabalho_id,
     local_pagamento_id: associado.local_pagamento_id,
-    escolaridade_id: associado.escolaridade_id,
-    funcao_id: associado.funcao_id,
-    data_categoria: toInputDate(associado.data_categoria),
-    data_nascimento: toInputDate(associado.data_nascimento),
-    data_admissao: toInputDate(associado.data_admissao),
-    data_situacao: toInputDate(associado.data_situacao),
-    data_ficha: toInputDate(associado.data_ficha),
-    naturalidade: associado.naturalidade ?? "",
-    nacionalidade: associado.nacionalidade ?? "",
-    endereco: associado.endereco ?? "",
-    numero: associado.numero ?? "",
-    complemento: associado.complemento ?? "",
-    bairro: associado.bairro ?? "",
-    cidade: associado.cidade ?? "",
-    uf: associado.uf ?? "",
-    cep: associado.cep ?? "",
-    tel1: associado.tel1 ?? "",
-    tel2: associado.tel2 ?? "",
-    tel3: associado.tel3 ?? "",
-    email: associado.email ?? "",
-    rg: associado.rg ?? "",
-    rg_data_emissao: toInputDate(associado.rg_data_emissao),
-    rg_orgao_emissor: associado.rg_orgao_emissor ?? "",
-    rg_uf: associado.rg_uf ?? "",
-    sexo: associado.sexo ?? "",
-    estado_civil: associado.estado_civil ?? "",
-    pis: associado.pis ?? "",
-    nome_pai: associado.nome_pai ?? "",
-    nome_mae: associado.nome_mae ?? "",
-    titulo_eleitor: associado.titulo_eleitor ?? "",
-    titulo_zona: associado.titulo_zona ?? "",
-    titulo_secao: associado.titulo_secao ?? "",
-    ctps: associado.ctps ?? "",
-    ctps_serie: associado.ctps_serie ?? "",
-    ctps_uf: associado.ctps_uf ?? "",
-    salario: associado.salario ?? 0,
-    secao: associado.secao ?? "",
-    turno: associado.turno ?? "",
-    posto_trabalho: associado.posto_trabalho ?? "",
-    masterclin: associado.masterclin ?? "",
-    observacao: associado.observacao ?? "",
-    foto_path: associado.foto_path
+    escolaridade_id   : associado.escolaridade_id,
+    funcao_id         : associado.funcao_id,
+    data_categoria    : toInputDate(associado.data_categoria),
+    data_nascimento   : toInputDate(associado.data_nascimento),
+    data_admissao     : toInputDate(associado.data_admissao),
+    data_situacao     : toInputDate(associado.data_situacao),
+    data_ficha        : toInputDate(associado.data_ficha),
+    naturalidade      : associado.naturalidade ?? "",
+    nacionalidade     : associado.nacionalidade ?? "",
+    endereco          : associado.endereco ?? "",
+    numero            : associado.numero ?? "",
+    complemento       : associado.complemento ?? "",
+    bairro            : associado.bairro ?? "",
+    cidade            : associado.cidade ?? "",
+    uf                : associado.uf ?? "",
+    cep               : associado.cep ?? "",
+    tel1              : associado.tel1 ?? "",
+    tel2              : associado.tel2 ?? "",
+    tel3              : associado.tel3 ?? "",
+    email             : associado.email ?? "",
+    rg                : associado.rg ?? "",
+    rg_data_emissao   : toInputDate(associado.rg_data_emissao),
+    rg_orgao_emissor  : associado.rg_orgao_emissor ?? "",
+    rg_uf             : associado.rg_uf ?? "",
+    sexo              : associado.sexo ?? "",
+    estado_civil      : associado.estado_civil ?? "",
+    pis               : associado.pis ?? "",
+    nome_pai          : associado.nome_pai ?? "",
+    nome_mae          : associado.nome_mae ?? "",
+    titulo_eleitor    : associado.titulo_eleitor ?? "",
+    titulo_zona       : associado.titulo_zona ?? "",
+    titulo_secao      : associado.titulo_secao ?? "",
+    ctps              : associado.ctps ?? "",
+    ctps_serie        : associado.ctps_serie ?? "",
+    ctps_uf           : associado.ctps_uf ?? "",
+    salario           : associado.salario ?? 0,
+    secao             : associado.secao ?? "",
+    turno             : associado.turno ?? "",
+    posto_trabalho    : associado.posto_trabalho ?? "",
+    masterclin        : associado.masterclin ?? "",
+    observacao        : associado.observacao ?? "",
+    foto_path         : associado.foto_path
   };
 }
 
@@ -149,22 +149,22 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
   const queryClient = useQueryClient();
   const [savedId, setSavedId] = useState<number | null>(associado?.id ?? null);
   const [openCards, setOpenCards] = useState<Record<DetalheCard, boolean>>({
-    Residência: false,
-    Contatos: false,
-    Identificação: false,
-    Classe: false
+    Residência    : false,
+    Contatos      : false,
+    Identificação : false,
+    Classe        : false
   });
   const [empresaSearch, setEmpresaSearch] = useState("");
-  const { data: empresas = [] } = useQuery({ queryKey: ["empresas", empresaSearch], queryFn: () => listEmpresas(empresaSearch) });
-  const { data: situacoes = [] } = useQuery({ queryKey: ["auxiliares", "situacao"], queryFn: () => listAuxiliaresOptions("situacao") });
-  const { data: locaisTrabalho = [] } = useQuery({ queryKey: ["locais-trabalho"], queryFn: listLocaisTrabalhoOptions });
-  const { data: locaisPagamento = [] } = useQuery({ queryKey: ["auxiliares", "locais_pagamento"], queryFn: () => listAuxiliaresOptions("locais_pagamento") });
-  const { data: funcoes = [] } = useQuery({ queryKey: ["auxiliares", "funcao"], queryFn: () => listAuxiliaresOptions("funcao") });
-  const { data: escolaridades = [] } = useQuery({ queryKey: ["auxiliares", "escolaridade"], queryFn: () => listAuxiliaresOptions("escolaridade") });
+  const { data: empresas = [] }         = useQuery({ queryKey: ["empresas", empresaSearch], queryFn: () => listEmpresas(empresaSearch) });
+  const { data: situacoes = [] }        = useQuery({ queryKey: ["auxiliares", "situacao"], queryFn: () => listAuxiliaresOptions("situacao") });
+  const { data: locaisTrabalho = [] }   = useQuery({ queryKey: ["locais-trabalho"], queryFn: listLocaisTrabalhoOptions });
+  const { data: locaisPagamento = [] }  = useQuery({ queryKey: ["auxiliares", "locais_pagamento"], queryFn: () => listAuxiliaresOptions("locais_pagamento") });
+  const { data: funcoes = [] }          = useQuery({ queryKey: ["auxiliares", "funcao"], queryFn: () => listAuxiliaresOptions("funcao") });
+  const { data: escolaridades = [] }    = useQuery({ queryKey: ["auxiliares", "escolaridade"], queryFn: () => listAuxiliaresOptions("escolaridade") });
 
-  const form = useForm<AssociadoFormValues>({ resolver: zodResolver(associadoSchema), defaultValues: toValues(associado) });
+  const form  = useForm<AssociadoFormValues>({ resolver: zodResolver(associadoSchema), defaultValues: toValues(associado) });
   const isNew = !associado?.id;
-  const gerarMatricula = form.watch("gerar_matricula");
+  const gerarMatricula    = form.watch("gerar_matricula");
   const selectedEmpresaId = form.watch("empresa_id");
   const { data: selectedEmpresa } = useQuery({
     queryKey: ["empresa-option", selectedEmpresaId],
@@ -212,13 +212,11 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
     const cep = onlyDigits(form.getValues("cep"));
     const enderecoAtual = String(form.getValues("endereco") ?? "").trim();
     if (cep.length !== 8 || enderecoAtual) return;
-
     try {
       const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
       if (!response.ok) return;
       const data = await response.json() as { erro?: boolean; logradouro?: string; bairro?: string; localidade?: string; uf?: string };
       if (data.erro) return;
-
       form.setValue("cep", formatCep(cep), { shouldDirty: true });
       if (data.logradouro) form.setValue("endereco", data.logradouro.toUpperCase(), { shouldDirty: true });
       if (data.bairro) form.setValue("bairro", data.bairro.toUpperCase(), { shouldDirty: true });
