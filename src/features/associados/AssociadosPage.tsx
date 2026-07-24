@@ -21,6 +21,50 @@ const emptyDependenteForm: AssociadoDependenteInsert = {
   obs           : ""
 };
 
+const estadoCivilOptions = ["CASADO(A)", "SOLTEIRO(A)", "VIUVO(A)", "DIVORCIADO(A)", "AMASIADO(A)", "OUTROS"];
+
+function onlyDigits(value: string | null | undefined) {
+  return value?.replace(/\D/g, "") ?? "";
+}
+
+function formatDateBr(value: string | null | undefined) {
+  if (!value) return "";
+  const digits = onlyDigits(value).slice(0, 8);
+  if (/^\d{4}-\d{2}-\d{2}/.test(value)) {
+    const [year, month, day] = value.slice(0, 10).split("-");
+    return `${day}/${month}/${year}`;
+  }
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+}
+
+function parseDateBr(value: string | null | undefined) {
+  const digits = onlyDigits(value);
+  if (digits.length !== 8) return value ?? "";
+  return `${digits.slice(4, 8)}-${digits.slice(2, 4)}-${digits.slice(0, 2)}`;
+}
+
+function formatCpf(value: string | null | undefined) {
+  const digits = onlyDigits(value).slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+}
+
+function formatTelefone(value: string | null | undefined) {
+  const digits = onlyDigits(value).slice(0, 11);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+}
+
+function displayValue(value: string | null | undefined) {
+  return value?.trim() ? value : "•";
+}
+
 export function AssociadosPage() {
   const [search, setSearch]         = useState("");
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -108,22 +152,23 @@ function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }
     setForm({
       id            : selected.id,
       associado_id  : selected.associado_id,
-      dt_nascimento : selected.dt_nascimento,
+      dt_nascimento : formatDateBr(selected.dt_nascimento),
       nm_dependente : selected.nm_dependente,
-      cpf           : selected.cpf ?? "",
+      cpf           : formatCpf(selected.cpf),
       sexo          : selected.sexo,
       estado_civil  : selected.estado_civil,
       parentesco    : selected.parentesco,
-      telefone      : selected.telefone ?? "",
+      telefone      : formatTelefone(selected.telefone),
       obs           : selected.obs ?? ""
     });
   }, [associadoId, selected]);
 
   const saveMutation = useMutation({
     mutationFn: saveDependente,
-    onSuccess: async (saved) => {
-      setSelectedDependenteId(saved.id);
+    onSuccess: async () => {
+      setSelectedDependenteId(null);
       setCreatingNew(false);
+      setForm(associadoId ? { ...emptyDependenteForm, associado_id: associadoId } : emptyDependenteForm);
       setMessage("Dependente salvo com sucesso.");
       await queryClient.invalidateQueries({ queryKey: ["associado-dependentes", associadoId] });
     },
@@ -160,7 +205,7 @@ function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }
     event.preventDefault();
     if (!associadoId) return;
     setMessage(null);
-    saveMutation.mutate({ ...form, associado_id: associadoId });
+    saveMutation.mutate({ ...form, associado_id: associadoId, dt_nascimento: parseDateBr(form.dt_nascimento) });
   }
 
   function handleDelete() {
@@ -194,9 +239,9 @@ function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }
               <tr key={item.id} onClick={() => handleSelect(item)}>
                 <td>{item.nm_dependente}</td>
                 <td>{item.parentesco}</td>
-                <td>{item.dt_nascimento}</td>
-                <td>{item.cpf ?? "-"}</td>
-                <td>{item.telefone ?? "-"}</td>
+                <td>{displayValue(formatDateBr(item.dt_nascimento))}</td>
+                <td>{displayValue(formatCpf(item.cpf))}</td>
+                <td>{displayValue(formatTelefone(item.telefone))}</td>
               </tr>
             ))}
           </tbody>
@@ -208,11 +253,11 @@ function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }
       {formOpen ? <form className="related-form" onSubmit={handleSubmit}>
         <div className="form-grid">
           <label className="field"><input value={form.nm_dependente} maxLength={50} onChange={(event) => setForm({ ...form, nm_dependente: event.target.value })} placeholder=" " required /><span>Nome dependente</span></label>
-          <label className="field"><input type="date" value={form.dt_nascimento} onChange={(event) => setForm({ ...form, dt_nascimento: event.target.value })} placeholder=" " required /><span>Nascimento</span></label>
+          <label className="field"><input value={form.dt_nascimento} maxLength={10} onChange={(event) => setForm({ ...form, dt_nascimento: formatDateBr(event.target.value) })} placeholder=" " required /><span>Nascimento</span></label>
         </div>
 
         <div className="form-grid compact">
-          <label className="field"><input value={form.cpf ?? ""} maxLength={11} onChange={(event) => setForm({ ...form, cpf: event.target.value })} placeholder=" " /><span>CPF</span></label>
+          <label className="field"><input value={form.cpf ?? ""} maxLength={14} onChange={(event) => setForm({ ...form, cpf: formatCpf(event.target.value) })} placeholder=" " /><span>CPF</span></label>
           <label className="field">
             <select value={form.sexo} onChange={(event) => setForm({ ...form, sexo: event.target.value })}>
               <option value="M">Masculino</option>
@@ -220,11 +265,17 @@ function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }
             </select>
             <span>Sexo</span>
           </label>
-          <label className="field"><input value={form.telefone ?? ""} maxLength={11} onChange={(event) => setForm({ ...form, telefone: event.target.value })} placeholder=" " /><span>Telefone</span></label>
+          <label className="field"><input value={form.telefone ?? ""} maxLength={15} onChange={(event) => setForm({ ...form, telefone: formatTelefone(event.target.value) })} placeholder=" " /><span>Telefone</span></label>
         </div>
 
         <div className="form-grid">
-          <label className="field"><input value={form.estado_civil} maxLength={15} onChange={(event) => setForm({ ...form, estado_civil: event.target.value })} placeholder=" " required /><span>Estado civil</span></label>
+          <label className="field">
+            <select value={form.estado_civil} onChange={(event) => setForm({ ...form, estado_civil: event.target.value })} required>
+              <option value="">Selecione</option>
+              {estadoCivilOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+            </select>
+            <span>Estado civil</span>
+          </label>
           <label className="field"><input value={form.parentesco} maxLength={15} onChange={(event) => setForm({ ...form, parentesco: event.target.value })} placeholder=" " required /><span>Parentesco</span></label>
         </div>
 
