@@ -88,6 +88,7 @@ export function ContribuicaoPage() {
 
   function handleDelete() {
     if (!form.id) return;
+    if (!window.confirm("Deseja excluir esta contribuição?")) return;
     deleteMutation.mutate(form.id);
   }
 

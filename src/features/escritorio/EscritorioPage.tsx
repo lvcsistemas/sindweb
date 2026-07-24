@@ -128,6 +128,7 @@ export function EscritorioPage() {
 
   function handleDelete() {
     if (!form.id) return;
+    if (!window.confirm("Deseja excluir este escritório?")) return;
     deleteMutation.mutate(form.id);
   }
 

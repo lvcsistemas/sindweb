@@ -223,6 +223,7 @@ function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }
 
   function handleDelete() {
     if (!form.id) return;
+    if (!window.confirm("Deseja excluir este dependente?")) return;
     deleteMutation.mutate(form.id);
   }
 

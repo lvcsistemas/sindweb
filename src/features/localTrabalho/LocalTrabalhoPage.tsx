@@ -104,6 +104,7 @@ export function LocalTrabalhoPage() {
 
   function handleDelete() {
     if (!form.id) return;
+    if (!window.confirm("Deseja excluir este local de trabalho?")) return;
     deleteMutation.mutate(form.id);
   }
 

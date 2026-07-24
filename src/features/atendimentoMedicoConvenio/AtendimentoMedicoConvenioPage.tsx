@@ -110,6 +110,7 @@ export function AtendimentoMedicoConvenioPage() {
 
   function handleDelete() {
     if (!form.id) return;
+    if (!window.confirm("Deseja excluir este convênio?")) return;
     deleteMutation.mutate(form.id);
   }
 

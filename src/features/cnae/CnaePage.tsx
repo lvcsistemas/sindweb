@@ -82,6 +82,7 @@ export function CnaePage() {
 
   function handleDelete() {
     if (!form.id) return;
+    if (!window.confirm("Deseja excluir este CNAE?")) return;
     deleteMutation.mutate(form.id);
   }
 
