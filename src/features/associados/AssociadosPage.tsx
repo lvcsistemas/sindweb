@@ -269,6 +269,10 @@ function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }
         <div className="form-grid">
           <label className="field"><input value={form.nm_dependente} maxLength={50} onChange={(event) => setForm({ ...form, nm_dependente: event.target.value })} placeholder=" " required /><span>Nome dependente</span></label>
           <label className="field"><input value={form.dt_nascimento} maxLength={10} onChange={(event) => setForm({ ...form, dt_nascimento: formatDateBr(event.target.value) })} placeholder=" " required /><span>Nascimento</span></label>
+          <label className="field"><input value={form.cpf ?? ""} maxLength={14} onChange={(event) => setForm({ ...form, cpf: formatCpf(event.target.value) })} placeholder=" " /><span>CPF</span></label>
+        </div>
+
+        <div className="form-grid">
           <label className="field">
             <select value={form.estado_civil} onChange={(event) => setForm({ ...form, estado_civil: event.target.value })} required>
               <option value="">Selecione</option>
@@ -280,7 +284,6 @@ function AssociadoDependentesTab({ associadoId }: { associadoId: number | null }
         </div>
 
         <div className="form-grid compact">
-          <label className="field"><input value={form.cpf ?? ""} maxLength={14} onChange={(event) => setForm({ ...form, cpf: formatCpf(event.target.value) })} placeholder=" " /><span>CPF</span></label>
           <label className="field">
             <select value={form.sexo} onChange={(event) => setForm({ ...form, sexo: event.target.value })}>
               <option value="M">Masculino</option>
