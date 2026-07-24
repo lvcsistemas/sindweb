@@ -2,10 +2,10 @@ import { useEffect, useMemo, useState }           from "react";
 import { useMutation, useQuery, useQueryClient }  from "@tanstack/react-query";
 import { useForm }                                from "react-hook-form";
 import { zodResolver }                            from "@hookform/resolvers/zod";
-import { Minus, Plus, Save, Upload }              from "lucide-react";
+import { Camera, Minus, Plus, Save, UserRound }   from "lucide-react";
 import type { Associado }                         from "../../types/database";
 import { associadoSchema, type AssociadoFormValues } from "./associadosSchema";
-import { getEmpresaOption, listAuxiliaresOptions, listEmpresas, listLocaisTrabalhoOptions, saveAssociado, uploadAssociadoFoto } from "./associadosApi";
+import { getEmpresaOption, getFotoUrl, listAuxiliaresOptions, listEmpresas, listLocaisTrabalhoOptions, saveAssociado, uploadAssociadoFoto } from "./associadosApi";
 
 const defaultValues: AssociadoFormValues = {
   ativo: true,
@@ -168,7 +168,6 @@ function toValues(associado: Associado | null): AssociadoFormValues {
 
 export function AssociadoForm({ associado, onSaved }: { associado: Associado | null; onSaved: (id: number) => void }) {
   const queryClient = useQueryClient();
-  const [savedId, setSavedId] = useState<number | null>(associado?.id ?? null);
   const [openCards, setOpenCards] = useState<Record<DetalheCard, boolean>>({
     Residência    : false,
     Contatos      : false,
@@ -176,6 +175,8 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
     Classe        : false
   });
   const [empresaSearch, setEmpresaSearch] = useState("");
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const { data: empresas = [] }         = useQuery({ queryKey: ["empresas", empresaSearch], queryFn: () => listEmpresas(empresaSearch) });
   const { data: situacoes = [] }        = useQuery({ queryKey: ["auxiliares", "situacao"], queryFn: () => listAuxiliaresOptions("situacao") });
   const { data: locaisTrabalho = [] }   = useQuery({ queryKey: ["locais-trabalho"], queryFn: listLocaisTrabalhoOptions });
@@ -199,8 +200,19 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
 
   useEffect(() => {
     form.reset(toValues(associado));
-    setSavedId(associado?.id ?? null);
+    setPhotoFile(null);
   }, [associado, form]);
+
+  useEffect(() => {
+    if (!photoFile) {
+      setPhotoPreview(getFotoUrl(associado?.foto_path ?? null));
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(photoFile);
+    setPhotoPreview(previewUrl);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [associado?.foto_path, photoFile]);
 
   useEffect(() => {
     if (isNew && gerarMatricula) {
@@ -209,20 +221,18 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
   }, [form, gerarMatricula, isNew]);
 
   const saveMutation = useMutation({
-    mutationFn: saveAssociado,
+    mutationFn: async (values: AssociadoFormValues) => {
+      const id = await saveAssociado(values);
+      if (photoFile) {
+        await uploadAssociadoFoto(id, photoFile);
+      }
+      return id;
+    },
     onSuccess: async (id) => {
-      setSavedId(id);
+      setPhotoFile(null);
       await queryClient.invalidateQueries({ queryKey: ["associados"] });
       await queryClient.invalidateQueries({ queryKey: ["associado", id] });
       onSaved(id);
-    }
-  });
-
-  const photoMutation = useMutation({
-    mutationFn: ({ id, file }: { id: number; file: File }) => uploadAssociadoFoto(id, file),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["associados"] });
-      if (savedId) await queryClient.invalidateQueries({ queryKey: ["associado", savedId] });
     }
   });
 
@@ -273,6 +283,13 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
       <div className="form-grid">
         <label className="field"><input {...form.register("nome")} placeholder=" " /><span>Nome do Associado</span></label>
         <label className="field"><input name={cpfField.name} ref={cpfField.ref} value={cpfValue ?? ""} maxLength={14} onBlur={cpfField.onBlur} onChange={(event) => form.setValue("cpf", formatCpf(event.target.value), { shouldDirty: true })} placeholder=" " /><span>CPF</span></label>
+      </div>
+      <div className="photo-field">
+        <div className="avatar large">{photoPreview ? <img src={photoPreview} alt="" /> : <UserRound size={30} />}</div>
+        <label className="secondary-button">
+          <Camera size={16} /> Foto
+          <input type="file" accept="image/*" onChange={(event) => setPhotoFile(event.target.files?.[0] ?? null)} />
+        </label>
       </div>
       <label className="field"><textarea rows={3} {...form.register("observacao")} placeholder=" " /><span>Observação</span></label>
       <div className="detail-card-stack">
@@ -410,9 +427,7 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
       </div>
       {errorList.length ? <div className="form-error">{errorList.join(" ")}</div> : null}
       {saveMutation.error ? <div className="form-error">{saveMutation.error.message}</div> : null}
-      {photoMutation.error ? <div className="form-error">{photoMutation.error.message}</div> : null}
       <div className="form-actions">
-        <label className={`secondary-button ${!savedId ? "disabled" : ""}`}><Upload size={16} /> Foto<input type="file" accept="image/*" disabled={!savedId} onChange={(event) => { const file = event.target.files?.[0]; if (file && savedId) photoMutation.mutate({ id: savedId, file }); }} /></label>
         <button type="submit" disabled={saveMutation.isPending}><Save size={16} /> {saveMutation.isPending ? "Salvando..." : "Salvar"}</button>
       </div>
     </form>

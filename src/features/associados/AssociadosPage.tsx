@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState }           from "react";
 import { useMutation, useQuery, useQueryClient }    from "@tanstack/react-query";
-import { Plus, Save, Search, Trash2 }               from "lucide-react";
+import { Plus, Save, Search, Trash2, UserRound }    from "lucide-react";
 import type { AssociadoDependente, AssociadoDependenteInsert, AssociadoLista } from "../../types/database";
 import { Breadcrumb }                               from "../../shared/Breadcrumb";
 import { deleteDependente, listDependentesByAssociado, saveDependente } from "../dependentes/dependentesApi";
@@ -245,7 +245,7 @@ function AssociadoRow({ associado, selected, onClick }: { associado: AssociadoLi
   const fotoUrl = getFotoUrl(associado.foto_path);
   return (
     <button className={`record-row ${selected ? "selected" : ""}`} onClick={onClick}>
-      <div className="avatar">{fotoUrl ? <img src={fotoUrl} alt="" /> : associado.nome.slice(0, 1)}</div>
+      <div className="avatar">{fotoUrl ? <img src={fotoUrl} alt="" /> : <UserRound size={19} />}</div>
       <div>
         <strong>{associado.nome}</strong>
         <span>{associado.matricula ?? "Sem matrícula"} · {associado.empresa_nome ?? "Sem empresa"}</span>
