@@ -86,6 +86,27 @@ function formatTelefone(value: string) {
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 }
 
+function formatCpf(value: string) {
+  const digits = onlyDigits(value).slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+}
+
+function formatCeiCnpj(value: string | null) {
+  const digits = onlyDigits(value);
+  if (!digits) return "";
+  if (digits.length === 14) {
+    return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8, 12)}-${digits.slice(12)}`;
+  }
+  return digits;
+}
+
+function todayInputDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
 function toValues(associado: Associado | null): AssociadoFormValues {
   if (!associado) return defaultValues;
   return {
@@ -93,7 +114,7 @@ function toValues(associado: Associado | null): AssociadoFormValues {
     ativo             : associado.ativo,
     gerar_matricula   : false,
     nome              : associado.nome,
-    cpf               : associado.cpf,
+    cpf               : formatCpf(associado.cpf),
     matricula         : associado.matricula ?? "",
     matricula_empresa : associado.matricula_empresa ?? "",
     empresa_id        : associado.empresa_id,
@@ -207,6 +228,18 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
 
   const errorList = useMemo(() => Object.values(form.formState.errors).map((error) => error.message).filter(Boolean), [form.formState.errors]);
   const cepField = form.register("cep");
+  const cpfField = form.register("cpf");
+  const cpfValue = form.watch("cpf");
+
+  function handleSubmit(values: AssociadoFormValues) {
+    const nextValues = { ...values };
+    const situacaoChanged = Number(values.situacao_id ?? 0) !== Number(associado?.situacao_id ?? 0);
+    if (!isNew && associado && situacaoChanged && values.data_situacao === toInputDate(associado.data_situacao)) {
+      nextValues.data_situacao = todayInputDate();
+      form.setValue("data_situacao", nextValues.data_situacao, { shouldDirty: true });
+    }
+    saveMutation.mutate(nextValues);
+  }
 
   async function handleCepBlur() {
     const cep = onlyDigits(form.getValues("cep"));
@@ -228,7 +261,7 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
   }
 
   return (
-    <form className="form-panel" onSubmit={form.handleSubmit((values) => saveMutation.mutate(values))}>
+    <form className="form-panel" onSubmit={form.handleSubmit(handleSubmit)}>
       <div className={`form-grid associado-status-grid ${isNew ? "" : "existing"}`}>
         <label className="field"><input {...form.register("matricula")} placeholder=" " disabled={isNew && gerarMatricula} /><span>Matrícula</span></label>
         {isNew ? <label className="check"><input type="checkbox" {...form.register("gerar_matricula")} /> Gerar Matricula?</label> : null}
@@ -239,7 +272,7 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
       </div>
       <div className="form-grid">
         <label className="field"><input {...form.register("nome")} placeholder=" " /><span>Nome do Associado</span></label>
-        <label className="field"><input {...form.register("cpf")} placeholder=" " /><span>CPF</span></label>
+        <label className="field"><input name={cpfField.name} ref={cpfField.ref} value={cpfValue ?? ""} maxLength={14} onBlur={cpfField.onBlur} onChange={(event) => form.setValue("cpf", formatCpf(event.target.value), { shouldDirty: true })} placeholder=" " /><span>CPF</span></label>
       </div>
       <label className="field"><textarea rows={3} {...form.register("observacao")} placeholder=" " /><span>Observação</span></label>
       <div className="detail-card-stack">
@@ -334,7 +367,7 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
                 {card === "Classe" ? <>
                   <div className="form-grid classe-empresa-grid">
                     <label className="field"><input value={empresaSearch} onChange={(event) => setEmpresaSearch(event.target.value)} placeholder=" " /><span>Buscar Empresa</span></label>
-                    <label className="field"><select {...form.register("empresa_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{empresaOptions.map((empresa) => <option key={empresa.id} value={empresa.id}>{empresa.nome_fantasia}{empresa.cnpj ? ` - ${empresa.cnpj}` : ""}</option>)}</select><span>Empresa</span></label>
+                    <label className="field"><select {...form.register("empresa_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{empresaOptions.map((empresa) => <option key={empresa.id} value={empresa.id}>{empresa.nome_fantasia} - {empresa.id}{empresa.cnpj ? ` - ${formatCeiCnpj(empresa.cnpj)}` : ""}</option>)}</select><span>Empresa</span></label>
                   </div>
                   <div className="form-grid classe-matricula-grid">
                     <label className="field"><input {...form.register("matricula_empresa")} placeholder=" " /><span>Matrícula Empresa</span></label>

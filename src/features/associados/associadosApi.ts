@@ -64,7 +64,11 @@ export async function listEmpresas(search = "") {
 
   const term = search.trim();
   if (term) {
-    query = query.or(`nm_fantasia.ilike.%${term}%,razao_social.ilike.%${term}%,cei_cnpj.ilike.%${term}%`);
+    const filters = [`nm_fantasia.ilike.%${term}%`, `razao_social.ilike.%${term}%`, `cei_cnpj.ilike.%${term}%`];
+    if (/^\d+$/.test(term)) {
+      filters.unshift(`id.eq.${term}`);
+    }
+    query = query.or(filters.join(","));
   }
 
   const { data, error } = await query;
