@@ -37,7 +37,6 @@ export type Associado = {
   escolaridade_id: number | null;
   funcao_id: number | null;
   situacao_id: number | null;
-  ativo: boolean;
   matricula: string | null;
   matricula_empresa: string | null;
   nome: string;
@@ -96,12 +95,14 @@ export type AssociadoInsert = Omit<Associado, "id" | "data_cadastro" | "created_
   data_cadastro?: string;
 };
 
-export type AssociadoLista = Pick<Associado, "id" | "ativo" | "matricula" | "nome" | "cpf" | "tel1" | "email" | "foto_path"> & {
+export type AssociadoLista = Pick<Associado, "id" | "empresa_id" | "matricula" | "nome" | "cpf" | "tel1" | "email" | "foto_path"> & {
   empresa_nome: string | null;
   situacao_nome: string | null;
 };
 
-export type EmpresaAssociadoLista = Pick<Associado, "id" | "ativo" | "matricula" | "nome" | "cpf" | "tel1" | "email">;
+export type EmpresaAssociadoLista = Pick<Associado, "id" | "matricula" | "nome" | "cpf" | "tel1" | "email"> & {
+  situacao_nome: string | null;
+};
 
 export type AssociadoOption = Pick<Associado, "id" | "nome" | "cpf">;
 

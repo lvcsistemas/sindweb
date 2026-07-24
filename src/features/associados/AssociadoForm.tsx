@@ -8,7 +8,6 @@ import { associadoSchema, type AssociadoFormValues } from "./associadosSchema";
 import { getEmpresaOption, getFotoUrl, listAuxiliaresOptions, listEmpresas, listLocaisTrabalhoOptions, saveAssociado, uploadAssociadoFoto } from "./associadosApi";
 
 const defaultValues: AssociadoFormValues = {
-  ativo: true,
   gerar_matricula: false,
   nome: "",
   cpf: "",
@@ -111,7 +110,6 @@ function toValues(associado: Associado | null): AssociadoFormValues {
   if (!associado) return defaultValues;
   return {
     id                : associado.id,
-    ativo             : associado.ativo,
     gerar_matricula   : false,
     nome              : associado.nome,
     cpf               : formatCpf(associado.cpf),

@@ -123,8 +123,8 @@ export async function deleteEmpresaCadastro(id: number) {
 
 export async function listEmpresaAssociados(empresaId: number) {
   const { data, error } = await supabase
-    .from("associados")
-    .select("id, ativo, matricula, nome, cpf, tel1, email")
+    .from("associados_lista")
+    .select("id, matricula, nome, cpf, tel1, email, situacao_nome")
     .eq("empresa_id", empresaId)
     .order("nome", { ascending: true });
 

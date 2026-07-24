@@ -697,7 +697,7 @@ export function EmpresaPage() {
                       <th>CPF</th>
                       <th>Telefone</th>
                       <th>E-mail</th>
-                      <th>Status</th>
+                      <th>Situação</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -708,7 +708,7 @@ export function EmpresaPage() {
                         <td>{formatCpf(associado.cpf)}</td>
                         <td>{associado.tel1 ?? "-"}</td>
                         <td>{associado.email ?? "-"}</td>
-                        <td className={associado.ativo ? "status-ok" : "status-muted"}>{associado.ativo ? "Ativo" : "Inativo"}</td>
+                        <td className={associado.situacao_nome ? "status-ok" : "status-muted"}>{associado.situacao_nome ?? "-"}</td>
                       </tr>
                     ))}
                   </tbody>
