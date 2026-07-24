@@ -234,6 +234,8 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
       <div className={`form-grid associado-status-grid ${isNew ? "" : "existing"}`}>
         <label className="field"><input {...form.register("matricula")} placeholder=" " disabled={isNew && gerarMatricula} /><span>Matrícula</span></label>
         {isNew ? <label className="check"><input type="checkbox" {...form.register("gerar_matricula")} /> Gerar Matricula?</label> : null}
+      </div>
+      <div className="form-grid">
         <label className="field"><select {...form.register("situacao_id", { setValueAs: (value) => value ? Number(value) : null })}><option value="">Selecione</option>{situacoes.map((item) => <option key={item.id} value={item.id}>{item.nome}</option>)}</select><span>Situação</span></label>
         <label className="field"><input type="date" {...form.register("data_situacao")} placeholder=" " /><span>Data Situação</span></label>
       </div>
@@ -241,7 +243,6 @@ export function AssociadoForm({ associado, onSaved }: { associado: Associado | n
         <label className="field"><input {...form.register("nome")} placeholder=" " /><span>Nome do Associado</span></label>
         <label className="field"><input {...form.register("cpf")} placeholder=" " /><span>CPF</span></label>
       </div>
-      
       <label className="field"><textarea rows={3} {...form.register("observacao")} placeholder=" " /><span>Observação</span></label>
       <div className="detail-card-stack">
         {detalheCards.map((card) => {

@@ -7,7 +7,7 @@ import { deleteDependente, listDependentesByAssociado, saveDependente } from "..
 import { getAssociado, getFotoUrl, listAssociados } from "./associadosApi";
 import { AssociadoForm } from "./AssociadoForm";
 
-type AssociadoTab = "dados" | "dependentes";
+type AssociadoTab = "dados" | "dependentes" | "contruibuicoes" | "financeiro";
 
 const emptyDependenteForm: AssociadoDependenteInsert = {
   associado_id: 0,
