@@ -553,7 +553,7 @@ export function EmpresaPage() {
             <div className="tabs" role="tablist" aria-label="Empresa">
               <button type="button" className={activeTab === "dados" ? "active" : ""} onClick={() => setActiveTab("dados")}>Dados</button>
               <button type="button" className={activeTab === "associados" ? "active" : ""} onClick={() => setActiveTab("associados")}>Associados({empresaAssociados.length})</button>
-              <button type="button" className={activeTab === "contribuicoes" ? "active" : ""} onClick={() => setActiveTab("contribuicoes")}>Contribuições</button>
+              <button type="button" className={activeTab === "contribuicoes" ? "active" : ""} onClick={() => setActiveTab("contribuicoes")}>Contribuições({empresaContribuicoes.length})</button>
               <button type="button" className={activeTab === "financeiro" ? "active" : ""} onClick={() => setActiveTab("financeiro")}>Financeiro</button>
             </div>
 

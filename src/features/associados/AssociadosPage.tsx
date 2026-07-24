@@ -95,8 +95,12 @@ export function AssociadosPage() {
   const [detailOpen, setDetailOpen] = useState(false);
   const associadosQuery             = useQuery({ queryKey: ["associados", search], queryFn: () => listAssociados(search) });
   const associadoQuery              = useQuery({ queryKey: ["associado", selectedId], queryFn: () => getAssociado(selectedId!), enabled: Boolean(selectedId) });
+  const dependentesCountQuery       = useQuery({ queryKey: ["associado-dependentes", selectedId], queryFn: () => listDependentesByAssociado(selectedId ?? 0), enabled: Boolean(selectedId) });
+  const contribuicoesCountQuery     = useQuery({ queryKey: ["associado-contribuicoes", selectedId], queryFn: () => listAssociadoContribuicoes(selectedId ?? 0), enabled: Boolean(selectedId) });
 
   const associados = associadosQuery.data ?? [];
+  const dependentesCount = dependentesCountQuery.data?.length ?? 0;
+  const contribuicoesCount = contribuicoesCountQuery.data?.length ?? 0;
 
   return (
     <main className="module-page">
@@ -126,8 +130,8 @@ export function AssociadosPage() {
             <div className="form-panel detail-tabs">
               <div className="tabs" role="tablist" aria-label="Associado">
                 <button type="button" className={activeTab === "dados"          ? "active" : ""} onClick={() => setActiveTab("dados")}>Dados</button>
-                <button type="button" className={activeTab === "dependentes"    ? "active" : ""} onClick={() => setActiveTab("dependentes")}>Dependentes</button>
-                <button type="button" className={activeTab === "contribuicoes"  ? "active" : ""} onClick={() => setActiveTab("contribuicoes")}>Contribuições</button>
+                <button type="button" className={activeTab === "dependentes"    ? "active" : ""} onClick={() => setActiveTab("dependentes")}>Dependentes({dependentesCount})</button>
+                <button type="button" className={activeTab === "contribuicoes"  ? "active" : ""} onClick={() => setActiveTab("contribuicoes")}>Contribuições({contribuicoesCount})</button>
                 <button type="button" className={activeTab === "financeiro"     ? "active" : ""} onClick={() => setActiveTab("financeiro")}>Financeiro</button>
               </div>
             </div>
