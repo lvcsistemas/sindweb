@@ -29,6 +29,17 @@ export async function listAtendimentoMedicoEspecialidades(search: string) {
   return data as AtendimentoMedicoEspecialidade[];
 }
 
+export async function listAtendimentoMedicoEspecialidadesByTipo(tipo: string) {
+  const { data, error } = await supabaseUnsafe
+    .from("atendimento_medico_especialidades")
+    .select("*")
+    .eq("tipo", tipo)
+    .order("nm_especialidade", { ascending: true });
+
+  if (error) throw error;
+  return data as AtendimentoMedicoEspecialidade[];
+}
+
 export async function saveAtendimentoMedicoEspecialidade(values: AtendimentoMedicoEspecialidadeInsert) {
   const payload = {
     ...values,
