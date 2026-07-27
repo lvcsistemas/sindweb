@@ -259,7 +259,7 @@ export function AtendimentoMedicoPage() {
           </label>
         </div>
 
-        <label className="field"><textarea rows={3} value={form.obs ?? ""} onChange={(event) => setForm({ ...form, obs: event.target.value })} placeholder=" " /><span>Observacao</span></label>
+        <label className="field"><textarea rows={3} value={form.obs ?? ""} onChange={(event) => setForm({ ...form, obs: event.target.value })} placeholder=" " /><span>Observação</span></label>
         {message ? <div className={saveMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
 
         <div className="form-actions">
@@ -275,8 +275,8 @@ export function AtendimentoMedicoPage() {
       <Breadcrumb items={[{ label: "Atendimentos" }, { label: "Medico" }]} />
       <section className="module-header">
         <div>
-          <h1>Atendimento Medico</h1>
-          <p>Pesquisa e gestao de atendimentos.</p>
+          <h1>Atendimento Médico</h1>
+          <p>Pesquisa e gestão de atendimentos.</p>
         </div>
       </section>
 
@@ -320,7 +320,7 @@ export function AtendimentoMedicoPage() {
               <tr>
                 <th>#</th>
                 <th>Agendado</th>
-                <th>Convenio</th>
+                <th>Convênio</th>
                 <th>Associado</th>
                 <th>Cadastrado</th>
                 <th>Alterado</th>
