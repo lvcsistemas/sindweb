@@ -297,13 +297,13 @@ export function AtendimentoMedicoPage() {
       <Breadcrumb items={[{ label: "Atendimentos" }, { label: "Medico" }]} />
       <section className="module-header">
         <div>
-          <h1>Atendimento Medico</h1>
-          <p>Pesquisa e gestao de atendimentos medicos.</p>
+          <h1>Atendimento Médico</h1>
+          <p>Pesquisa e gestão de atendimentos.</p>
         </div>
       </section>
 
       <div className="toolbar-right">
-        <button type="button" onClick={handleNew}><Plus size={16} /> Novo atendimento</button>
+        <button type="button" onClick={handleNew}><Plus size={16} /> Novo Atendimento</button>
       </div>
 
       {atendimentoForm}
@@ -342,7 +342,7 @@ export function AtendimentoMedicoPage() {
               <tr>
                 <th>#</th>
                 <th>Agendado</th>
-                <th>Convenio</th>
+                <th>Convênio</th>
                 <th>Associado</th>
                 <th>Cadastrado</th>
                 <th>Alterado</th>
