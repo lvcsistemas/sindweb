@@ -1,13 +1,13 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Save, Search, Trash2 } from "lucide-react";
-import { Breadcrumb } from "../../shared/Breadcrumb";
-import type { AtendimentoMedicoInsert, AtendimentoMedicoLista } from "../../types/database";
-import { listAssociados } from "../associados/associadosApi";
-import { listAtendimentoMedicoConvenios } from "../atendimentoMedicoConvenio/atendimentoMedicoConvenioApi";
-import { listAtendimentoMedicoEspecialidadesByTipo } from "../atendimentoMedicoEspecialidade/atendimentoMedicoEspecialidadeApi";
-import { listDependentesByAssociado } from "../dependentes/dependentesApi";
-import { listUsuarios } from "../usuarios/usuariosApi";
+import { FormEvent, useEffect, useMemo, useState }                from "react";
+import { useMutation, useQuery, useQueryClient }                  from "@tanstack/react-query";
+import { Plus, Save, Search, Trash2 }                             from "lucide-react";
+import { Breadcrumb }                                             from "../../shared/Breadcrumb";
+import type { AtendimentoMedicoInsert, AtendimentoMedicoLista }   from "../../types/database";
+import { listAssociados }                                         from "../associados/associadosApi";
+import { listAtendimentoMedicoConvenios }                         from "../atendimentoMedicoConvenio/atendimentoMedicoConvenioApi";
+import { listAtendimentoMedicoEspecialidadesByTipo }              from "../atendimentoMedicoEspecialidade/atendimentoMedicoEspecialidadeApi";
+import { listDependentesByAssociado }                             from "../dependentes/dependentesApi";
+import { listUsuarios }                                           from "../usuarios/usuariosApi";
 import { deleteAtendimentoMedico, listAtendimentosMedicos, saveAtendimentoMedico, type AtendimentoMedicoFilters, type AtendimentoMedicoSearchType } from "./atendimentoMedicoApi";
 
 const pesquisaOptions: Array<{ value: AtendimentoMedicoSearchType; label: string }> = [
@@ -112,14 +112,14 @@ function newEmptyForm(): AtendimentoMedicoInsert {
 }
 
 export function AtendimentoMedicoPage() {
-  const queryClient                     = useQueryClient();
-  const [filters, setFilters]           = useState<AtendimentoMedicoFilters>(emptyFilters);
-  const [draftFilters, setDraftFilters] = useState<AtendimentoMedicoFilters>(emptyFilters);
-  const [selectedId, setSelectedId]     = useState<number | null>(null);
-  const [formOpen, setFormOpen]         = useState(false);
-  const [form, setForm]                 = useState<AtendimentoMedicoInsert>(newEmptyForm);
+  const queryClient                           = useQueryClient();
+  const [filters, setFilters]                 = useState<AtendimentoMedicoFilters>(emptyFilters);
+  const [draftFilters, setDraftFilters]       = useState<AtendimentoMedicoFilters>(emptyFilters);
+  const [selectedId, setSelectedId]           = useState<number | null>(null);
+  const [formOpen, setFormOpen]               = useState(false);
+  const [form, setForm]                       = useState<AtendimentoMedicoInsert>(newEmptyForm);
   const [associadoSearch, setAssociadoSearch] = useState("");
-  const [message, setMessage]           = useState<string | null>(null);
+  const [message, setMessage]                 = useState<string | null>(null);
 
   const atendimentosQuery   = useQuery({ queryKey: ["atendimento-medico", filters], queryFn: () => listAtendimentosMedicos(filters) });
   const conveniosQuery      = useQuery({ queryKey: ["atendimento-medico-convenios", ""], queryFn: () => listAtendimentoMedicoConvenios("") });
@@ -177,7 +177,7 @@ export function AtendimentoMedicoPage() {
       setMessage("Atendimento salvo com sucesso.");
       await queryClient.invalidateQueries({ queryKey: ["atendimento-medico"] });
     },
-    onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel salvar o atendimento.")
+    onError: (error) => setMessage(error instanceof Error ? error.message : "Não foi possível salvar o atendimento.")
   });
 
   const deleteMutation = useMutation({
@@ -189,7 +189,7 @@ export function AtendimentoMedicoPage() {
       setMessage("Atendimento excluido com sucesso.");
       await queryClient.invalidateQueries({ queryKey: ["atendimento-medico"] });
     },
-    onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel excluir o atendimento.")
+    onError: (error) => setMessage(error instanceof Error ? error.message : "Não foi possível excluir o atendimento.")
   });
 
   const totalLabel = useMemo(() => `${atendimentos.length} registro${atendimentos.length === 1 ? "" : "s"}`, [atendimentos.length]);
