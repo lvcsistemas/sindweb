@@ -6,23 +6,49 @@ import type { AtendimentoMedicoInsert, AtendimentoMedicoLista } from "../../type
 import { listAssociados } from "../associados/associadosApi";
 import { listAtendimentoMedicoConvenios } from "../atendimentoMedicoConvenio/atendimentoMedicoConvenioApi";
 import { listDependentesByAssociado } from "../dependentes/dependentesApi";
-import { deleteAtendimentoMedico, listAtendimentosMedicos, saveAtendimentoMedico } from "./atendimentoMedicoApi";
+import { listUsuarios } from "../usuarios/usuariosApi";
+import { deleteAtendimentoMedico, listAtendimentosMedicos, saveAtendimentoMedico, type AtendimentoMedicoFilters, type AtendimentoMedicoSearchType } from "./atendimentoMedicoApi";
 
-const emptyForm: AtendimentoMedicoInsert = {
-  created_by: 0,
-  updated_by: 0,
-  convenio_id: 0,
-  associado_id: 0,
-  dependente_id: 0,
-  qtd: 0,
-  dt_agendado: new Date().toISOString().slice(0, 16),
-  situacao: "AGENDADO",
-  tipo: "",
-  obs: ""
-};
+const pesquisaOptions: Array<{ value: AtendimentoMedicoSearchType; label: string }> = [
+  { value: "T", label: "TODOS" },
+  { value: "CADASTRO", label: "DATA: CADASTRO" },
+  { value: "ID ATENDIMENTO", label: "ID: ATENDIMENTO" },
+  { value: "ID ASSOCIADO", label: "ID: ASSOCIADO" },
+  { value: "ID CONVENIO", label: "ID: CONVÊNIO" },
+  { value: "ID DEPENDENTE", label: "ID: DEPENDENTE" },
+  { value: "NM ASSOCIADO", label: "NOME: ASSOCIADO" },
+  { value: "NM DEPENDENTE", label: "NOME: DEPENDENTE" },
+  { value: "NM CONVENIO", label: "NOME: CONVÊNIO" },
+  { value: "AGENDADO", label: "SITUAÇÃO: AGENDADO" },
+  { value: "ATENDIDO", label: "SITUAÇÃO: ATENDIDO" },
+  { value: "CANCELADO", label: "SITUAÇÃO: CANCELADO" },
+  { value: "AURICULOTERAPIA", label: "TIPO: AURICULOTERAPIA" },
+  { value: "CARDIOLOGIA", label: "TIPO: CARDIOLOGIA" },
+  { value: "CLINICO GERAL", label: "TIPO: CLINICO GERAL" },
+  { value: "CONSULTA", label: "TIPO: CONSULTA" },
+  { value: "EXAME", label: "TIPO: EXAME" },
+  { value: "EXAME DE SANGUE", label: "TIPO: EXAME DE SANGUE" },
+  { value: "FISIOTERAPIA", label: "TIPO: FISIOTERAPIA" },
+  { value: "FONOAUDIOLOGIA", label: "TIPO: FONOAUDIOLOGIA" },
+  { value: "MASSOTERAPIA", label: "TIPO: MASSOTERAPIA" },
+  { value: "ODONTOLOGIA", label: "TIPO: ODONTOLOGIA" },
+  { value: "PSICOLOGIA", label: "TIPO: PSICOLOGIA" }
+];
+
+const tipoOptions = ["AURICULOTERAPIA", "CARDIOLOGIA", "CLINICO GERAL", "CONSULTA", "EXAME", "EXAME DE SANGUE", "FISIOTERAPIA", "FONOAUDIOLOGIA", "MASSOTERAPIA", "ODONTOLOGIA", "PSICOLOGIA"];
+
+function todayAt(time: "start" | "end") {
+  const date = new Date();
+  date.setHours(time === "start" ? 0 : 23, time === "start" ? 0 : 59, 0, 0);
+  return toDateTimeLocal(date.toISOString());
+}
 
 function toDateTimeLocal(value: string | null | undefined) {
-  return value ? value.slice(0, 16) : new Date().toISOString().slice(0, 16);
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value.slice(0, 16);
+  const offsetMs = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
 }
 
 function formatDateTime(value: string | null | undefined) {
@@ -30,17 +56,44 @@ function formatDateTime(value: string | null | undefined) {
   return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
 }
 
+function emptyFilters(): AtendimentoMedicoFilters {
+  return {
+    pesquisa: "T",
+    inicio: todayAt("start"),
+    fim: todayAt("end"),
+    usuarioId: "TODOS",
+    valor: ""
+  };
+}
+
+const emptyForm: AtendimentoMedicoInsert = {
+  created_by: 0,
+  updated_by: 0,
+  created_by_profile_id: null,
+  updated_by_profile_id: null,
+  convenio_id: 0,
+  associado_id: 0,
+  dependente_id: 0,
+  qtd: 0,
+  dt_agendado: toDateTimeLocal(new Date().toISOString()),
+  situacao: "AGENDADO",
+  tipo: "CONSULTA",
+  obs: ""
+};
+
 export function AtendimentoMedicoPage() {
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState<AtendimentoMedicoFilters>(emptyFilters);
+  const [draftFilters, setDraftFilters] = useState<AtendimentoMedicoFilters>(emptyFilters);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [creatingNew, setCreatingNew] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
   const [form, setForm] = useState<AtendimentoMedicoInsert>(emptyForm);
   const [message, setMessage] = useState<string | null>(null);
 
-  const atendimentosQuery = useQuery({ queryKey: ["atendimento-medico", search], queryFn: () => listAtendimentosMedicos(search) });
+  const atendimentosQuery = useQuery({ queryKey: ["atendimento-medico", filters], queryFn: () => listAtendimentosMedicos(filters) });
   const conveniosQuery = useQuery({ queryKey: ["atendimento-medico-convenios", ""], queryFn: () => listAtendimentoMedicoConvenios("") });
   const associadosQuery = useQuery({ queryKey: ["associados", ""], queryFn: () => listAssociados("") });
+  const usuariosQuery = useQuery({ queryKey: ["usuarios"], queryFn: listUsuarios });
   const dependentesQuery = useQuery({
     queryKey: ["atendimento-medico-dependentes", form.associado_id],
     queryFn: () => listDependentesByAssociado(Number(form.associado_id)),
@@ -50,20 +103,18 @@ export function AtendimentoMedicoPage() {
   const atendimentos = atendimentosQuery.data ?? [];
   const convenios = conveniosQuery.data ?? [];
   const associados = associadosQuery.data ?? [];
+  const usuarios = usuariosQuery.data ?? [];
   const dependentes = dependentesQuery.data ?? [];
   const selected = atendimentos.find((item) => item.id === selectedId) ?? null;
-  const formOpen = creatingNew || Boolean(selectedId);
 
   useEffect(() => {
-    if (!selected) {
-      setForm(emptyForm);
-      return;
-    }
-
+    if (!selected) return;
     setForm({
       id: selected.id,
       created_by: selected.created_by,
       updated_by: selected.updated_by,
+      created_by_profile_id: selected.created_by_profile_id,
+      updated_by_profile_id: selected.updated_by_profile_id,
       convenio_id: selected.convenio_id,
       associado_id: selected.associado_id,
       dependente_id: selected.dependente_id,
@@ -73,13 +124,14 @@ export function AtendimentoMedicoPage() {
       tipo: selected.tipo,
       obs: selected.obs ?? ""
     });
+    setFormOpen(true);
   }, [selected]);
 
   const saveMutation = useMutation({
     mutationFn: saveAtendimentoMedico,
     onSuccess: async (saved) => {
       setSelectedId(saved.id);
-      setCreatingNew(false);
+      setFormOpen(false);
       setMessage("Atendimento salvo com sucesso.");
       await queryClient.invalidateQueries({ queryKey: ["atendimento-medico"] });
     },
@@ -90,7 +142,7 @@ export function AtendimentoMedicoPage() {
     mutationFn: deleteAtendimentoMedico,
     onSuccess: async () => {
       setSelectedId(null);
-      setCreatingNew(false);
+      setFormOpen(false);
       setForm(emptyForm);
       setMessage("Atendimento excluido com sucesso.");
       await queryClient.invalidateQueries({ queryKey: ["atendimento-medico"] });
@@ -102,15 +154,19 @@ export function AtendimentoMedicoPage() {
 
   function handleNew() {
     setSelectedId(null);
-    setCreatingNew(true);
     setMessage(null);
-    setForm(emptyForm);
+    setForm({ ...emptyForm, dt_agendado: toDateTimeLocal(new Date().toISOString()) });
+    setFormOpen(true);
   }
 
   function handleSelect(item: AtendimentoMedicoLista) {
     setSelectedId(item.id);
-    setCreatingNew(false);
     setMessage(null);
+  }
+
+  function handleSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setFilters(draftFilters);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -121,7 +177,7 @@ export function AtendimentoMedicoPage() {
 
   function handleDelete() {
     if (!form.id) return;
-    if (!window.confirm("Deseja excluir este atendimento medico?")) return;
+    if (!window.confirm("Deseja excluir este atendimento médico?")) return;
     deleteMutation.mutate(form.id);
   }
 
@@ -131,83 +187,126 @@ export function AtendimentoMedicoPage() {
       <section className="module-header">
         <div>
           <h1>Atendimento Médico</h1>
-          <p>Agendamentos e atendimentos médicos de associados e dependentes.</p>
+          <p>Pesquisa e gestão de atendimentos médicos.</p>
         </div>
-        <button onClick={handleNew}><Plus size={16} /> Novo</button>
       </section>
 
-      <section className={`split-view ${formOpen ? "" : "list-only"}`}>
-        <div className="list-panel">
-          <label className="search-box"><Search size={16} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por tipo, situação ou observação" /></label>
-          <div className="list-summary">{totalLabel}</div>
-          <div className="record-list">
-            {atendimentosQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
-            {atendimentos.map((item) => (
-              <button key={item.id} className={`record-row simple ${item.id === selectedId ? "selected" : ""}`} onClick={() => handleSelect(item)}>
-                <div>
-                  <strong>{item.associado?.nome ?? "Sem associado"}</strong>
-                  <span>{formatDateTime(item.dt_agendado)} • {item.convenio?.nm_convenio ?? "Sem convênio"} • {item.situacao}</span>
-                </div>
-              </button>
-            ))}
-            {!atendimentosQuery.isLoading && atendimentos.length === 0 ? <div className="empty-state">Nenhum atendimento encontrado.</div> : null}
+      <section className="form-panel atendimento-search-panel">
+        <form className="atendimento-search-grid" onSubmit={handleSearch}>
+          <button type="button" onClick={handleNew}><Plus size={16} /> Novo atendimento</button>
+          <label className="field">
+            <select value={draftFilters.pesquisa} onChange={(event) => setDraftFilters({ ...draftFilters, pesquisa: event.target.value as AtendimentoMedicoSearchType })}>
+              {pesquisaOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+            </select>
+            <span>Pesquisar por</span>
+          </label>
+          <label className="field"><input type="datetime-local" value={draftFilters.inicio} onChange={(event) => setDraftFilters({ ...draftFilters, inicio: event.target.value })} placeholder=" " /><span>Inicial</span></label>
+          <label className="field"><input type="datetime-local" value={draftFilters.fim} onChange={(event) => setDraftFilters({ ...draftFilters, fim: event.target.value })} placeholder=" " /><span>Final</span></label>
+          <label className="field">
+            <select value={draftFilters.usuarioId} onChange={(event) => setDraftFilters({ ...draftFilters, usuarioId: event.target.value })}>
+              <option value="TODOS">TODOS</option>
+              {usuarios.map((usuario) => <option key={usuario.id} value={usuario.id}>{usuario.codinome || usuario.full_name || usuario.email}</option>)}
+            </select>
+            <span>Usuário</span>
+          </label>
+          <label className="field"><input value={draftFilters.valor} onChange={(event) => setDraftFilters({ ...draftFilters, valor: event.target.value })} placeholder=" " /><span>Valor procurado</span></label>
+          <button type="submit"><Search size={16} /> Pesquisar</button>
+        </form>
+      </section>
+
+      <section className="form-panel">
+        <div className="list-summary">{totalLabel}</div>
+        <div className="data-table-wrap">
+          <table className="data-table clickable-rows">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Agendado</th>
+                <th>Convênio</th>
+                <th>Associado</th>
+                <th>Dependente</th>
+                <th>Cadastrado</th>
+                <th>Alterado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {atendimentos.map((item) => (
+                <tr key={item.id} onClick={() => handleSelect(item)}>
+                  <td>{item.id}</td>
+                  <td>{formatDateTime(item.dt_agendado)}</td>
+                  <td>{item.nm_convenio ?? "-"}</td>
+                  <td>{item.nm_associado ?? "-"}</td>
+                  <td>{item.nm_dependente ?? "-"}</td>
+                  <td>{formatDateTime(item.created_at)}</td>
+                  <td>{item.updated_by_codinome || item.updated_by_nome || "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {atendimentosQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
+          {!atendimentosQuery.isLoading && atendimentos.length === 0 ? <div className="empty-state">Nenhum atendimento encontrado.</div> : null}
+        </div>
+      </section>
+
+      {formOpen ? <section className="detail-panel atendimento-form-panel">
+        <form className="form-panel" onSubmit={handleSubmit}>
+          <div className="form-grid compact">
+            <label className="field">
+              <select value={form.situacao} onChange={(event) => setForm({ ...form, situacao: event.target.value })} required>
+                <option value="AGENDADO">AGENDADO</option>
+                <option value="ATENDIDO">ATENDIDO</option>
+                <option value="CANCELADO">CANCELADO</option>
+              </select>
+              <span>Situação</span>
+            </label>
+            <label className="field"><input type="datetime-local" value={form.dt_agendado} onChange={(event) => setForm({ ...form, dt_agendado: event.target.value })} placeholder=" " required /><span>Agendado</span></label>
+            <label className="field"><input type="number" min={0} value={form.qtd} onChange={(event) => setForm({ ...form, qtd: Number(event.target.value) })} placeholder=" " /><span>Qtd</span></label>
           </div>
-        </div>
 
-        {formOpen ? <div className="detail-panel">
-          <form className="form-panel" onSubmit={handleSubmit}>
-            <div className="form-grid compact">
-              <label className="field">
-                <select value={form.situacao} onChange={(event) => setForm({ ...form, situacao: event.target.value })} required>
-                  <option value="AGENDADO">AGENDADO</option>
-                  <option value="ATENDIDO">ATENDIDO</option>
-                  <option value="CANCELADO">CANCELADO</option>
-                </select>
-                <span>Situação</span>
-              </label>
-              <label className="field"><input type="datetime-local" value={form.dt_agendado} onChange={(event) => setForm({ ...form, dt_agendado: event.target.value })} placeholder=" " required /><span>Agendado</span></label>
-              <label className="field"><input type="number" min={0} value={form.qtd} onChange={(event) => setForm({ ...form, qtd: Number(event.target.value) })} placeholder=" " /><span>Qtd</span></label>
-            </div>
+          <div className="form-grid">
+            <label className="field">
+              <select value={form.convenio_id} onChange={(event) => setForm({ ...form, convenio_id: Number(event.target.value) })} required>
+                <option value={0}>Selecione</option>
+                {convenios.map((convenio) => <option key={convenio.id} value={convenio.id}>{convenio.nm_convenio}</option>)}
+              </select>
+              <span>Convênio</span>
+            </label>
+            <label className="field">
+              <select value={form.tipo} onChange={(event) => setForm({ ...form, tipo: event.target.value })} required>
+                {tipoOptions.map((tipo) => <option key={tipo} value={tipo}>{tipo}</option>)}
+              </select>
+              <span>Tipo</span>
+            </label>
+          </div>
 
-            <div className="form-grid">
-              <label className="field">
-                <select value={form.convenio_id} onChange={(event) => setForm({ ...form, convenio_id: Number(event.target.value) })} required>
-                  <option value={0}>Selecione</option>
-                  {convenios.map((convenio) => <option key={convenio.id} value={convenio.id}>{convenio.nm_convenio}</option>)}
-                </select>
-                <span>Convênio</span>
-              </label>
-              <label className="field"><input value={form.tipo} maxLength={30} onChange={(event) => setForm({ ...form, tipo: event.target.value })} placeholder=" " required /><span>Tipo</span></label>
-            </div>
+          <div className="form-grid">
+            <label className="field">
+              <select value={form.associado_id} onChange={(event) => setForm({ ...form, associado_id: Number(event.target.value), dependente_id: 0 })} required>
+                <option value={0}>Selecione</option>
+                {associados.map((associado) => <option key={associado.id} value={associado.id}>{associado.nome}{associado.matricula ? ` - ${associado.matricula}` : ""}</option>)}
+              </select>
+              <span>Associado</span>
+            </label>
+            <label className="field">
+              <select value={form.dependente_id} onChange={(event) => setForm({ ...form, dependente_id: Number(event.target.value) })}>
+                <option value={0}>Sem dependente</option>
+                {dependentes.map((dependente) => <option key={dependente.id} value={dependente.id}>{dependente.nm_dependente}</option>)}
+              </select>
+              <span>Dependente</span>
+            </label>
+          </div>
 
-            <div className="form-grid">
-              <label className="field">
-                <select value={form.associado_id} onChange={(event) => setForm({ ...form, associado_id: Number(event.target.value), dependente_id: 0 })} required>
-                  <option value={0}>Selecione</option>
-                  {associados.map((associado) => <option key={associado.id} value={associado.id}>{associado.nome}{associado.matricula ? ` - ${associado.matricula}` : ""}</option>)}
-                </select>
-                <span>Associado</span>
-              </label>
-              <label className="field">
-                <select value={form.dependente_id} onChange={(event) => setForm({ ...form, dependente_id: Number(event.target.value) })}>
-                  <option value={0}>Sem dependente</option>
-                  {dependentes.map((dependente) => <option key={dependente.id} value={dependente.id}>{dependente.nm_dependente}</option>)}
-                </select>
-                <span>Dependente</span>
-              </label>
-            </div>
+          <label className="field"><textarea rows={3} value={form.obs ?? ""} onChange={(event) => setForm({ ...form, obs: event.target.value })} placeholder=" " /><span>Observação</span></label>
 
-            <label className="field"><textarea rows={3} value={form.obs ?? ""} onChange={(event) => setForm({ ...form, obs: event.target.value })} placeholder=" " /><span>Observação</span></label>
+          {message ? <div className={saveMutation.isError || deleteMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
 
-            {message ? <div className={saveMutation.isError || deleteMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
-
-            <div className="form-actions">
-              {form.id ? <button type="button" className="danger-button" onClick={handleDelete} disabled={deleteMutation.isPending}><Trash2 size={16} /> Excluir</button> : null}
-              <button type="submit" disabled={saveMutation.isPending}><Save size={16} /> {saveMutation.isPending ? "Salvando..." : "Salvar"}</button>
-            </div>
-          </form>
-        </div> : null}
-      </section>
+          <div className="form-actions">
+            <button type="button" className="secondary-button" onClick={() => setFormOpen(false)}>Sair</button>
+            {form.id ? <button type="button" className="danger-button" onClick={handleDelete} disabled={deleteMutation.isPending}><Trash2 size={16} /> Excluir</button> : null}
+            <button type="submit" disabled={saveMutation.isPending}><Save size={16} /> {saveMutation.isPending ? "Salvando..." : "Salvar"}</button>
+          </div>
+        </form>
+      </section> : null}
     </main>
   );
 }

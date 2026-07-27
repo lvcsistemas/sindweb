@@ -21,6 +21,7 @@ export type Database = {
     };
     Views: {
       associados_lista: { Row: AssociadoLista };
+      atendimento_medico_lista: { Row: AtendimentoMedicoLista };
     };
     Functions: {
       can_access_module: { Args: { module_key: string; action_key?: string }; Returns: boolean };
@@ -240,6 +241,8 @@ export type AtendimentoMedico = {
   id: number;
   created_by: number;
   updated_by: number;
+  created_by_profile_id: string | null;
+  updated_by_profile_id: string | null;
   convenio_id: number;
   associado_id: number;
   dependente_id: number;
@@ -259,8 +262,12 @@ export type AtendimentoMedicoInsert = Omit<AtendimentoMedico, "id" | "created_at
 };
 
 export type AtendimentoMedicoLista = AtendimentoMedico & {
-  convenio: Pick<AtendimentoMedicoConvenio, "nm_convenio"> | null;
-  associado: Pick<Associado, "nome" | "matricula"> | null;
+  nm_convenio: string | null;
+  nm_associado: string | null;
+  matricula: string | null;
+  nm_dependente: string | null;
+  updated_by_codinome: string | null;
+  updated_by_nome: string | null;
 };
 
 export type AtendimentoMedicoConvenio = {
