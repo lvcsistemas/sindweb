@@ -1,53 +1,54 @@
-import { FormEvent, useEffect, useMemo, useState }                from "react";
-import { useMutation, useQuery, useQueryClient }                  from "@tanstack/react-query";
-import { Plus, Save, Search, Trash2 }                             from "lucide-react";
-import { Breadcrumb }                                             from "../../shared/Breadcrumb";
-import type { AtendimentoMedicoInsert, AtendimentoMedicoLista }   from "../../types/database";
-import { listAssociados }                                         from "../associados/associadosApi";
-import { listAtendimentoMedicoConvenios }                         from "../atendimentoMedicoConvenio/atendimentoMedicoConvenioApi";
-import { listAtendimentoMedicoEspecialidadesByTipo }              from "../atendimentoMedicoEspecialidade/atendimentoMedicoEspecialidadeApi";
-import { listDependentesByAssociado }                             from "../dependentes/dependentesApi";
-import { listUsuarios }                                           from "../usuarios/usuariosApi";
-import { deleteAtendimentoMedico, listAtendimentosMedicos, saveAtendimentoMedico, type AtendimentoMedicoFilters, type AtendimentoMedicoSearchType } from "./atendimentoMedicoApi";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Plus, Save, Search } from "lucide-react";
+import { Breadcrumb } from "../../shared/Breadcrumb";
+import type { AtendimentoMedicoInsert, AtendimentoMedicoLista } from "../../types/database";
+import { listAssociados } from "../associados/associadosApi";
+import { listAtendimentoMedicoConvenios } from "../atendimentoMedicoConvenio/atendimentoMedicoConvenioApi";
+import { listAtendimentoMedicoEspecialidadesByTipo } from "../atendimentoMedicoEspecialidade/atendimentoMedicoEspecialidadeApi";
+import { listDependentesByAssociado } from "../dependentes/dependentesApi";
+import { listUsuarios } from "../usuarios/usuariosApi";
+import { listAtendimentosMedicos, saveAtendimentoMedico, type AtendimentoMedicoFilters, type AtendimentoMedicoSearchType } from "./atendimentoMedicoApi";
 
 const pesquisaOptions: Array<{ value: AtendimentoMedicoSearchType; label: string }> = [
-  { value: "T",               label: "TODOS" },
-  { value: "CADASTRO",        label: "DATA: CADASTRO" },
-  { value: "ID ATENDIMENTO",  label: "ID: ATENDIMENTO" },
-  { value: "ID ASSOCIADO",    label: "ID: ASSOCIADO" },
-  { value: "ID CONVENIO",     label: "ID: CONVENIO" },
-  { value: "ID DEPENDENTE",   label: "ID: DEPENDENTE" },
-  { value: "NM ASSOCIADO",    label: "NOME: ASSOCIADO" },
-  { value: "NM DEPENDENTE",   label: "NOME: DEPENDENTE" },
-  { value: "NM CONVENIO",     label: "NOME: CONVENIO" },
-  { value: "AGENDADO",        label: "SITUACAO: AGENDADO" },
-  { value: "ATENDIDO",        label: "SITUACAO: ATENDIDO" },
-  { value: "CANCELADO",       label: "SITUACAO: CANCELADO" },
+  { value: "T", label: "TODOS" },
+  { value: "CADASTRO", label: "DATA: CADASTRO" },
+  { value: "ID ATENDIMENTO", label: "ID: ATENDIMENTO" },
+  { value: "ID ASSOCIADO", label: "ID: ASSOCIADO" },
+  { value: "ID CONVENIO", label: "ID: CONVENIO" },
+  { value: "ID DEPENDENTE", label: "ID: DEPENDENTE" },
+  { value: "NM ASSOCIADO", label: "NOME: ASSOCIADO" },
+  { value: "NM DEPENDENTE", label: "NOME: DEPENDENTE" },
+  { value: "NM CONVENIO", label: "NOME: CONVENIO" },
+  { value: "AGENDADO", label: "SITUACAO: AGENDADO" },
+  { value: "ATENDIDO", label: "SITUACAO: ATENDIDO" },
+  { value: "CANCELADO", label: "SITUACAO: CANCELADO" },
   { value: "AURICULOTERAPIA", label: "TIPO: AURICULOTERAPIA" },
-  { value: "CARDIOLOGIA",     label: "TIPO: CARDIOLOGIA" },
-  { value: "CLINICO GERAL",   label: "TIPO: CLINICO GERAL" },
-  { value: "CONSULTA",        label: "TIPO: CONSULTA" },
-  { value: "EXAME",           label: "TIPO: EXAME" },
+  { value: "CARDIOLOGIA", label: "TIPO: CARDIOLOGIA" },
+  { value: "CLINICO GERAL", label: "TIPO: CLINICO GERAL" },
+  { value: "CONSULTA", label: "TIPO: CONSULTA" },
+  { value: "EXAME", label: "TIPO: EXAME" },
   { value: "EXAME DE SANGUE", label: "TIPO: EXAME DE SANGUE" },
-  { value: "FISIOTERAPIA",    label: "TIPO: FISIOTERAPIA" },
-  { value: "FONOAUDIOLOGIA",  label: "TIPO: FONOAUDIOLOGIA" },
-  { value: "MASSOTERAPIA",    label: "TIPO: MASSOTERAPIA" },
-  { value: "ODONTOLOGIA",     label: "TIPO: ODONTOLOGIA" },
-  { value: "PSICOLOGIA",      label: "TIPO: PSICOLOGIA" }
+  { value: "FISIOTERAPIA", label: "TIPO: FISIOTERAPIA" },
+  { value: "FONOAUDIOLOGIA", label: "TIPO: FONOAUDIOLOGIA" },
+  { value: "MASSOTERAPIA", label: "TIPO: MASSOTERAPIA" },
+  { value: "ODONTOLOGIA", label: "TIPO: ODONTOLOGIA" },
+  { value: "PSICOLOGIA", label: "TIPO: PSICOLOGIA" }
 ];
 
-function toDateTimeLocal(value: string | null | undefined) {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value.slice(0, 16);
+function localDateTimeValue(date = new Date()) {
   const offsetMs = date.getTimezoneOffset() * 60000;
   return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
+}
+
+function toDateTimeLocal(value: string | null | undefined) {
+  return value ? value.slice(0, 16) : "";
 }
 
 function todayAt(time: "start" | "end") {
   const date = new Date();
   date.setHours(time === "start" ? 0 : 23, time === "start" ? 0 : 59, 0, 0);
-  return toDateTimeLocal(date.toISOString());
+  return localDateTimeValue(date);
 }
 
 function datePart(value: string | null | undefined) {
@@ -59,7 +60,8 @@ function timePart(value: string | null | undefined) {
 }
 
 function combineDateTime(date: string, time: string) {
-  return `${date || datePart(new Date().toISOString())}T${time || timePart(new Date().toISOString())}`;
+  const now = localDateTimeValue();
+  return `${date || datePart(now)}T${time || timePart(now)}`;
 }
 
 function weekDayLabel(date: string) {
@@ -72,12 +74,14 @@ function weekDayLabel(date: string) {
 
 function formatDateTime(value: string | null | undefined) {
   if (!value) return "-";
-  return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "medium" }).format(new Date(value));
+  const [date = "", time = ""] = value.slice(0, 19).split("T");
+  const [year, month, day] = date.split("-");
+  return `${day}/${month}/${year} ${time}`;
 }
 
 function getAtendimentoRowClass(item: AtendimentoMedicoLista) {
   const situacao = item.situacao?.toUpperCase();
-  const agendado = new Date(item.dt_agendado);
+  const agendado = new Date(toDateTimeLocal(item.dt_agendado));
   if (situacao === "CANCELADO") return "atendimento-row canceled";
   if (situacao === "ATENDIDO") return "atendimento-row completed";
   if (situacao === "AGENDADO" && !Number.isNaN(agendado.getTime()) && new Date() > agendado) return "atendimento-row overdue";
@@ -85,13 +89,7 @@ function getAtendimentoRowClass(item: AtendimentoMedicoLista) {
 }
 
 function emptyFilters(): AtendimentoMedicoFilters {
-  return {
-    pesquisa: "T",
-    inicio: todayAt("start"),
-    fim: todayAt("end"),
-    usuarioId: "TODOS",
-    valor: ""
-  };
+  return { pesquisa: "T", inicio: todayAt("start"), fim: todayAt("end"), usuarioId: "TODOS", valor: "" };
 }
 
 function newEmptyForm(): AtendimentoMedicoInsert {
@@ -104,7 +102,7 @@ function newEmptyForm(): AtendimentoMedicoInsert {
     associado_id: 0,
     dependente_id: 0,
     qtd: 0,
-    dt_agendado: toDateTimeLocal(new Date().toISOString()),
+    dt_agendado: localDateTimeValue(),
     situacao: "AGENDADO",
     tipo: "",
     obs: ""
@@ -112,61 +110,60 @@ function newEmptyForm(): AtendimentoMedicoInsert {
 }
 
 export function AtendimentoMedicoPage() {
-  const queryClient                           = useQueryClient();
-  const [filters, setFilters]                 = useState<AtendimentoMedicoFilters>(emptyFilters);
-  const [draftFilters, setDraftFilters]       = useState<AtendimentoMedicoFilters>(emptyFilters);
-  const [selectedId, setSelectedId]           = useState<number | null>(null);
-  const [formOpen, setFormOpen]               = useState(false);
-  const [form, setForm]                       = useState<AtendimentoMedicoInsert>(newEmptyForm);
+  const queryClient = useQueryClient();
+  const [filters, setFilters] = useState<AtendimentoMedicoFilters>(emptyFilters);
+  const [draftFilters, setDraftFilters] = useState<AtendimentoMedicoFilters>(emptyFilters);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
+  const [form, setForm] = useState<AtendimentoMedicoInsert>(newEmptyForm);
   const [associadoSearch, setAssociadoSearch] = useState("");
-  const [message, setMessage]                 = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
 
-  const atendimentosQuery   = useQuery({ queryKey: ["atendimento-medico", filters], queryFn: () => listAtendimentosMedicos(filters) });
-  const conveniosQuery      = useQuery({ queryKey: ["atendimento-medico-convenios", ""], queryFn: () => listAtendimentoMedicoConvenios("") });
+  const atendimentosQuery = useQuery({ queryKey: ["atendimento-medico", filters], queryFn: () => listAtendimentosMedicos(filters) });
+  const conveniosQuery = useQuery({ queryKey: ["atendimento-medico-convenios", ""], queryFn: () => listAtendimentoMedicoConvenios("") });
   const especialidadesQuery = useQuery({ queryKey: ["atendimento-medico-especialidades", "ESPECIALIDADE"], queryFn: () => listAtendimentoMedicoEspecialidadesByTipo("ESPECIALIDADE") });
-  const associadosQuery     = useQuery({ queryKey: ["atendimento-medico-associados", associadoSearch], queryFn: () => listAssociados(associadoSearch), enabled: formOpen });
-  const usuariosQuery       = useQuery({ queryKey: ["usuarios"], queryFn: listUsuarios });
-  const dependentesQuery    = useQuery({
+  const associadosQuery = useQuery({ queryKey: ["atendimento-medico-associados", associadoSearch], queryFn: () => listAssociados(associadoSearch), enabled: formOpen });
+  const usuariosQuery = useQuery({ queryKey: ["usuarios"], queryFn: listUsuarios });
+  const dependentesQuery = useQuery({
     queryKey: ["atendimento-medico-dependentes", form.associado_id],
     queryFn: () => listDependentesByAssociado(Number(form.associado_id)),
     enabled: Boolean(form.associado_id)
   });
 
-  const atendimentos    = atendimentosQuery.data ?? [];
-  const convenios       = conveniosQuery.data ?? [];
-  const especialidades  = especialidadesQuery.data ?? [];
-  const associados      = associadosQuery.data ?? [];
-  const usuarios        = usuariosQuery.data ?? [];
-  const dependentes     = dependentesQuery.data ?? [];
-  const selected        = atendimentos.find((item) => item.id === selectedId) ?? null;
+  const atendimentos = atendimentosQuery.data ?? [];
+  const convenios = conveniosQuery.data ?? [];
+  const especialidades = especialidadesQuery.data ?? [];
+  const associados = associadosQuery.data ?? [];
+  const usuarios = usuariosQuery.data ?? [];
+  const dependentes = dependentesQuery.data ?? [];
+  const selected = atendimentos.find((item) => item.id === selectedId) ?? null;
   const associadoOptions = useMemo(() => {
     if (!form.associado_id || associados.some((associado) => associado.id === form.associado_id)) return associados;
-    return [{
-      id: form.associado_id,
-      nome: selected?.nm_associado ?? `Associado #${form.associado_id}`,
-      matricula: selected?.matricula ?? null
-    }, ...associados];
+    return [{ id: form.associado_id, nome: selected?.nm_associado ?? `Associado #${form.associado_id}`, matricula: selected?.matricula ?? null }, ...associados];
   }, [associados, form.associado_id, selected?.matricula, selected?.nm_associado]);
 
-  useEffect(() => {
-    if (!selected) return;
+  function openFormForAtendimento(item: AtendimentoMedicoLista) {
     setForm({
-      id: selected.id,
-      created_by: selected.created_by,
-      updated_by: selected.updated_by,
-      created_by_legacy: selected.created_by_legacy,
-      updated_by_legacy: selected.updated_by_legacy,
-      convenio_id: selected.convenio_id,
-      associado_id: selected.associado_id,
-      dependente_id: selected.dependente_id,
-      qtd: selected.qtd,
-      dt_agendado: toDateTimeLocal(selected.dt_agendado),
-      situacao: selected.situacao,
-      tipo: selected.tipo,
-      obs: selected.obs ?? ""
+      id: item.id,
+      created_by: item.created_by,
+      updated_by: item.updated_by,
+      created_by_legacy: item.created_by_legacy,
+      updated_by_legacy: item.updated_by_legacy,
+      convenio_id: item.convenio_id,
+      associado_id: item.associado_id,
+      dependente_id: item.dependente_id,
+      qtd: item.qtd,
+      dt_agendado: toDateTimeLocal(item.dt_agendado),
+      situacao: item.situacao,
+      tipo: item.tipo,
+      obs: item.obs ?? ""
     });
-    setAssociadoSearch(selected.nm_associado ?? "");
+    setAssociadoSearch(item.nm_associado ?? "");
     setFormOpen(true);
+  }
+
+  useEffect(() => {
+    if (selected) openFormForAtendimento(selected);
   }, [selected]);
 
   const saveMutation = useMutation({
@@ -177,19 +174,7 @@ export function AtendimentoMedicoPage() {
       setMessage("Atendimento salvo com sucesso.");
       await queryClient.invalidateQueries({ queryKey: ["atendimento-medico"] });
     },
-    onError: (error) => setMessage(error instanceof Error ? error.message : "Não foi possível salvar o atendimento.")
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteAtendimentoMedico,
-    onSuccess: async () => {
-      setSelectedId(null);
-      setFormOpen(false);
-      setForm(newEmptyForm());
-      setMessage("Atendimento excluido com sucesso.");
-      await queryClient.invalidateQueries({ queryKey: ["atendimento-medico"] });
-    },
-    onError: (error) => setMessage(error instanceof Error ? error.message : "Não foi possível excluir o atendimento.")
+    onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel salvar o atendimento.")
   });
 
   const totalLabel = useMemo(() => `${atendimentos.length} registro${atendimentos.length === 1 ? "" : "s"}`, [atendimentos.length]);
@@ -204,6 +189,7 @@ export function AtendimentoMedicoPage() {
 
   function handleSelect(item: AtendimentoMedicoLista) {
     setSelectedId(item.id);
+    openFormForAtendimento(item);
     setMessage(null);
   }
 
@@ -216,12 +202,6 @@ export function AtendimentoMedicoPage() {
     event.preventDefault();
     setMessage(null);
     saveMutation.mutate(form);
-  }
-
-  function handleDelete() {
-    if (!form.id) return;
-    if (!window.confirm("Deseja excluir este atendimento?")) return;
-    deleteMutation.mutate(form.id);
   }
 
   const atendimentoForm = formOpen ? (
@@ -254,7 +234,7 @@ export function AtendimentoMedicoPage() {
               <option value={0}>Selecione</option>
               {convenios.map((convenio) => <option key={convenio.id} value={convenio.id}>{convenio.nm_convenio}</option>)}
             </select>
-            <span>Convênio</span>
+            <span>Convenio</span>
           </label>
         </div>
 
@@ -280,12 +260,10 @@ export function AtendimentoMedicoPage() {
         </div>
 
         <label className="field"><textarea rows={3} value={form.obs ?? ""} onChange={(event) => setForm({ ...form, obs: event.target.value })} placeholder=" " /><span>Observacao</span></label>
-
-        {message ? <div className={saveMutation.isError || deleteMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
+        {message ? <div className={saveMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
 
         <div className="form-actions">
           <button type="button" className="secondary-button" onClick={() => setFormOpen(false)}>Sair</button>
-          {form.id ? <button type="button" className="danger-button" onClick={handleDelete} disabled={deleteMutation.isPending}><Trash2 size={16} /> Excluir</button> : null}
           <button type="submit" disabled={saveMutation.isPending}><Save size={16} /> {saveMutation.isPending ? "Salvando..." : "Salvar"}</button>
         </div>
       </form>
@@ -297,8 +275,8 @@ export function AtendimentoMedicoPage() {
       <Breadcrumb items={[{ label: "Atendimentos" }, { label: "Medico" }]} />
       <section className="module-header">
         <div>
-          <h1>Atendimento Médico</h1>
-          <p>Pesquisa e gestão de atendimentos.</p>
+          <h1>Atendimento Medico</h1>
+          <p>Pesquisa e gestao de atendimentos.</p>
         </div>
       </section>
 
@@ -342,7 +320,7 @@ export function AtendimentoMedicoPage() {
               <tr>
                 <th>#</th>
                 <th>Agendado</th>
-                <th>Convênio</th>
+                <th>Convenio</th>
                 <th>Associado</th>
                 <th>Cadastrado</th>
                 <th>Alterado</th>
@@ -365,7 +343,6 @@ export function AtendimentoMedicoPage() {
           {!atendimentosQuery.isLoading && atendimentos.length === 0 ? <div className="empty-state">Nenhum atendimento encontrado.</div> : null}
         </div>
       </section>
-
     </main>
   );
 }

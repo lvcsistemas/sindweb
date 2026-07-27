@@ -135,8 +135,3 @@ export async function saveAtendimentoMedico(values: AtendimentoMedicoInsert) {
   raiseSupabaseError(error);
   return data as AtendimentoMedicoLista;
 }
-
-export async function deleteAtendimentoMedico(id: number) {
-  const { error } = await supabaseUnsafe.from("atendimento_medico").delete().eq("id", id);
-  raiseSupabaseError(error);
-}
