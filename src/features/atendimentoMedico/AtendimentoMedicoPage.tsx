@@ -1,39 +1,39 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Save, Search } from "lucide-react";
-import { Breadcrumb } from "../../shared/Breadcrumb";
+import { FormEvent, useEffect, useMemo, useState }              from "react";
+import { useMutation, useQuery, useQueryClient }                from "@tanstack/react-query";
+import { Plus, Save, Search }                                   from "lucide-react";
+import { Breadcrumb }                                           from "../../shared/Breadcrumb";
 import type { AtendimentoMedicoInsert, AtendimentoMedicoLista } from "../../types/database";
-import { listAssociados } from "../associados/associadosApi";
-import { listAtendimentoMedicoConvenios } from "../atendimentoMedicoConvenio/atendimentoMedicoConvenioApi";
-import { listAtendimentoMedicoEspecialidadesByTipo } from "../atendimentoMedicoEspecialidade/atendimentoMedicoEspecialidadeApi";
-import { listDependentesByAssociado } from "../dependentes/dependentesApi";
-import { listUsuarios } from "../usuarios/usuariosApi";
+import { listAssociados }                                       from "../associados/associadosApi";
+import { listAtendimentoMedicoConvenios }                       from "../atendimentoMedicoConvenio/atendimentoMedicoConvenioApi";
+import { listAtendimentoMedicoEspecialidadesByTipo }            from "../atendimentoMedicoEspecialidade/atendimentoMedicoEspecialidadeApi";
+import { listDependentesByAssociado }                           from "../dependentes/dependentesApi";
+import { listUsuarios }                                         from "../usuarios/usuariosApi";
 import { listAtendimentosMedicos, saveAtendimentoMedico, type AtendimentoMedicoFilters, type AtendimentoMedicoSearchType } from "./atendimentoMedicoApi";
 
 const pesquisaOptions: Array<{ value: AtendimentoMedicoSearchType; label: string }> = [
-  { value: "T", label: "TODOS" },
-  { value: "CADASTRO", label: "DATA: CADASTRO" },
-  { value: "ID ATENDIMENTO", label: "ID: ATENDIMENTO" },
-  { value: "ID ASSOCIADO", label: "ID: ASSOCIADO" },
-  { value: "ID CONVENIO", label: "ID: CONVENIO" },
-  { value: "ID DEPENDENTE", label: "ID: DEPENDENTE" },
-  { value: "NM ASSOCIADO", label: "NOME: ASSOCIADO" },
-  { value: "NM DEPENDENTE", label: "NOME: DEPENDENTE" },
-  { value: "NM CONVENIO", label: "NOME: CONVENIO" },
-  { value: "AGENDADO", label: "SITUACAO: AGENDADO" },
-  { value: "ATENDIDO", label: "SITUACAO: ATENDIDO" },
-  { value: "CANCELADO", label: "SITUACAO: CANCELADO" },
-  { value: "AURICULOTERAPIA", label: "TIPO: AURICULOTERAPIA" },
-  { value: "CARDIOLOGIA", label: "TIPO: CARDIOLOGIA" },
-  { value: "CLINICO GERAL", label: "TIPO: CLINICO GERAL" },
-  { value: "CONSULTA", label: "TIPO: CONSULTA" },
-  { value: "EXAME", label: "TIPO: EXAME" },
-  { value: "EXAME DE SANGUE", label: "TIPO: EXAME DE SANGUE" },
-  { value: "FISIOTERAPIA", label: "TIPO: FISIOTERAPIA" },
-  { value: "FONOAUDIOLOGIA", label: "TIPO: FONOAUDIOLOGIA" },
-  { value: "MASSOTERAPIA", label: "TIPO: MASSOTERAPIA" },
-  { value: "ODONTOLOGIA", label: "TIPO: ODONTOLOGIA" },
-  { value: "PSICOLOGIA", label: "TIPO: PSICOLOGIA" }
+  { value: "T",                 label: "TODOS" },
+  { value: "CADASTRO",          label: "DATA: CADASTRO" },
+  { value: "ID ATENDIMENTO",    label: "ID: ATENDIMENTO" },
+  { value: "ID ASSOCIADO",      label: "ID: ASSOCIADO" },
+  { value: "ID CONVENIO",       label: "ID: CONVENIO" },
+  { value: "ID DEPENDENTE",     label: "ID: DEPENDENTE" },
+  { value: "NM ASSOCIADO",      label: "NOME: ASSOCIADO" },
+  { value: "NM DEPENDENTE",     label: "NOME: DEPENDENTE" },
+  { value: "NM CONVENIO",       label: "NOME: CONVENIO" },
+  { value: "AGENDADO",          label: "SITUACAO: AGENDADO" },
+  { value: "ATENDIDO",          label: "SITUACAO: ATENDIDO" },
+  { value: "CANCELADO",         label: "SITUACAO: CANCELADO" },
+  { value: "AURICULOTERAPIA",   label: "TIPO: AURICULOTERAPIA" },
+  { value: "CARDIOLOGIA",       label: "TIPO: CARDIOLOGIA" },
+  { value: "CLINICO GERAL",     label: "TIPO: CLINICO GERAL" },
+  { value: "CONSULTA",          label: "TIPO: CONSULTA" },
+  { value: "EXAME",             label: "TIPO: EXAME" },
+  { value: "EXAME DE SANGUE",   label: "TIPO: EXAME DE SANGUE" },
+  { value: "FISIOTERAPIA",      label: "TIPO: FISIOTERAPIA" },
+  { value: "FONOAUDIOLOGIA",    label: "TIPO: FONOAUDIOLOGIA" },
+  { value: "MASSOTERAPIA",      label: "TIPO: MASSOTERAPIA" },
+  { value: "ODONTOLOGIA",       label: "TIPO: ODONTOLOGIA" },
+  { value: "PSICOLOGIA",        label: "TIPO: PSICOLOGIA" }
 ];
 
 function localDateTimeValue(date = new Date()) {
@@ -110,33 +110,33 @@ function newEmptyForm(): AtendimentoMedicoInsert {
 }
 
 export function AtendimentoMedicoPage() {
-  const queryClient = useQueryClient();
-  const [filters, setFilters] = useState<AtendimentoMedicoFilters>(emptyFilters);
-  const [draftFilters, setDraftFilters] = useState<AtendimentoMedicoFilters>(emptyFilters);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [formOpen, setFormOpen] = useState(false);
-  const [form, setForm] = useState<AtendimentoMedicoInsert>(newEmptyForm);
+  const queryClient                           = useQueryClient();
+  const [filters, setFilters]                 = useState<AtendimentoMedicoFilters>(emptyFilters);
+  const [draftFilters, setDraftFilters]       = useState<AtendimentoMedicoFilters>(emptyFilters);
+  const [selectedId, setSelectedId]           = useState<number | null>(null);
+  const [formOpen, setFormOpen]               = useState(false);
+  const [form, setForm]                       = useState<AtendimentoMedicoInsert>(newEmptyForm);
   const [associadoSearch, setAssociadoSearch] = useState("");
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage]                 = useState<string | null>(null);
 
-  const atendimentosQuery = useQuery({ queryKey: ["atendimento-medico", filters], queryFn: () => listAtendimentosMedicos(filters) });
-  const conveniosQuery = useQuery({ queryKey: ["atendimento-medico-convenios", ""], queryFn: () => listAtendimentoMedicoConvenios("") });
+  const atendimentosQuery   = useQuery({ queryKey: ["atendimento-medico", filters], queryFn: () => listAtendimentosMedicos(filters) });
+  const conveniosQuery      = useQuery({ queryKey: ["atendimento-medico-convenios", ""], queryFn: () => listAtendimentoMedicoConvenios("") });
   const especialidadesQuery = useQuery({ queryKey: ["atendimento-medico-especialidades", "ESPECIALIDADE"], queryFn: () => listAtendimentoMedicoEspecialidadesByTipo("ESPECIALIDADE") });
-  const associadosQuery = useQuery({ queryKey: ["atendimento-medico-associados", associadoSearch], queryFn: () => listAssociados(associadoSearch), enabled: formOpen });
-  const usuariosQuery = useQuery({ queryKey: ["usuarios"], queryFn: listUsuarios });
-  const dependentesQuery = useQuery({
+  const associadosQuery     = useQuery({ queryKey: ["atendimento-medico-associados", associadoSearch], queryFn: () => listAssociados(associadoSearch), enabled: formOpen });
+  const usuariosQuery       = useQuery({ queryKey: ["usuarios"], queryFn: listUsuarios });
+  const dependentesQuery    = useQuery({
     queryKey: ["atendimento-medico-dependentes", form.associado_id],
     queryFn: () => listDependentesByAssociado(Number(form.associado_id)),
     enabled: Boolean(form.associado_id)
   });
 
-  const atendimentos = atendimentosQuery.data ?? [];
-  const convenios = conveniosQuery.data ?? [];
-  const especialidades = especialidadesQuery.data ?? [];
-  const associados = associadosQuery.data ?? [];
-  const usuarios = usuariosQuery.data ?? [];
-  const dependentes = dependentesQuery.data ?? [];
-  const selected = atendimentos.find((item) => item.id === selectedId) ?? null;
+  const atendimentos    = atendimentosQuery.data    ?? [];
+  const convenios       = conveniosQuery.data       ?? [];
+  const especialidades  = especialidadesQuery.data  ?? [];
+  const associados      = associadosQuery.data      ?? [];
+  const usuarios        = usuariosQuery.data        ?? [];
+  const dependentes     = dependentesQuery.data     ?? [];
+  const selected        = atendimentos.find((item) => item.id === selectedId) ?? null;
   const associadoOptions = useMemo(() => {
     if (!form.associado_id || associados.some((associado) => associado.id === form.associado_id)) return associados;
     return [{ id: form.associado_id, nome: selected?.nm_associado ?? `Associado #${form.associado_id}`, matricula: selected?.matricula ?? null }, ...associados];
@@ -234,7 +234,7 @@ export function AtendimentoMedicoPage() {
               <option value={0}>Selecione</option>
               {convenios.map((convenio) => <option key={convenio.id} value={convenio.id}>{convenio.nm_convenio}</option>)}
             </select>
-            <span>Convenio</span>
+            <span>Convênio</span>
           </label>
         </div>
 
