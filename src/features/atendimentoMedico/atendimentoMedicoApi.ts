@@ -41,6 +41,10 @@ function toNumber(value: number | string | null | undefined, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function raiseSupabaseError(error: { message?: string } | null) {
+  if (error) throw new Error(error.message || "Erro ao acessar o Supabase.");
+}
+
 const situacaoFilters = new Set(["AGENDADO", "ATENDIDO", "CANCELADO"]);
 const tipoFilters = new Set(["AURICULOTERAPIA", "CARDIOLOGIA", "CLINICO GERAL", "CONSULTA", "EXAME", "EXAME DE SANGUE", "FISIOTERAPIA", "FONOAUDIOLOGIA", "MASSOTERAPIA", "ODONTOLOGIA", "PSICOLOGIA"]);
 
@@ -88,18 +92,20 @@ export async function listAtendimentosMedicos(filters: AtendimentoMedicoFilters)
   }
 
   const { data, error } = await query;
-  if (error) throw error;
+  raiseSupabaseError(error);
   return data as AtendimentoMedicoLista[];
 }
 
 export async function saveAtendimentoMedico(values: AtendimentoMedicoInsert) {
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.id) throw new Error("Sessao expirada. Entre novamente para salvar o atendimento.");
+
   const payload = {
     ...values,
-    created_by: values.id ? values.created_by : user?.id,
-    updated_by: user?.id,
-    created_by_legacy: values.created_by_legacy ?? null,
-    updated_by_legacy: values.updated_by_legacy ?? null,
+    created_by: values.id ? values.created_by ?? user.id : user.id,
+    updated_by: user.id,
+    created_by_legacy: toNumber(values.created_by_legacy),
+    updated_by_legacy: toNumber(values.updated_by_legacy),
     convenio_id: toNumber(values.convenio_id),
     associado_id: toNumber(values.associado_id),
     dependente_id: toNumber(values.dependente_id),
@@ -117,7 +123,7 @@ export async function saveAtendimentoMedico(values: AtendimentoMedicoInsert) {
       .eq("id", payload.id)
       .select()
       .single();
-    if (error) throw error;
+    raiseSupabaseError(error);
     return data as AtendimentoMedicoLista;
   }
 
@@ -126,11 +132,11 @@ export async function saveAtendimentoMedico(values: AtendimentoMedicoInsert) {
     .insert(payload)
     .select()
     .single();
-  if (error) throw error;
+  raiseSupabaseError(error);
   return data as AtendimentoMedicoLista;
 }
 
 export async function deleteAtendimentoMedico(id: number) {
   const { error } = await supabaseUnsafe.from("atendimento_medico").delete().eq("id", id);
-  if (error) throw error;
+  raiseSupabaseError(error);
 }
