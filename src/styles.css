@@ -159,8 +159,9 @@ textarea { resize: vertical; }
 .form-grid.classe-local-trabalho-grid { grid-template-columns: minmax(260px, 1fr) minmax(160px, 220px); }
 .form-grid.classe-profissional-grid { grid-template-columns: minmax(130px, 150px) minmax(180px, 1fr) minmax(180px, 1fr) minmax(140px, 170px); }
 .related-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: stretch; }
+.toolbar-right { display: flex; justify-content: flex-end; margin-bottom: 12px; }
 .atendimento-search-panel { margin-bottom: 16px; }
-.atendimento-search-grid { display: grid; grid-template-columns: auto minmax(190px, 1.4fr) minmax(165px, 1fr) minmax(165px, 1fr) minmax(170px, 1fr) minmax(180px, 1fr) auto; gap: 10px; align-items: stretch; }
+.atendimento-search-grid { display: grid; grid-template-columns: minmax(190px, 1.4fr) minmax(165px, 1fr) minmax(165px, 1fr) minmax(170px, 1fr) minmax(180px, 1fr) auto; gap: 10px; align-items: stretch; }
 .atendimento-form-panel { margin-top: 16px; overflow: hidden; }
 .data-table-wrap { width: 100%; overflow-x: auto; border: 1px solid #d7dee5; border-radius: 8px; }
 .data-table { width: 100%; border-collapse: collapse; min-width: 680px; background: #fff; }
@@ -169,6 +170,13 @@ textarea { resize: vertical; }
 .data-table.clickable-rows tbody tr { cursor: pointer; }
 .data-table.clickable-rows tbody tr:hover { background: #edf8f3; }
 .data-table tbody tr:last-child td { border-bottom: 0; }
+.data-table td strong, .data-table td span { display: block; }
+.data-table td strong { font-weight: 750; }
+.data-table td span { margin-top: 3px; font-size: 0.82rem; opacity: 0.82; }
+.atendimento-row.scheduled { color: #111827; }
+.atendimento-row.completed { color: #137a4f; }
+.atendimento-row.canceled { color: #b45f06; }
+.atendimento-row.overdue { color: #c62828; }
 .numeric-cell { text-align: right; white-space: nowrap; }
 .modal-backdrop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 18px; background: rgba(23, 32, 42, 0.42); }
 .modal-panel { width: min(560px, 100%); display: grid; gap: 14px; background: #fff; border: 1px solid #d7dee5; border-radius: 8px; box-shadow: 0 18px 48px rgba(20, 33, 45, 0.18); padding: 18px; }

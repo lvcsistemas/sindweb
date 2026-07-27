@@ -61,7 +61,7 @@ export async function listAtendimentosMedicos(filters: AtendimentoMedicoFilters)
   }
 
   if (filters.usuarioId !== "TODOS") {
-    query = query.eq("updated_by_profile_id", filters.usuarioId);
+    query = query.eq("updated_by", filters.usuarioId);
   }
 
   const term = filters.valor.trim();
@@ -96,10 +96,10 @@ export async function saveAtendimentoMedico(values: AtendimentoMedicoInsert) {
   const { data: { user } } = await supabase.auth.getUser();
   const payload = {
     ...values,
-    created_by: toNumber(values.created_by),
-    updated_by: toNumber(values.updated_by),
-    created_by_profile_id: values.id ? values.created_by_profile_id : user?.id,
-    updated_by_profile_id: user?.id,
+    created_by: values.id ? values.created_by : user?.id,
+    updated_by: user?.id,
+    created_by_legacy: values.created_by_legacy ?? null,
+    updated_by_legacy: values.updated_by_legacy ?? null,
     convenio_id: toNumber(values.convenio_id),
     associado_id: toNumber(values.associado_id),
     dependente_id: toNumber(values.dependente_id),

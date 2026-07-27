@@ -239,10 +239,10 @@ export type EmpresaContribuicaoLista = EmpresaContribuicao & {
 
 export type AtendimentoMedico = {
   id: number;
-  created_by: number;
-  updated_by: number;
-  created_by_profile_id: string | null;
-  updated_by_profile_id: string | null;
+  created_by: string | null;
+  updated_by: string | null;
+  created_by_legacy: number | null;
+  updated_by_legacy: number | null;
   convenio_id: number;
   associado_id: number;
   dependente_id: number;
@@ -266,6 +266,8 @@ export type AtendimentoMedicoLista = AtendimentoMedico & {
   nm_associado: string | null;
   matricula: string | null;
   nm_dependente: string | null;
+  created_by_codinome: string | null;
+  created_by_nome: string | null;
   updated_by_codinome: string | null;
   updated_by_nome: string | null;
 };
