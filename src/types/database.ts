@@ -7,6 +7,7 @@ export type Database = {
       associados_contribuicoes: { Row: AssociadoContribuicao; Insert: AssociadoContribuicaoInsert; Update: Partial<AssociadoContribuicaoInsert> };
       associados_dependentes: { Row: AssociadoDependente; Insert: AssociadoDependenteInsert; Update: Partial<AssociadoDependenteInsert> };
       auxiliares: { Row: Auxiliar; Insert: AuxiliarInsert; Update: Partial<AuxiliarInsert> };
+      atendimento_medico: { Row: AtendimentoMedico; Insert: AtendimentoMedicoInsert; Update: Partial<AtendimentoMedicoInsert> };
       atendimento_medico_convenios: { Row: AtendimentoMedicoConvenio; Insert: AtendimentoMedicoConvenioInsert; Update: Partial<AtendimentoMedicoConvenioInsert> };
       atendimento_medico_especialidades: { Row: AtendimentoMedicoEspecialidade; Insert: AtendimentoMedicoEspecialidadeInsert; Update: Partial<AtendimentoMedicoEspecialidadeInsert> };
       cnaes: { Row: Cnae; Insert: CnaeInsert; Update: Partial<CnaeInsert> };
@@ -233,6 +234,33 @@ export type EmpresaContribuicaoInsert = Omit<EmpresaContribuicao, "id" | "create
 
 export type EmpresaContribuicaoLista = EmpresaContribuicao & {
   contribuicao: Pick<Contribuicao, "tipo" | "nm_contribuicao" | "valor_base"> | null;
+};
+
+export type AtendimentoMedico = {
+  id: number;
+  created_by: number;
+  updated_by: number;
+  convenio_id: number;
+  associado_id: number;
+  dependente_id: number;
+  qtd: number;
+  created_at: string;
+  updated_at: string;
+  dt_agendado: string;
+  situacao: string;
+  tipo: string;
+  obs: string | null;
+};
+
+export type AtendimentoMedicoInsert = Omit<AtendimentoMedico, "id" | "created_at" | "updated_at"> & {
+  id?: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type AtendimentoMedicoLista = AtendimentoMedico & {
+  convenio: Pick<AtendimentoMedicoConvenio, "nm_convenio"> | null;
+  associado: Pick<Associado, "nome" | "matricula"> | null;
 };
 
 export type AtendimentoMedicoConvenio = {
