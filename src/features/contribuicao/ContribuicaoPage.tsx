@@ -125,7 +125,7 @@ export function ContribuicaoPage() {
               <span>Nome da contribuição</span>
             </label>
             <label className="field">
-              <input value={form.instrucao ?? ""} maxLength={100} onChange={(event) => setForm({ ...form, instrucao: event.target.value })} placeholder=" " />
+              <textarea rows={3} value={form.instrucao ?? ""} onChange={(event) => setForm({ ...form, instrucao: event.target.value })} placeholder=" " />
               <span>Instrução</span>
             </label>
 
