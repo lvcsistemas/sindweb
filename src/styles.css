@@ -165,8 +165,11 @@ textarea { resize: vertical; }
 .atendimento-agendamento-grid { grid-template-columns: minmax(150px, 170px) minmax(110px, 130px) minmax(140px, 1fr) minmax(150px, 170px); align-items: stretch; }
 .weekday-label { display: flex; align-items: center; min-height: 44px; padding: 0 12px; border: 1px solid #d7dee5; border-radius: 8px; background: #f8fafb; color: #465563; font-weight: 750; text-transform: capitalize; }
 .atendimento-form-panel { margin-top: 16px; margin-bottom: 16px; overflow: hidden; }
-.atendimento-form-header { display: flex; justify-content: flex-end; }
-.mini-calendar { width: 238px; display: grid; gap: 8px; border: 1px solid #d7dee5; border-radius: 8px; padding: 10px; background: #f8fafb; color: #33434f; }
+.atendimento-form-panel .form-panel { grid-template-columns: minmax(0, 1fr) minmax(220px, 260px); align-items: start; }
+.atendimento-form-header { grid-column: 2; grid-row: 1 / span 3; display: flex; justify-content: flex-end; }
+.atendimento-agendamento-grid, .atendimento-tipo-grid, .atendimento-associado-grid { grid-column: 1; }
+.atendimento-full-grid, .atendimento-form-panel .field:has(textarea), .atendimento-form-panel .form-error, .atendimento-form-panel .form-success { grid-column: 1 / -1; }
+.mini-calendar { width: 100%; display: grid; gap: 8px; border: 1px solid #d7dee5; border-radius: 8px; padding: 10px; background: #f8fafb; color: #33434f; }
 .mini-calendar-nav { display: grid; grid-template-columns: 30px 1fr 30px; gap: 8px; align-items: center; text-align: center; }
 .mini-calendar-nav .icon-button { width: 30px; height: 30px; min-height: 30px; background: #fff; color: #33434f; border-color: #cbd5dd; }
 .mini-calendar-nav strong { font-size: 0.88rem; text-transform: capitalize; }
@@ -223,6 +226,8 @@ textarea { resize: vertical; }
   .related-toolbar { grid-template-columns: 1fr; }
   .atendimento-search-grid { grid-template-columns: 1fr; }
   .atendimento-agendamento-grid { grid-template-columns: 1fr; }
+  .atendimento-form-panel .form-panel { grid-template-columns: 1fr; }
+  .atendimento-form-header, .atendimento-agendamento-grid, .atendimento-tipo-grid, .atendimento-associado-grid { grid-column: 1; grid-row: auto; }
   .atendimento-form-header { justify-content: stretch; }
   .mini-calendar { width: 100%; }
   .choice-grid, .lookup-summary div { grid-template-columns: 1fr; }

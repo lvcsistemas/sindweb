@@ -290,7 +290,7 @@ export function AtendimentoMedicoPage() {
           </label>
         </div>
 
-        <div className="form-grid">
+        <div className="form-grid atendimento-tipo-grid">
           <label className="field">
             <select value={form.tipo} onChange={(event) => setForm({ ...form, tipo: event.target.value })} required>
               <option value="">Selecione</option>
@@ -307,7 +307,7 @@ export function AtendimentoMedicoPage() {
           </label>
         </div>
 
-        <div className="form-grid">
+        <div className="form-grid atendimento-associado-grid">
           <label className="field"><input value={associadoSearch} onChange={(event) => setAssociadoSearch(event.target.value)} placeholder=" " /><span>Buscar associado</span></label>
           <label className="field">
             <select value={form.associado_id} onChange={(event) => setForm({ ...form, associado_id: Number(event.target.value), dependente_id: 0 })} required>
@@ -318,7 +318,7 @@ export function AtendimentoMedicoPage() {
           </label>
         </div>
 
-        <div className="form-grid">
+        <div className="form-grid atendimento-full-grid">
           <label className="field">
             <select value={form.dependente_id} onChange={(event) => setForm({ ...form, dependente_id: Number(event.target.value) })}>
               <option value={0}>Sem dependente</option>
@@ -331,7 +331,7 @@ export function AtendimentoMedicoPage() {
         <label className="field"><textarea rows={3} value={form.obs ?? ""} onChange={(event) => setForm({ ...form, obs: event.target.value })} placeholder=" " /><span>Observação</span></label>
         {message ? <div className={saveMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
 
-        <div className="form-actions">
+        <div className="form-actions atendimento-full-grid">
           <button type="button" className="secondary-button" onClick={() => setFormOpen(false)}>Sair</button>
           <button type="submit" disabled={saveMutation.isPending}><Save size={16} /> {saveMutation.isPending ? "Salvando..." : "Salvar"}</button>
         </div>
