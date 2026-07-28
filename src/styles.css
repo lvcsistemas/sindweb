@@ -60,7 +60,7 @@ button { cursor: pointer; }
 .breadcrumb-home, .breadcrumb-item { display: inline-flex; align-items: center; gap: 6px; }
 .breadcrumb-item span { color: #657383; font-weight: 650; }
 .dashboard-header, .module-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; gap: 18px; }
-.dashboard-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.dashboard-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
 .dashboard-tile { min-height: 96px; background: #fff; border: 1px solid #d7dee5; border-radius: 8px; padding: 16px; display: flex; align-items: flex-start; gap: 12px; color: #1f5e49; }
 .dashboard-tile strong { display: block; color: #17202a; margin-bottom: 4px; }
 .dashboard-tile span { color: #657383; }

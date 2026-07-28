@@ -19,3 +19,11 @@ export async function countAssociados() {
   if (error) throw error;
   return count ?? 0;
 }
+export async function countDependentes() {
+  const { count, error } = await supabaseUnsafe
+    .from("associados_dependentes")
+    .select("id", { count: "exact", head: true });
+
+  if (error) throw error;
+  return count ?? 0;
+}
