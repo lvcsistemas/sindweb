@@ -1,15 +1,13 @@
-import { Building2, FileText, UsersRound } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb } from "../../shared/Breadcrumb";
-import { getConfig } from "../config/configApi";
-import { countAssociados, countEmpresas } from "./dashboardApi";
+import { Building2, FileText, UsersRound }  from "lucide-react";
+import { useQuery }                         from "@tanstack/react-query";
+import { Breadcrumb }                       from "../../shared/Breadcrumb";
+import { getConfig }                        from "../config/configApi";
+import { countAssociados, countEmpresas }   from "./dashboardApi";
 
 function formatDateBr(value: string | null | undefined) {
   if (!value) return "-";
-
   const date = value.includes("T") ? new Date(value) : new Date(`${value}T00:00:00`);
   if (Number.isNaN(date.getTime())) return "-";
-
   return new Intl.DateTimeFormat("pt-BR").format(date);
 }
 
@@ -18,20 +16,14 @@ function formatNumber(value: number | null | undefined) {
 }
 
 export function DashboardPage() {
-  const configQuery = useQuery({ queryKey: ["config"], queryFn: getConfig });
-  const empresasQuery = useQuery({ queryKey: ["dashboard-empresas-count"], queryFn: countEmpresas });
+  const configQuery     = useQuery({ queryKey: ["config"], queryFn: getConfig });
+  const empresasQuery   = useQuery({ queryKey: ["dashboard-empresas-count"], queryFn: countEmpresas });
   const associadosQuery = useQuery({ queryKey: ["dashboard-associados-count"], queryFn: countAssociados });
-  const config = configQuery.data;
+  const config          = configQuery.data;
 
   return (
     <main className="dashboard-page">
       <Breadcrumb items={[]} />
-      <section className="dashboard-header">
-        <div>
-          <h1>Painel Principal</h1>
-          <p>Visao inicial do SindWeb. Use o menu lateral para acessar os modulos do sistema.</p>
-        </div>
-      </section>
 
       <section className="dashboard-grid">
         <article className="dashboard-tile dashboard-info-tile">
