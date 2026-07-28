@@ -8,7 +8,7 @@ import { listAtendimentoMedicoConvenios }                       from "../atendim
 import { listAtendimentoMedicoEspecialidadesByTipo }            from "../atendimentoMedicoEspecialidade/atendimentoMedicoEspecialidadeApi";
 import { listDependentesByAssociado }                           from "../dependentes/dependentesApi";
 import { listUsuarios }                                         from "../usuarios/usuariosApi";
-import { listAtendimentosMedicos, saveAtendimentoMedico, type AtendimentoMedicoFilters, type AtendimentoMedicoSearchType } from "./atendimentoMedicoApi";
+import { getAtendimentoAssociadoResumo, listAtendimentosMedicos, saveAtendimentoMedico, type AtendimentoAssociadoResumo, type AtendimentoMedicoFilters, type AtendimentoMedicoSearchType } from "./atendimentoMedicoApi";
 
 const pesquisaOptions: Array<{ value: AtendimentoMedicoSearchType; label: string }> = [
   { value: "T",                 label: "TODOS" },
@@ -111,6 +111,23 @@ function formatDateTime(value: string | null | undefined) {
   return `${day}/${month}/${year} ${time}`;
 }
 
+function formatDate(value: string | null | undefined) {
+  if (!value) return "-";
+  const [year, month, day] = value.slice(0, 10).split("-");
+  return `${day}/${month}/${year}`;
+}
+
+function calculateAge(value: string | null | undefined) {
+  if (!value) return "-";
+  const birth = new Date(`${value.slice(0, 10)}T00:00:00`);
+  if (Number.isNaN(birth.getTime())) return "-";
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age -= 1;
+  return `${age}`;
+}
+
 function getAtendimentoRowClass(item: AtendimentoMedicoLista) {
   const situacao = item.situacao?.toUpperCase();
   const agendado = new Date(toDateTimeLocal(item.dt_agendado));
@@ -157,6 +174,11 @@ export function AtendimentoMedicoPage() {
   const especialidadesQuery = useQuery({ queryKey: ["atendimento-medico-especialidades", "ESPECIALIDADE"], queryFn: () => listAtendimentoMedicoEspecialidadesByTipo("ESPECIALIDADE") });
   const associadosQuery     = useQuery({ queryKey: ["atendimento-medico-associados", associadoSearch], queryFn: () => listAssociados(associadoSearch), enabled: formOpen });
   const usuariosQuery       = useQuery({ queryKey: ["usuarios"], queryFn: listUsuarios });
+  const associadoResumoQuery = useQuery({
+    queryKey: ["atendimento-associado-resumo", form.associado_id],
+    queryFn: () => getAtendimentoAssociadoResumo(Number(form.associado_id)),
+    enabled: Boolean(form.associado_id)
+  });
   const dependentesQuery    = useQuery({
     queryKey: ["atendimento-medico-dependentes", form.associado_id],
     queryFn: () => listDependentesByAssociado(Number(form.associado_id)),
@@ -168,6 +190,7 @@ export function AtendimentoMedicoPage() {
   const especialidades  = especialidadesQuery.data  ?? [];
   const associados      = associadosQuery.data      ?? [];
   const usuarios        = usuariosQuery.data        ?? [];
+  const associadoResumo = associadoResumoQuery.data ?? null;
   const dependentes     = dependentesQuery.data     ?? [];
   const selected        = atendimentos.find((item) => item.id === selectedId) ?? null;
   const calendarDays    = useMemo(() => buildCalendarDays(calendarMonth), [calendarMonth]);
@@ -244,6 +267,58 @@ export function AtendimentoMedicoPage() {
     saveMutation.mutate(form);
   }
 
+  function renderAssociadoResumoCard(resumo: AtendimentoAssociadoResumo | null) {
+    if (!form.associado_id) return null;
+
+    return (
+      <section className="detail-card atendimento-associado-card">
+        <div className="detail-card-title"><strong>Dados do Associado</strong></div>
+        <div className="detail-card-body">
+          {associadoResumoQuery.isLoading ? <div className="empty-state">Carregando dados do associado...</div> : null}
+          {!associadoResumoQuery.isLoading && resumo ? <>
+            <div className="info-grid associado-info-grid">
+              <div><span>Matrícula</span><strong>{resumo.matricula ?? "-"}</strong></div>
+              <div><span>Situação</span><strong>{resumo.situacao ?? "-"}</strong></div>
+              <div><span>Data de Filiação</span><strong>{formatDate(resumo.data_filiacao)}</strong></div>
+              <div><span>Idade</span><strong>{calculateAge(resumo.data_nascimento)}</strong></div>
+              <div><span>Telefone 1</span><strong>{resumo.tel1 ?? "-"}</strong></div>
+              <div><span>Telefone 2</span><strong>{resumo.tel2 ?? "-"}</strong></div>
+              <div><span>Consultas no Mês</span><strong>{resumo.consultas_mes}</strong></div>
+              <div><span>Exames no Mês</span><strong>{resumo.exames_mes}</strong></div>
+              <div><span>Empresa</span><strong>{resumo.empresa_id ? `${resumo.empresa_id} - ${resumo.empresa_nome ?? "-"}` : "-"}</strong></div>
+              <div><span>Convenção</span><strong>{resumo.convencao ?? "-"}</strong></div>
+              <div><span>Local Pagamento</span><strong>{resumo.local_pagamento ?? "-"}</strong></div>
+              <div className="info-wide"><span>Observação</span><strong>{resumo.observacao ?? "-"}</strong></div>
+            </div>
+
+            <div className="data-table-wrap">
+              <table className="data-table associado-contribuicoes-table">
+                <thead>
+                  <tr>
+                    <th>Tipo</th>
+                    <th>Contribuição</th>
+                    <th>Data de Pagamento</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {resumo.contribuicoes.map((item) => (
+                    <tr key={item.id}>
+                      <td>{item.contribuicao?.tipo ?? "-"}</td>
+                      <td>{item.contribuicao?.nm_contribuicao ?? "-"}</td>
+                      <td>{formatDate(item.dt_pg)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {resumo.contribuicoes.length === 0 ? <div className="empty-state">Nenhuma contribuição cadastrada.</div> : null}
+            </div>
+          </> : null}
+          {!associadoResumoQuery.isLoading && associadoResumoQuery.isError ? <div className="form-error">Não foi possível carregar os dados do associado.</div> : null}
+        </div>
+      </section>
+    );
+  }
+
   const atendimentoForm = formOpen ? (
     <section className="detail-panel atendimento-form-panel">
       <form className="form-panel" onSubmit={handleSubmit}>
@@ -316,6 +391,10 @@ export function AtendimentoMedicoPage() {
             </select>
             <span>Associado</span>
           </label>
+        </div>
+
+        <div className="form-grid atendimento-full-grid">
+          {renderAssociadoResumoCard(associadoResumo)}
         </div>
 
         <div className="form-grid atendimento-full-grid">

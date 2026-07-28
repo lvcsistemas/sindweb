@@ -1,5 +1,5 @@
 import { supabase } from "../../lib/supabase";
-import type { AtendimentoMedicoInsert, AtendimentoMedicoLista } from "../../types/database";
+import type { AssociadoContribuicaoLista, AtendimentoMedicoInsert, AtendimentoMedicoLista } from "../../types/database";
 
 const supabaseUnsafe = supabase as any;
 
@@ -36,6 +36,24 @@ export type AtendimentoMedicoFilters = {
   valor: string;
 };
 
+export type AtendimentoAssociadoResumo = {
+  id: number;
+  matricula: string | null;
+  situacao: string | null;
+  data_filiacao: string | null;
+  data_nascimento: string | null;
+  tel1: string | null;
+  tel2: string | null;
+  empresa_id: number | null;
+  empresa_nome: string | null;
+  convencao: string | null;
+  local_pagamento: string | null;
+  observacao: string | null;
+  consultas_mes: number;
+  exames_mes: number;
+  contribuicoes: AssociadoContribuicaoLista[];
+};
+
 function toNumber(value: number | string | null | undefined, fallback = 0) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -50,6 +68,17 @@ const tipoFilters = new Set(["AURICULOTERAPIA", "CARDIOLOGIA", "CLINICO GERAL", 
 
 function dateEnd(value: string) {
   return value ? value : new Date().toISOString();
+}
+
+function currentMonthRange() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const toLocal = (date: Date) => {
+    const offsetMs = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - offsetMs).toISOString().slice(0, 19);
+  };
+  return { start: toLocal(start), end: toLocal(end) };
 }
 
 export async function listAtendimentosMedicos(filters: AtendimentoMedicoFilters) {
@@ -134,4 +163,82 @@ export async function saveAtendimentoMedico(values: AtendimentoMedicoInsert) {
     .single();
   raiseSupabaseError(error);
   return data as AtendimentoMedicoLista;
+}
+
+export async function getAtendimentoAssociadoResumo(associadoId: number) {
+  const { start, end } = currentMonthRange();
+
+  const { data: associado, error: associadoError } = await supabaseUnsafe
+    .from("associados")
+    .select("id, matricula, situacao_id, data_cadastro, data_nascimento, tel1, tel2, empresa_id, local_pagamento_id, observacao")
+    .eq("id", associadoId)
+    .single();
+  raiseSupabaseError(associadoError);
+
+  const empresaId = associado?.empresa_id ? Number(associado.empresa_id) : 0;
+  const situacaoId = associado?.situacao_id ? Number(associado.situacao_id) : 0;
+  const localPagamentoId = associado?.local_pagamento_id ? Number(associado.local_pagamento_id) : 0;
+
+  const [
+    empresaResult,
+    situacaoResult,
+    localPagamentoResult,
+    consultasResult,
+    examesResult,
+    contribuicoesResult
+  ] = await Promise.all([
+    empresaId ? supabaseUnsafe.from("empresas").select("id, nm_fantasia, convencao_id").eq("id", empresaId).maybeSingle() : Promise.resolve({ data: null, error: null }),
+    situacaoId ? supabaseUnsafe.from("auxiliares").select("nome").eq("id", situacaoId).maybeSingle() : Promise.resolve({ data: null, error: null }),
+    localPagamentoId ? supabaseUnsafe.from("auxiliares").select("nome").eq("id", localPagamentoId).maybeSingle() : Promise.resolve({ data: null, error: null }),
+    supabaseUnsafe.from("atendimento_medico").select("id", { count: "exact", head: true }).eq("associado_id", associadoId).gte("dt_agendado", start).lt("dt_agendado", end).ilike("tipo", "%CONSULTA%"),
+    supabaseUnsafe.from("atendimento_medico").select("id", { count: "exact", head: true }).eq("associado_id", associadoId).gte("dt_agendado", start).lt("dt_agendado", end).ilike("tipo", "%EXAME%"),
+    supabaseUnsafe
+      .from("associados_contribuicoes")
+      .select(`
+        id,
+        associado_id,
+        contribuicao_id,
+        created_at,
+        dt_pg,
+        contribuicao:contribuicoes!associados_contribuicoes_contribuicao_id_fkey (
+          tipo,
+          nm_contribuicao,
+          valor_base
+        )
+      `)
+      .eq("associado_id", associadoId)
+      .order("dt_pg", { ascending: false })
+  ]);
+
+  raiseSupabaseError(empresaResult.error);
+  raiseSupabaseError(situacaoResult.error);
+  raiseSupabaseError(localPagamentoResult.error);
+  raiseSupabaseError(consultasResult.error);
+  raiseSupabaseError(examesResult.error);
+  raiseSupabaseError(contribuicoesResult.error);
+
+  const empresa = empresaResult.data;
+  const convencaoId = empresa?.convencao_id ? Number(empresa.convencao_id) : 0;
+  const { data: convencao, error: convencaoError } = convencaoId
+    ? await supabaseUnsafe.from("auxiliares").select("nome").eq("id", convencaoId).maybeSingle()
+    : { data: null, error: null };
+  raiseSupabaseError(convencaoError);
+
+  return {
+    id: associado.id,
+    matricula: associado.matricula,
+    situacao: situacaoResult.data?.nome ?? null,
+    data_filiacao: associado.data_cadastro,
+    data_nascimento: associado.data_nascimento,
+    tel1: associado.tel1,
+    tel2: associado.tel2,
+    empresa_id: empresa?.id ?? null,
+    empresa_nome: empresa?.nm_fantasia ?? null,
+    convencao: convencao?.nome ?? null,
+    local_pagamento: localPagamentoResult.data?.nome ?? null,
+    observacao: associado.observacao,
+    consultas_mes: consultasResult.count ?? 0,
+    exames_mes: examesResult.count ?? 0,
+    contribuicoes: (contribuicoesResult.data ?? []) as AssociadoContribuicaoLista[]
+  } satisfies AtendimentoAssociadoResumo;
 }

@@ -143,6 +143,14 @@ textarea { resize: vertical; }
 .detail-card-title strong { font-size: 0.95rem; }
 .detail-card-title .icon-button { width: 30px; height: 30px; min-height: 30px; flex: 0 0 auto; }
 .detail-card-body { display: grid; gap: 12px; min-height: 42px; border-top: 1px solid #e5ebf0; background: #f8fafb; padding: 12px; }
+.atendimento-associado-card { grid-column: 1 / -1; }
+.info-grid { display: grid; gap: 10px; }
+.associado-info-grid { grid-template-columns: repeat(4, minmax(140px, 1fr)); }
+.info-grid div { min-width: 0; display: grid; gap: 3px; border: 1px solid #d7dee5; border-radius: 6px; background: #fff; padding: 9px 10px; }
+.info-grid span { color: #657383; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; }
+.info-grid strong { min-width: 0; color: #17202a; font-size: 0.92rem; overflow-wrap: anywhere; }
+.info-grid .info-wide { grid-column: span 2; }
+.associado-contribuicoes-table { min-width: 520px; }
 .form-grid.residence-cep-grid { grid-template-columns: minmax(140px, 180px); }
 .form-grid.residence-address-grid { grid-template-columns: minmax(220px, 1fr) minmax(100px, 140px) minmax(160px, 220px); }
 .form-grid.residence-city-grid { grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) minmax(70px, 90px); }
@@ -223,6 +231,8 @@ textarea { resize: vertical; }
   .form-grid.contatos-phone-grid, .form-grid.contatos-email-grid { grid-template-columns: 1fr; }
   .form-grid.identificacao-birth-grid, .form-grid.identificacao-civil-grid, .form-grid.identificacao-parents-grid, .form-grid.identificacao-rg-grid, .form-grid.identificacao-titulo-grid, .form-grid.identificacao-ctps-grid { grid-template-columns: 1fr; }
   .form-grid.classe-empresa-grid, .form-grid.classe-matricula-grid, .form-grid.classe-local-pagamento-grid, .form-grid.classe-local-trabalho-grid, .form-grid.classe-profissional-grid { grid-template-columns: 1fr; }
+  .associado-info-grid { grid-template-columns: 1fr; }
+  .info-grid .info-wide { grid-column: auto; }
   .related-toolbar { grid-template-columns: 1fr; }
   .atendimento-search-grid { grid-template-columns: 1fr; }
   .atendimento-agendamento-grid { grid-template-columns: 1fr; }
