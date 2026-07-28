@@ -1,7 +1,8 @@
-import { Building2, ClipboardList, FileText } from "lucide-react";
+import { Building2, FileText, UsersRound } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Breadcrumb } from "../../shared/Breadcrumb";
 import { getConfig } from "../config/configApi";
+import { countAssociados, countEmpresas } from "./dashboardApi";
 
 function formatDateBr(value: string | null | undefined) {
   if (!value) return "-";
@@ -12,8 +13,14 @@ function formatDateBr(value: string | null | undefined) {
   return new Intl.DateTimeFormat("pt-BR").format(date);
 }
 
+function formatNumber(value: number | null | undefined) {
+  return new Intl.NumberFormat("pt-BR").format(value ?? 0);
+}
+
 export function DashboardPage() {
   const configQuery = useQuery({ queryKey: ["config"], queryFn: getConfig });
+  const empresasQuery = useQuery({ queryKey: ["dashboard-empresas-count"], queryFn: countEmpresas });
+  const associadosQuery = useQuery({ queryKey: ["dashboard-associados-count"], queryFn: countAssociados });
   const config = configQuery.data;
 
   return (
@@ -27,7 +34,7 @@ export function DashboardPage() {
       </section>
 
       <section className="dashboard-grid">
-        <article className="dashboard-tile dashboard-contract-tile">
+        <article className="dashboard-tile dashboard-info-tile">
           <FileText size={22} />
           <div>
             <strong>CONTRATO</strong>
@@ -36,18 +43,20 @@ export function DashboardPage() {
             <span>{configQuery.isLoading ? "Carregando..." : formatDateBr(config?.dt_vencimento)}</span>
           </div>
         </article>
-        <article className="dashboard-tile muted">
+        <article className="dashboard-tile dashboard-info-tile muted">
           <Building2 size={22} />
           <div>
-            <strong>Empresas</strong>
-            <span>Proximo modulo de cadastro.</span>
+            <strong>EMPRESAS</strong>
+            <span>{empresasQuery.isLoading ? "Carregando..." : formatNumber(empresasQuery.data)}</span>
           </div>
         </article>
-        <article className="dashboard-tile muted">
-          <ClipboardList size={22} />
+        <article className="dashboard-tile dashboard-info-tile muted">
+          <UsersRound size={22} />
           <div>
-            <strong>Financeiro</strong>
-            <span>Planejado para etapa posterior.</span>
+            <strong>ASSOCIADOS</strong>
+            <span>{associadosQuery.isLoading ? "Carregando..." : formatNumber(associadosQuery.data)}</span>
+            <strong>ULTIMA MATRICULA</strong>
+            <span>{configQuery.isLoading ? "Carregando..." : formatNumber(config?.ultima_matricula)}</span>
           </div>
         </article>
       </section>
