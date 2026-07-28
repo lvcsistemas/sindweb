@@ -1,9 +1,9 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Save, Search, Trash2 } from "lucide-react";
+import { Plus, Save, Search } from "lucide-react";
 import { Breadcrumb } from "../../shared/Breadcrumb";
 import type { AtendimentoMedicoExame, AtendimentoMedicoExameInsert } from "../../types/database";
-import { ATENDIMENTO_MEDICO_EXAME_TIPOS, deleteAtendimentoMedicoExame, listAtendimentoMedicoExames, saveAtendimentoMedicoExame } from "./atendimentoMedicoExamesApi";
+import { ATENDIMENTO_MEDICO_EXAME_TIPOS, listAtendimentoMedicoExames, saveAtendimentoMedicoExame } from "./atendimentoMedicoExamesApi";
 
 const emptyForm: AtendimentoMedicoExameInsert = {
   tipo: "FEZES/URINA",
@@ -12,9 +12,11 @@ const emptyForm: AtendimentoMedicoExameInsert = {
 
 export function AtendimentoMedicoExamesPage() {
   const queryClient = useQueryClient();
+  const exameRef = useRef<HTMLInputElement>(null);
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [creatingNew, setCreatingNew] = useState(false);
+  const [lastTipo, setLastTipo] = useState(emptyForm.tipo);
   const [form, setForm] = useState<AtendimentoMedicoExameInsert>(emptyForm);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -25,7 +27,7 @@ export function AtendimentoMedicoExamesPage() {
 
   useEffect(() => {
     if (!selected) {
-      setForm(emptyForm);
+      setForm({ ...emptyForm, tipo: lastTipo });
       return;
     }
 
@@ -34,38 +36,38 @@ export function AtendimentoMedicoExamesPage() {
       tipo: selected.tipo,
       exame: selected.exame
     });
-  }, [selected]);
+    setLastTipo(selected.tipo);
+  }, [selected, lastTipo]);
+
+  useEffect(() => {
+    if (formOpen) {
+      exameRef.current?.focus();
+      exameRef.current?.select();
+    }
+  }, [formOpen, selectedId, creatingNew]);
 
   const saveMutation = useMutation({
     mutationFn: saveAtendimentoMedicoExame,
     onSuccess: async (saved) => {
-      setSelectedId(saved.id);
+      setLastTipo(saved.tipo);
+      setSelectedId(null);
       setCreatingNew(false);
+      setSearch(saved.tipo);
+      setForm({ ...emptyForm, tipo: saved.tipo });
       setMessage("Exame salvo com sucesso.");
       await queryClient.invalidateQueries({ queryKey: ["atendimento-medico-exames"] });
     },
     onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel salvar o exame.")
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteAtendimentoMedicoExame,
-    onSuccess: async () => {
-      setSelectedId(null);
-      setCreatingNew(false);
-      setForm(emptyForm);
-      setMessage("Exame excluido com sucesso.");
-      await queryClient.invalidateQueries({ queryKey: ["atendimento-medico-exames"] });
-    },
-    onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel excluir o exame.")
-  });
-
   const totalLabel = useMemo(() => `${exames.length} registro${exames.length === 1 ? "" : "s"}`, [exames.length]);
 
   function handleNew() {
+    const tipo = form.tipo || lastTipo || emptyForm.tipo;
     setSelectedId(null);
     setCreatingNew(true);
     setMessage(null);
-    setForm(emptyForm);
+    setForm({ ...emptyForm, tipo });
   }
 
   function handleSelect(item: AtendimentoMedicoExame) {
@@ -77,13 +79,7 @@ export function AtendimentoMedicoExamesPage() {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage(null);
-    saveMutation.mutate(form);
-  }
-
-  function handleDelete() {
-    if (!form.id) return;
-    if (!window.confirm(`Deseja excluir "${form.exame}"?`)) return;
-    deleteMutation.mutate(form.id);
+    saveMutation.mutate({ ...form, exame: form.exame.toUpperCase() });
   }
 
   return (
@@ -118,20 +114,22 @@ export function AtendimentoMedicoExamesPage() {
         {formOpen ? <div className="detail-panel">
           <form className="form-panel" onSubmit={handleSubmit}>
             <label className="field">
-              <select value={form.tipo} onChange={(event) => setForm({ ...form, tipo: event.target.value })}>
+              <select value={form.tipo} onChange={(event) => {
+                setLastTipo(event.target.value);
+                setForm({ ...form, tipo: event.target.value });
+              }}>
                 {ATENDIMENTO_MEDICO_EXAME_TIPOS.map((tipo) => <option key={tipo} value={tipo}>{tipo}</option>)}
               </select>
               <span>Tipo</span>
             </label>
             <label className="field">
-              <input value={form.exame} maxLength={100} onChange={(event) => setForm({ ...form, exame: event.target.value })} placeholder=" " required />
+              <input ref={exameRef} value={form.exame} maxLength={100} onChange={(event) => setForm({ ...form, exame: event.target.value.toUpperCase() })} placeholder=" " required />
               <span>Exame</span>
             </label>
 
-            {message ? <div className={saveMutation.isError || deleteMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
+            {message ? <div className={saveMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
 
             <div className="form-actions">
-              {form.id ? <button type="button" className="danger-button" onClick={handleDelete} disabled={deleteMutation.isPending}><Trash2 size={16} /> Excluir</button> : null}
               <button type="submit" disabled={saveMutation.isPending}><Save size={16} /> {saveMutation.isPending ? "Salvando..." : "Salvar"}</button>
             </div>
           </form>
