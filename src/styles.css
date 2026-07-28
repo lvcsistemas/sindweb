@@ -65,6 +65,8 @@ button { cursor: pointer; }
 .dashboard-tile strong { display: block; color: #17202a; margin-bottom: 4px; }
 .dashboard-tile span { color: #657383; }
 .dashboard-tile.muted { color: #53616f; }
+.dashboard-contract-tile div { display: grid; gap: 3px; }
+.dashboard-contract-tile strong + span { margin-bottom: 8px; }
 h1 { margin: 0 0 4px; font-size: 1.6rem; }
 p { margin: 0; color: #657383; }
 button, .secondary-button { border: 1px solid #1b6b50; background: #1f7a5b; color: #fff; min-height: 38px; padding: 0 14px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 650; }
