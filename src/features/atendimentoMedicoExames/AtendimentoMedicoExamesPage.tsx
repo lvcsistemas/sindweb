@@ -1,7 +1,7 @@
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Save, Search } from "lucide-react";
-import { Breadcrumb } from "../../shared/Breadcrumb";
+import { FormEvent, useEffect, useMemo, useRef, useState }  from "react";
+import { useMutation, useQuery, useQueryClient }            from "@tanstack/react-query";
+import { Plus, Save, Search }                               from "lucide-react";
+import { Breadcrumb }                                       from "../../shared/Breadcrumb";
 import type { AtendimentoMedicoExame, AtendimentoMedicoExameInsert } from "../../types/database";
 import { ATENDIMENTO_MEDICO_EXAME_TIPOS, listAtendimentoMedicoExames, saveAtendimentoMedicoExame } from "./atendimentoMedicoExamesApi";
 
@@ -11,19 +11,19 @@ const emptyForm: AtendimentoMedicoExameInsert = {
 };
 
 export function AtendimentoMedicoExamesPage() {
-  const queryClient = useQueryClient();
-  const exameRef = useRef<HTMLInputElement>(null);
-  const [search, setSearch] = useState("");
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const queryClient                   = useQueryClient();
+  const exameRef                      = useRef<HTMLInputElement>(null);
+  const [search, setSearch]           = useState("");
+  const [selectedId, setSelectedId]   = useState<number | null>(null);
   const [creatingNew, setCreatingNew] = useState(false);
-  const [lastTipo, setLastTipo] = useState(emptyForm.tipo);
-  const [form, setForm] = useState<AtendimentoMedicoExameInsert>(emptyForm);
-  const [message, setMessage] = useState<string | null>(null);
+  const [lastTipo, setLastTipo]       = useState(emptyForm.tipo);
+  const [form, setForm]               = useState<AtendimentoMedicoExameInsert>(emptyForm);
+  const [message, setMessage]         = useState<string | null>(null);
 
   const examesQuery = useQuery({ queryKey: ["atendimento-medico-exames", search], queryFn: () => listAtendimentoMedicoExames(search) });
-  const exames = examesQuery.data ?? [];
-  const selected = exames.find((item) => item.id === selectedId) ?? null;
-  const formOpen = creatingNew || Boolean(selectedId);
+  const exames      = examesQuery.data ?? [];
+  const selected    = exames.find((item) => item.id === selectedId) ?? null;
+  const formOpen    = creatingNew || Boolean(selectedId);
 
   useEffect(() => {
     if (!selected) {
@@ -87,8 +87,8 @@ export function AtendimentoMedicoExamesPage() {
       <Breadcrumb items={[{ label: "Cadastros" }, { label: "Atendimento Medico Exames" }]} />
       <section className="module-header">
         <div>
-          <h1>Atendimento Medico Exames</h1>
-          <p>Cadastro de exames utilizados no atendimento medico.</p>
+          <h1>Atendimento Médico Exames</h1>
+          <p>Cadastro de exames.</p>
         </div>
         <button onClick={handleNew}><Plus size={16} /> Novo</button>
       </section>
