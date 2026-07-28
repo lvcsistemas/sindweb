@@ -318,7 +318,7 @@ export function AtendimentoMedicoPage() {
           </label>
         </div>
 
-        <div className="form-grid compact">
+        <div className="form-grid">
           <label className="field">
             <select value={form.dependente_id} onChange={(event) => setForm({ ...form, dependente_id: Number(event.target.value) })}>
               <option value={0}>Sem dependente</option>
