@@ -212,13 +212,30 @@ export type ContribuicaoInsert = Omit<Contribuicao, "id" | "created_at" | "updat
 
 export type Config = {
   id: number;
+  cpf_cnpj: string | null;
+  dt_vencimento: string | null;
+  razao_social: string | null;
+  nm_fantasia: string | null;
+  nm_diretor: string | null;
+  email: string | null;
+  telefone: string | null;
+  cep: string | null;
+  endereco: string | null;
+  numero: string | null;
+  complemento: string | null;
+  bairro: string | null;
+  cidade: string | null;
+  uf: string | null;
+  obs: string | null;
   ultima_matricula: number;
+  qtd_exames: number;
+  qtd_consultas: number;
   created_at: string;
   updated_at: string;
 };
 
 export type ConfigInsert = Omit<Config, "id" | "created_at" | "updated_at"> & { id?: number };
-export type ConfigUpdate = Pick<Config, "ultima_matricula">;
+export type ConfigUpdate = Partial<ConfigInsert>;
 
 export type EmpresaContribuicao = {
   id: number;
@@ -380,4 +397,3 @@ export type LookupItem = {
   legacy_id: number | null;
   created_at: string;
 };
-
