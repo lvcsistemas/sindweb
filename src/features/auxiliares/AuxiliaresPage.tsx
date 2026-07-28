@@ -1,10 +1,10 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Save, Search, Trash2 } from "lucide-react";
+import { Plus, Save, Search } from "lucide-react";
 import { Breadcrumb } from "../../shared/Breadcrumb";
 import type { Auxiliar, AuxiliarInsert } from "../../types/database";
-import { deleteAuxiliar, listAuxiliares, saveAuxiliar } from "./auxiliaresApi";
+import { listAuxiliares, saveAuxiliar } from "./auxiliaresApi";
 import { getAuxiliarGrupoByPath } from "./auxiliaresConfig";
 
 function emptyForm(grupo: string): AuxiliarInsert {
@@ -80,18 +80,6 @@ export function AuxiliaresPage() {
     onError: (error) => setMessage(error instanceof Error ? error.message : "Não foi possível salvar o auxiliar.")
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteAuxiliar,
-    onSuccess: async () => {
-      setSelectedId(null);
-      setCreatingNew(false);
-      setForm(emptyForm(grupoConfig!.key));
-      setMessage("Auxiliar excluído com sucesso.");
-      await queryClient.invalidateQueries({ queryKey: ["auxiliares", grupoConfig?.key] });
-    },
-    onError: (error) => setMessage(error instanceof Error ? error.message : "Não foi possível excluir o auxiliar.")
-  });
-
   const totalLabel = useMemo(() => `${auxiliares.length} registro${auxiliares.length === 1 ? "" : "s"}`, [auxiliares.length]);
 
   if (!grupoConfig) {
@@ -109,11 +97,6 @@ export function AuxiliaresPage() {
     setSelectedId(item.id);
     setCreatingNew(false);
     setMessage(null);
-  }
-
-  function handleDeleteFromList(id: number, nome: string) {
-    if (!window.confirm(`Deseja excluir "${nome}"?`)) return;
-    deleteMutation.mutate(id);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -154,15 +137,6 @@ export function AuxiliaresPage() {
                   <strong>{item.nome}</strong>
                   <span>Ordem {item.ordem} · {item.ativo === "S" ? "Ativo" : "Inativo"}</span>
                 </div>
-                <button className="icon-button danger-icon" 
-                  title="Excluir" 
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleDeleteFromList(item.id, item.nome);
-                  }}
-                  disabled={deleteMutation.isPending}>
-                  <Trash2 size={16} />
-                </button>
               </div>
 
             ))}
@@ -190,7 +164,7 @@ export function AuxiliaresPage() {
               <span>Nome</span>
             </label>
 
-            {message ? <div className={saveMutation.isError || deleteMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
+            {message ? <div className={saveMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
 
             <div className="form-actions">
               <button type="submit" disabled={saveMutation.isPending}><Save size={16} /> {saveMutation.isPending ? "Salvando..." : "Salvar"}</button>

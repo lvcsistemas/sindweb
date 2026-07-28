@@ -1,9 +1,9 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Save, Search, Trash2 } from "lucide-react";
+import { Plus, Save, Search } from "lucide-react";
 import { Breadcrumb } from "../../shared/Breadcrumb";
 import type { Cnae, CnaeInsert } from "../../types/database";
-import { deleteCnae, listCnaes, saveCnae } from "./cnaeApi";
+import { listCnaes, saveCnae } from "./cnaeApi";
 
 const emptyForm: CnaeInsert = {
   codigo_cnae: "",
@@ -47,18 +47,6 @@ export function CnaePage() {
     onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel salvar o CNAE.")
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteCnae,
-    onSuccess: async () => {
-      setSelectedId(null);
-      setCreatingNew(false);
-      setForm(emptyForm);
-      setMessage("CNAE excluido com sucesso.");
-      await queryClient.invalidateQueries({ queryKey: ["cnaes"] });
-    },
-    onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel excluir o CNAE.")
-  });
-
   const totalLabel = useMemo(() => `${cnaes.length} registro${cnaes.length === 1 ? "" : "s"}`, [cnaes.length]);
 
   function handleNew() {
@@ -80,18 +68,8 @@ export function CnaePage() {
     saveMutation.mutate(form);
   }
 
-  function handleDelete() {
-    if (!form.id) return;
-    if (!window.confirm("Deseja excluir este CNAE?")) return;
-    deleteMutation.mutate(form.id);
-  }
-
-  function handleDeleteFromList(id: number, nome: string) {
-    if (!window.confirm(`Deseja excluir "${nome}"?`)) return;
-    deleteMutation.mutate(id);
-  }
-
   return (
+
     <main className="module-page">
       <Breadcrumb items={[{ label: "Cadastros" }, { label: "CNAE" }]} />
       <section className="module-header">
@@ -123,15 +101,6 @@ export function CnaePage() {
                   <strong>{item.codigo_cnae}</strong>
                   <span>{item.descricao}</span>
                 </div>
-                <button className="icon-button danger-icon" 
-                  title="Excluir" 
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleDeleteFromList(item.id, item.codigo_cnae);
-                  }}
-                  disabled={deleteMutation.isPending}>
-                  <Trash2 size={16} />
-                </button>
               </div>
             ))}
             {!cnaesQuery.isLoading && cnaes.length === 0 ? <div className="empty-state">Nenhum CNAE encontrado.</div> : null}
@@ -149,7 +118,7 @@ export function CnaePage() {
               <span>Descrição</span>
             </label>
 
-            {message ? <div className={saveMutation.isError || deleteMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
+            {message ? <div className={saveMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
 
             <div className="form-actions">
               <button type="submit" disabled={saveMutation.isPending}><Save size={16} /> {saveMutation.isPending ? "Salvando..." : "Salvar"}</button>

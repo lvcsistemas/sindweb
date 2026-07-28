@@ -1,11 +1,10 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Save, Search, Trash2 } from "lucide-react";
+import { Plus, Save, Search } from "lucide-react";
 import { Breadcrumb } from "../../shared/Breadcrumb";
 import type { AtendimentoMedicoEspecialidade, AtendimentoMedicoEspecialidadeInsert } from "../../types/database";
 import {
   ATENDIMENTO_MEDICO_ESPECIALIDADE_TIPOS,
-  deleteAtendimentoMedicoEspecialidade,
   listAtendimentoMedicoEspecialidades,
   saveAtendimentoMedicoEspecialidade
 } from "./atendimentoMedicoEspecialidadeApi";
@@ -52,18 +51,6 @@ export function AtendimentoMedicoEspecialidadePage() {
     onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel salvar a especialidade.")
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteAtendimentoMedicoEspecialidade,
-    onSuccess: async () => {
-      setSelectedId(null);
-      setCreatingNew(false);
-      setForm(emptyForm);
-      setMessage("Especialidade excluida com sucesso.");
-      await queryClient.invalidateQueries({ queryKey: ["atendimento-medico-especialidades"] });
-    },
-    onError: (error) => setMessage(error instanceof Error ? error.message : "Não foi possível excluir a especialidade.")
-  });
-
   const totalLabel = useMemo(() => `${especialidades.length} registro${especialidades.length === 1 ? "" : "s"}`, [especialidades.length]);
 
   function handleNew() {
@@ -85,12 +72,8 @@ export function AtendimentoMedicoEspecialidadePage() {
     saveMutation.mutate(form);
   }
 
-  function handleDeleteFromList(id: number, nome: string) {
-    if (!window.confirm(`Deseja excluir "${nome}"?`)) return;
-    deleteMutation.mutate(id);
-  }
-
   return (
+
     <main className="module-page">
       <Breadcrumb items={[{ label: "Cadastros" }, { label: "Atendimento Médico Especialidades" }]} />
       <section className="module-header">
@@ -122,15 +105,6 @@ export function AtendimentoMedicoEspecialidadePage() {
                   <strong>{item.nm_especialidade}</strong>
                   <span>{item.tipo}</span>
                 </div>
-                <button className="icon-button danger-icon" 
-                  title="Excluir" 
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleDeleteFromList(item.id, item.nm_especialidade);
-                  }}
-                  disabled={deleteMutation.isPending}>
-                  <Trash2 size={16} />
-                </button>  
               </div>
             ))}
             {!especialidadesQuery.isLoading && especialidades.length === 0 ? <div className="empty-state">Nenhuma especialidade encontrada.</div> : null}
@@ -150,7 +124,7 @@ export function AtendimentoMedicoEspecialidadePage() {
               <span>Nome da Especialidade</span>
             </label>
 
-            {message ? <div className={saveMutation.isError || deleteMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
+            {message ? <div className={saveMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
 
             <div className="form-actions">
               <button type="submit" disabled={saveMutation.isPending}><Save size={16} /> {saveMutation.isPending ? "Salvando..." : "Salvar"}</button>

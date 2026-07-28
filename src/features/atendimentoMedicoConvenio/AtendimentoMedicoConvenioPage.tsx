@@ -1,9 +1,9 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Save, Search, Trash2 } from "lucide-react";
+import { Plus, Save, Search } from "lucide-react";
 import { Breadcrumb } from "../../shared/Breadcrumb";
 import type { AtendimentoMedicoConvenio, AtendimentoMedicoConvenioInsert } from "../../types/database";
-import { deleteAtendimentoMedicoConvenio, listAtendimentoMedicoConvenios, saveAtendimentoMedicoConvenio } from "./atendimentoMedicoConvenioApi";
+import { listAtendimentoMedicoConvenios, saveAtendimentoMedicoConvenio } from "./atendimentoMedicoConvenioApi";
 
 const emptyForm: AtendimentoMedicoConvenioInsert = {
   ativo: "S",
@@ -75,18 +75,6 @@ export function AtendimentoMedicoConvenioPage() {
     onError: (error) => setMessage(error instanceof Error ? error.message : "Não foi possível salvar o cadastro.")
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteAtendimentoMedicoConvenio,
-    onSuccess: async () => {
-      setSelectedId(null);
-      setCreatingNew(false);
-      setForm(emptyForm);
-      setMessage("Cadastro excluido com sucesso.");
-      await queryClient.invalidateQueries({ queryKey: ["atendimento-medico-convenios"] });
-    },
-    onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel excluir o cadastro.")
-  });
-
   const totalLabel = useMemo(() => `${convenios.length} registro${convenios.length === 1 ? "" : "s"}`, [convenios.length]);
 
   function handleNew() {
@@ -108,13 +96,8 @@ export function AtendimentoMedicoConvenioPage() {
     saveMutation.mutate(form);
   }
 
-  function handleDelete() {
-    if (!form.id) return;
-    if (!window.confirm("Deseja excluir este convênio?")) return;
-    deleteMutation.mutate(form.id);
-  }
-
   return (
+
     <main className="module-page">
       <Breadcrumb items={[{ label: "Cadastros" }, { label: "Atendimento Médico Convênios" }]} />
       <section className="module-header">
@@ -198,10 +181,9 @@ export function AtendimentoMedicoConvenioPage() {
             <label className="field"><input value={form.tel3 ?? ""} maxLength={11} onChange={(event) => setForm({ ...form, tel3: event.target.value })} placeholder=" " /><span>Telefone 3</span></label>
             <label className="field"><textarea rows={3} value={form.obs ?? ""} onChange={(event) => setForm({ ...form, obs: event.target.value })} placeholder=" " /><span>Observação</span></label>
 
-            {message ? <div className={saveMutation.isError || deleteMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
+            {message ? <div className={saveMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
 
             <div className="form-actions">
-              {form.id ? <button type="button" className="danger-button" onClick={handleDelete} disabled={deleteMutation.isPending}><Trash2 size={16} /> Excluir</button> : null}
               <button type="submit" disabled={saveMutation.isPending}><Save size={16} /> {saveMutation.isPending ? "Salvando..." : "Salvar"}</button>
             </div>
           </form>

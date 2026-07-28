@@ -1,9 +1,9 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Save, Search, Trash2 } from "lucide-react";
+import { Plus, Save, Search } from "lucide-react";
 import { Breadcrumb } from "../../shared/Breadcrumb";
 import type { ContribuicaoInsert, Contribuicao } from "../../types/database";
-import { deleteContribuicao, listContribuicoes, saveContribuicao } from "./contribuicaoApi";
+import { listContribuicoes, saveContribuicao } from "./contribuicaoApi";
 
 const emptyForm: ContribuicaoInsert = {
   tipo: "",
@@ -53,18 +53,6 @@ export function ContribuicaoPage() {
     onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel salvar a contribuicao.")
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteContribuicao,
-    onSuccess: async () => {
-      setSelectedId(null);
-      setCreatingNew(false);
-      setForm(emptyForm);
-      setMessage("Contribuicao excluida com sucesso.");
-      await queryClient.invalidateQueries({ queryKey: ["contribuicoes"] });
-    },
-    onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel excluir a contribuicao.")
-  });
-
   const totalLabel = useMemo(() => `${contribuicoes.length} registro${contribuicoes.length === 1 ? "" : "s"}`, [contribuicoes.length]);
 
   function handleNew() {
@@ -86,13 +74,8 @@ export function ContribuicaoPage() {
     saveMutation.mutate(form);
   }
 
-  function handleDelete() {
-    if (!form.id) return;
-    if (!window.confirm("Deseja excluir esta contribuição?")) return;
-    deleteMutation.mutate(form.id);
-  }
-
   return (
+
     <main className="module-page">
       <Breadcrumb items={[{ label: "Cadastros" }, { label: "Contribuições" }]} />
       <section className="module-header">
@@ -146,10 +129,9 @@ export function ContribuicaoPage() {
               <span>Instrução</span>
             </label>
 
-            {message ? <div className={saveMutation.isError || deleteMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
+            {message ? <div className={saveMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
 
             <div className="form-actions">
-              {form.id ? <button type="button" className="danger-button" onClick={handleDelete} disabled={deleteMutation.isPending}><Trash2 size={16} /> Excluir</button> : null}
               <button type="submit" disabled={saveMutation.isPending}><Save size={16} /> {saveMutation.isPending ? "Salvando..." : "Salvar"}</button>
             </div>
           </form>
