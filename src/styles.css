@@ -177,6 +177,7 @@ textarea { resize: vertical; }
 .atendimento-form-header { grid-column: 2; grid-row: 2 / span 3; display: flex; justify-content: flex-end; }
 .atendimento-agendamento-grid, .atendimento-tipo-grid, .atendimento-associado-grid { grid-column: 1; }
 .atendimento-full-grid, .atendimento-form-panel .field:has(textarea), .atendimento-form-panel .form-error, .atendimento-form-panel .form-success { grid-column: 1 / -1; }
+.atendimento-form-panel .form-grid.atendimento-full-grid { grid-template-columns: 1fr; }
 .mini-calendar { width: 100%; display: grid; gap: 8px; border: 1px solid #d7dee5; border-radius: 8px; padding: 10px; background: #f8fafb; color: #33434f; }
 .mini-calendar-nav { display: grid; grid-template-columns: 30px 1fr 30px; gap: 8px; align-items: center; text-align: center; }
 .mini-calendar-nav .icon-button { width: 30px; height: 30px; min-height: 30px; background: #fff; color: #33434f; border-color: #cbd5dd; }

@@ -493,69 +493,73 @@ export function AtendimentoMedicoPage() {
         </div>
       </section>
 
-      <div className="toolbar-right">
-        <button type="button" onClick={handleNew}><Plus size={16} /> Novo Atendimento</button>
-      </div>
+      {!formOpen ? (
+        <>
+          <div className="toolbar-right">
+            <button type="button" onClick={handleNew}><Plus size={16} /> Novo Atendimento</button>
+          </div>
+
+          <section className="form-panel atendimento-search-panel">
+            <form className="atendimento-search-grid" onSubmit={handleSearch}>
+              <label className="field">
+                <select value={draftFilters.pesquisa} onChange={(event) => setDraftFilters({ ...draftFilters, pesquisa: event.target.value as AtendimentoMedicoSearchType })}>
+                  {pesquisaOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                </select>
+                <span>Pesquisar por</span>
+              </label>
+              <label className="field"><input type="datetime-local" value={draftFilters.inicio} onChange={(event) => setDraftFilters({ ...draftFilters, inicio: event.target.value })} placeholder=" " /><span>Inicial</span></label>
+              <label className="field"><input type="datetime-local" value={draftFilters.fim} onChange={(event) => setDraftFilters({ ...draftFilters, fim: event.target.value })} placeholder=" " /><span>Final</span></label>
+              <label className="field">
+                <select value={draftFilters.usuarioId} onChange={(event) => {
+                  const nextFilters = { ...draftFilters, usuarioId: event.target.value };
+                  setDraftFilters(nextFilters);
+                  setFilters(nextFilters);
+                }}>
+                  <option value="TODOS">TODOS</option>
+                  {usuarios.map((usuario) => <option key={usuario.id} value={usuario.id}>{usuario.codinome || usuario.full_name || usuario.email}</option>)}
+                </select>
+                <span>Usuario</span>
+              </label>
+              <label className="field"><input value={draftFilters.valor} onChange={(event) => setDraftFilters({ ...draftFilters, valor: event.target.value })} placeholder=" " /><span>Valor procurado</span></label>
+              <button type="submit"><Search size={16} /> Pesquisar</button>
+            </form>
+          </section>
+
+          <section className="form-panel">
+            <div className="list-summary">{totalLabel}</div>
+            <div className="data-table-wrap">
+              <table className="data-table clickable-rows">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Agendado</th>
+                    <th>Convênio</th>
+                    <th>Associado</th>
+                    <th>Cadastrado</th>
+                    <th>Alterado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {atendimentos.map((item) => (
+                    <tr key={item.id} className={getAtendimentoRowClass(item)} onClick={() => handleSelect(item)}>
+                      <td>{item.id}</td>
+                      <td><strong>{formatDateTime(item.dt_agendado)}</strong><span>{item.situacao}</span></td>
+                      <td><strong>{item.nm_convenio ?? "-"}</strong><span>{item.tipo || "-"}</span></td>
+                      <td><strong>{item.nm_associado ?? "-"}</strong><span>{item.nm_dependente || "-"}</span></td>
+                      <td><strong>{formatDateTime(item.created_at)}</strong><span>{item.created_by_codinome || item.created_by_nome || "-"}</span></td>
+                      <td><strong>{formatDateTime(item.updated_at)}</strong><span>{item.updated_by_codinome || item.updated_by_nome || "-"}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {atendimentosQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
+              {!atendimentosQuery.isLoading && atendimentos.length === 0 ? <div className="empty-state">Nenhum atendimento encontrado.</div> : null}
+            </div>
+          </section>
+        </>
+      ) : null}
 
       {atendimentoForm}
-
-      <section className="form-panel atendimento-search-panel">
-        <form className="atendimento-search-grid" onSubmit={handleSearch}>
-          <label className="field">
-            <select value={draftFilters.pesquisa} onChange={(event) => setDraftFilters({ ...draftFilters, pesquisa: event.target.value as AtendimentoMedicoSearchType })}>
-              {pesquisaOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-            </select>
-            <span>Pesquisar por</span>
-          </label>
-          <label className="field"><input type="datetime-local" value={draftFilters.inicio} onChange={(event) => setDraftFilters({ ...draftFilters, inicio: event.target.value })} placeholder=" " /><span>Inicial</span></label>
-          <label className="field"><input type="datetime-local" value={draftFilters.fim} onChange={(event) => setDraftFilters({ ...draftFilters, fim: event.target.value })} placeholder=" " /><span>Final</span></label>
-          <label className="field">
-            <select value={draftFilters.usuarioId} onChange={(event) => {
-              const nextFilters = { ...draftFilters, usuarioId: event.target.value };
-              setDraftFilters(nextFilters);
-              setFilters(nextFilters);
-            }}>
-              <option value="TODOS">TODOS</option>
-              {usuarios.map((usuario) => <option key={usuario.id} value={usuario.id}>{usuario.codinome || usuario.full_name || usuario.email}</option>)}
-            </select>
-            <span>Usuario</span>
-          </label>
-          <label className="field"><input value={draftFilters.valor} onChange={(event) => setDraftFilters({ ...draftFilters, valor: event.target.value })} placeholder=" " /><span>Valor procurado</span></label>
-          <button type="submit"><Search size={16} /> Pesquisar</button>
-        </form>
-      </section>
-
-      <section className="form-panel">
-        <div className="list-summary">{totalLabel}</div>
-        <div className="data-table-wrap">
-          <table className="data-table clickable-rows">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Agendado</th>
-                <th>Convênio</th>
-                <th>Associado</th>
-                <th>Cadastrado</th>
-                <th>Alterado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {atendimentos.map((item) => (
-                <tr key={item.id} className={getAtendimentoRowClass(item)} onClick={() => handleSelect(item)}>
-                  <td>{item.id}</td>
-                  <td><strong>{formatDateTime(item.dt_agendado)}</strong><span>{item.situacao}</span></td>
-                  <td><strong>{item.nm_convenio ?? "-"}</strong><span>{item.tipo || "-"}</span></td>
-                  <td><strong>{item.nm_associado ?? "-"}</strong><span>{item.nm_dependente || "-"}</span></td>
-                  <td><strong>{formatDateTime(item.created_at)}</strong><span>{item.created_by_codinome || item.created_by_nome || "-"}</span></td>
-                  <td><strong>{formatDateTime(item.updated_at)}</strong><span>{item.updated_by_codinome || item.updated_by_nome || "-"}</span></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {atendimentosQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
-          {!atendimentosQuery.isLoading && atendimentos.length === 0 ? <div className="empty-state">Nenhum atendimento encontrado.</div> : null}
-        </div>
-      </section>
     </main>
   );
 }
