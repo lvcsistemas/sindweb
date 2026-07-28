@@ -155,7 +155,7 @@ function newEmptyForm(): AtendimentoMedicoInsert {
     qtd: 0,
     dt_agendado: localDateTimeValue(),
     situacao: "AGENDADO",
-    tipo: "",
+    tipo: "CONSULTA",
     obs: ""
   };
 }
@@ -175,7 +175,7 @@ export function AtendimentoMedicoPage() {
 
   const atendimentosQuery   = useQuery({ queryKey: ["atendimento-medico", filters], queryFn: () => listAtendimentosMedicos(filters) });
   const conveniosQuery      = useQuery({ queryKey: ["atendimento-medico-convenios", ""], queryFn: () => listAtendimentoMedicoConvenios("") });
-  const especialidadesQuery = useQuery({ queryKey: ["auxiliares", "atendimento_medico_especialidade"], queryFn: () => listAuxiliares("atendimento_medico_especialidade", "") });
+  const tiposQuery          = useQuery({ queryKey: ["auxiliares", "atendimento_medico_tipo"], queryFn: () => listAuxiliares("atendimento_medico_tipo", "") });
   const associadosQuery     = useQuery({ queryKey: ["atendimento-medico-associados", associadoSearch], queryFn: () => listAssociados(associadoSearch), enabled: formOpen });
   const usuariosQuery       = useQuery({ queryKey: ["usuarios"], queryFn: listUsuarios });
   const associadoResumoQuery = useQuery({
@@ -196,7 +196,7 @@ export function AtendimentoMedicoPage() {
 
   const atendimentos    = atendimentosQuery.data    ?? [];
   const convenios       = conveniosQuery.data       ?? [];
-  const especialidades  = especialidadesQuery.data  ?? [];
+  const tipos           = tiposQuery.data           ?? [];
   const associados      = associadosQuery.data      ?? [];
   const usuarios        = usuariosQuery.data        ?? [];
   const associadoResumo = associadoResumoQuery.data ?? null;
@@ -433,7 +433,7 @@ export function AtendimentoMedicoPage() {
           <label className="field">
             <select value={form.tipo} onChange={(event) => setForm({ ...form, tipo: event.target.value })} required>
               <option value="">Selecione</option>
-              {especialidades.map((especialidade) => <option key={especialidade.id} value={especialidade.nome}>{especialidade.nome}</option>)}
+              {tipos.map((tipo) => <option key={tipo.id} value={tipo.nome}>{tipo.nome}</option>)}
             </select>
             <span>Tipo</span>
           </label>
