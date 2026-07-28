@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState }              from "react";
 import { useMutation, useQuery, useQueryClient }                from "@tanstack/react-query";
-import { Plus, Save, Search }                                   from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Save, Search }         from "lucide-react";
 import { Breadcrumb }                                           from "../../shared/Breadcrumb";
 import type { AtendimentoMedicoInsert, AtendimentoMedicoLista } from "../../types/database";
 import { listAssociados }                                       from "../associados/associadosApi";
@@ -64,6 +64,38 @@ function combineDateTime(date: string, time: string) {
   return `${date || datePart(now)}T${time || timePart(now)}`;
 }
 
+function dateToInputValue(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function monthStartFromValue(value: string | null | undefined) {
+  const selectedDate = datePart(value);
+  if (selectedDate) {
+    const [year, month] = selectedDate.split("-").map(Number);
+    return new Date(year, month - 1, 1);
+  }
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1);
+}
+
+function shiftMonth(month: Date, amount: number) {
+  return new Date(month.getFullYear(), month.getMonth() + amount, 1);
+}
+
+function buildCalendarDays(month: Date) {
+  const firstDay = new Date(month.getFullYear(), month.getMonth(), 1).getDay();
+  const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+  const days: Array<Date | null> = Array.from({ length: firstDay }, () => null);
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    days.push(new Date(month.getFullYear(), month.getMonth(), day));
+  }
+  while (days.length % 7 !== 0) days.push(null);
+  return days;
+}
+
 function weekDayLabel(date: string) {
   if (!date) return "";
   const [year, month, day] = date.split("-").map(Number);
@@ -116,6 +148,7 @@ export function AtendimentoMedicoPage() {
   const [selectedId, setSelectedId]           = useState<number | null>(null);
   const [formOpen, setFormOpen]               = useState(false);
   const [form, setForm]                       = useState<AtendimentoMedicoInsert>(newEmptyForm);
+  const [calendarMonth, setCalendarMonth]     = useState(() => monthStartFromValue(localDateTimeValue()));
   const [associadoSearch, setAssociadoSearch] = useState("");
   const [message, setMessage]                 = useState<string | null>(null);
 
@@ -137,6 +170,10 @@ export function AtendimentoMedicoPage() {
   const usuarios        = usuariosQuery.data        ?? [];
   const dependentes     = dependentesQuery.data     ?? [];
   const selected        = atendimentos.find((item) => item.id === selectedId) ?? null;
+  const calendarDays    = useMemo(() => buildCalendarDays(calendarMonth), [calendarMonth]);
+  const calendarTitle   = useMemo(() => new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(calendarMonth), [calendarMonth]);
+  const selectedDate    = datePart(form.dt_agendado);
+  const todayDate       = dateToInputValue(new Date());
   const associadoOptions = useMemo(() => {
     if (!form.associado_id || associados.some((associado) => associado.id === form.associado_id)) return associados;
     return [{ id: form.associado_id, nome: selected?.nm_associado ?? `Associado #${form.associado_id}`, matricula: selected?.matricula ?? null }, ...associados];
@@ -159,6 +196,7 @@ export function AtendimentoMedicoPage() {
       obs: item.obs ?? ""
     });
     setAssociadoSearch(item.nm_associado ?? "");
+    setCalendarMonth(monthStartFromValue(item.dt_agendado));
     setFormOpen(true);
   }
 
@@ -183,7 +221,9 @@ export function AtendimentoMedicoPage() {
     setSelectedId(null);
     setAssociadoSearch("");
     setMessage(null);
-    setForm(newEmptyForm());
+    const nextForm = newEmptyForm();
+    setForm(nextForm);
+    setCalendarMonth(monthStartFromValue(nextForm.dt_agendado));
     setFormOpen(true);
   }
 
@@ -207,8 +247,37 @@ export function AtendimentoMedicoPage() {
   const atendimentoForm = formOpen ? (
     <section className="detail-panel atendimento-form-panel">
       <form className="form-panel" onSubmit={handleSubmit}>
+        <div className="atendimento-form-header">
+          <div className="mini-calendar" aria-label="Calendario do mes">
+            <div className="mini-calendar-nav">
+              <button type="button" className="icon-button" onClick={() => setCalendarMonth((month) => shiftMonth(month, -1))} aria-label="Mes anterior"><ChevronLeft size={16} /></button>
+              <strong>{calendarTitle}</strong>
+              <button type="button" className="icon-button" onClick={() => setCalendarMonth((month) => shiftMonth(month, 1))} aria-label="Proximo mes"><ChevronRight size={16} /></button>
+            </div>
+            <div className="mini-calendar-weekdays">
+              {["D", "S", "T", "Q", "Q", "S", "S"].map((day, index) => <span key={`${day}-${index}`}>{day}</span>)}
+            </div>
+            <div className="mini-calendar-grid">
+              {calendarDays.map((day, index) => {
+                const value = day ? dateToInputValue(day) : "";
+                const className = [
+                  "mini-calendar-day",
+                  value === selectedDate ? "selected" : "",
+                  value === todayDate ? "today" : ""
+                ].filter(Boolean).join(" ");
+                return day ? (
+                  <button key={value} type="button" className={className} onClick={() => setForm({ ...form, dt_agendado: combineDateTime(value, timePart(form.dt_agendado)) })}>{day.getDate()}</button>
+                ) : <span key={`empty-${index}`} className="mini-calendar-empty" />;
+              })}
+            </div>
+          </div>
+        </div>
+
         <div className="form-grid atendimento-agendamento-grid">
-          <label className="field"><input type="date" value={datePart(form.dt_agendado)} onChange={(event) => setForm({ ...form, dt_agendado: combineDateTime(event.target.value, timePart(form.dt_agendado)) })} placeholder=" " required /><span>Agendamento</span></label>
+          <label className="field"><input type="date" value={datePart(form.dt_agendado)} onChange={(event) => {
+            setForm({ ...form, dt_agendado: combineDateTime(event.target.value, timePart(form.dt_agendado)) });
+            setCalendarMonth(monthStartFromValue(event.target.value));
+          }} placeholder=" " required /><span>Agendamento</span></label>
           <label className="field"><input type="time" value={timePart(form.dt_agendado)} onChange={(event) => setForm({ ...form, dt_agendado: combineDateTime(datePart(form.dt_agendado), event.target.value) })} placeholder=" " required /><span>Hora</span></label>
           <div className="weekday-label">{weekDayLabel(datePart(form.dt_agendado))}</div>
           <label className="field">

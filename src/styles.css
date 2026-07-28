@@ -160,11 +160,23 @@ textarea { resize: vertical; }
 .form-grid.classe-profissional-grid { grid-template-columns: minmax(130px, 150px) minmax(180px, 1fr) minmax(180px, 1fr) minmax(140px, 170px); }
 .related-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: stretch; }
 .toolbar-right { display: flex; justify-content: flex-end; margin-bottom: 12px; }
-.atendimento-search-panel { margin-bottom: 16px; }
+.atendimento-search-panel { margin-bottom: 0; }
 .atendimento-search-grid { display: grid; grid-template-columns: minmax(190px, 1.4fr) minmax(165px, 1fr) minmax(165px, 1fr) minmax(170px, 1fr) minmax(180px, 1fr) auto; gap: 10px; align-items: stretch; }
 .atendimento-agendamento-grid { grid-template-columns: minmax(150px, 170px) minmax(110px, 130px) minmax(140px, 1fr) minmax(150px, 170px); align-items: stretch; }
 .weekday-label { display: flex; align-items: center; min-height: 44px; padding: 0 12px; border: 1px solid #d7dee5; border-radius: 8px; background: #f8fafb; color: #465563; font-weight: 750; text-transform: capitalize; }
-.atendimento-form-panel { margin-top: 16px; overflow: hidden; }
+.atendimento-form-panel { margin-top: 16px; margin-bottom: 16px; overflow: hidden; }
+.atendimento-form-header { display: flex; justify-content: flex-end; }
+.mini-calendar { width: 238px; display: grid; gap: 8px; border: 1px solid #d7dee5; border-radius: 8px; padding: 10px; background: #f8fafb; color: #33434f; }
+.mini-calendar-nav { display: grid; grid-template-columns: 30px 1fr 30px; gap: 8px; align-items: center; text-align: center; }
+.mini-calendar-nav .icon-button { width: 30px; height: 30px; min-height: 30px; background: #fff; color: #33434f; border-color: #cbd5dd; }
+.mini-calendar-nav strong { font-size: 0.88rem; text-transform: capitalize; }
+.mini-calendar-weekdays, .mini-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.mini-calendar-weekdays span { text-align: center; font-size: 0.7rem; font-weight: 800; color: #657383; }
+.mini-calendar-day, .mini-calendar-empty { width: 100%; aspect-ratio: 1; min-height: 0; padding: 0; border-radius: 6px; }
+.mini-calendar-day { border: 1px solid transparent; background: #fff; color: #33434f; font-size: 0.78rem; font-weight: 700; }
+.mini-calendar-day:hover { border-color: #1f7a5b; color: #1f5e49; }
+.mini-calendar-day.today { border-color: #8bbca9; }
+.mini-calendar-day.selected { background: #1f7a5b; border-color: #1b6b50; color: #fff; }
 .data-table-wrap { width: 100%; overflow-x: auto; border: 1px solid #d7dee5; border-radius: 8px; }
 .data-table { width: 100%; border-collapse: collapse; min-width: 680px; background: #fff; }
 .data-table th, .data-table td { padding: 10px 12px; border-bottom: 1px solid #e5ebf0; text-align: left; vertical-align: middle; }
@@ -211,6 +223,8 @@ textarea { resize: vertical; }
   .related-toolbar { grid-template-columns: 1fr; }
   .atendimento-search-grid { grid-template-columns: 1fr; }
   .atendimento-agendamento-grid { grid-template-columns: 1fr; }
+  .atendimento-form-header { justify-content: stretch; }
+  .mini-calendar { width: 100%; }
   .choice-grid, .lookup-summary div { grid-template-columns: 1fr; }
   .topbar { padding: 10px 14px; min-height: 56px; flex-wrap: wrap; justify-content: flex-start; }
 }
