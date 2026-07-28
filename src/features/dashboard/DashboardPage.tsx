@@ -1,5 +1,6 @@
 import { Building2, FileText, UserRoundPlus, UsersRound } from "lucide-react";
 import { useQuery }                         from "@tanstack/react-query";
+import { Link }                             from "react-router-dom";
 import { Breadcrumb }                       from "../../shared/Breadcrumb";
 import { getConfig }                        from "../config/configApi";
 import { countAssociados, countDependentes, countEmpresas } from "./dashboardApi";
@@ -36,14 +37,14 @@ export function DashboardPage() {
             <span>{configQuery.isLoading ? "Carregando..." : formatDateBr(config?.dt_vencimento)}</span>
           </div>
         </article>
-        <article className="dashboard-tile dashboard-info-tile muted">
+        <Link className="dashboard-tile dashboard-info-tile muted dashboard-link-tile" to="/empresas">
           <Building2 size={22} />
           <div>
             <strong>EMPRESAS</strong>
             <span>{empresasQuery.isLoading ? "Carregando..." : formatNumber(empresasQuery.data)}</span>
           </div>
-        </article>
-        <article className="dashboard-tile dashboard-info-tile muted">
+        </Link>
+        <Link className="dashboard-tile dashboard-info-tile muted dashboard-link-tile" to="/associados">
           <UsersRound size={22} />
           <div>
             <strong>ASSOCIADOS</strong>
@@ -51,7 +52,7 @@ export function DashboardPage() {
             <strong>ULTIMA MATRICULA</strong>
             <span>{configQuery.isLoading ? "Carregando..." : formatNumber(config?.ultima_matricula)}</span>
           </div>
-        </article>
+        </Link>
         <article className="dashboard-tile dashboard-info-tile muted">
           <UserRoundPlus size={22} />
           <div>
