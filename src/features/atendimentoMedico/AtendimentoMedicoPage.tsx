@@ -5,7 +5,7 @@ import { Breadcrumb }                                           from "../../shar
 import type { AtendimentoMedicoInsert, AtendimentoMedicoLista } from "../../types/database";
 import { listAssociados }                                       from "../associados/associadosApi";
 import { listAtendimentoMedicoConvenios }                       from "../atendimentoMedicoConvenio/atendimentoMedicoConvenioApi";
-import { listAtendimentoMedicoEspecialidadesByTipo }            from "../atendimentoMedicoEspecialidade/atendimentoMedicoEspecialidadeApi";
+import { listAtendimentoMedicoEspecialidades }                  from "../atendimentoMedicoEspecialidade/atendimentoMedicoEspecialidadeApi";
 import { listDependentesByAssociado }                           from "../dependentes/dependentesApi";
 import { listUsuarios }                                         from "../usuarios/usuariosApi";
 import { getAtendimentoAssociadoResumo, listAtendimentosAssociadoMes, listAtendimentosMedicos, saveAtendimentoMedico, type AtendimentoAssociadoResumo, type AtendimentoMedicoFilters, type AtendimentoMedicoSearchType } from "./atendimentoMedicoApi";
@@ -175,7 +175,7 @@ export function AtendimentoMedicoPage() {
 
   const atendimentosQuery   = useQuery({ queryKey: ["atendimento-medico", filters], queryFn: () => listAtendimentosMedicos(filters) });
   const conveniosQuery      = useQuery({ queryKey: ["atendimento-medico-convenios", ""], queryFn: () => listAtendimentoMedicoConvenios("") });
-  const especialidadesQuery = useQuery({ queryKey: ["atendimento-medico-especialidades", "ESPECIALIDADE"], queryFn: () => listAtendimentoMedicoEspecialidadesByTipo("ESPECIALIDADE") });
+  const especialidadesQuery = useQuery({ queryKey: ["atendimento-medico-especialidades", "all"], queryFn: () => listAtendimentoMedicoEspecialidades("") });
   const associadosQuery     = useQuery({ queryKey: ["atendimento-medico-associados", associadoSearch], queryFn: () => listAssociados(associadoSearch), enabled: formOpen });
   const usuariosQuery       = useQuery({ queryKey: ["usuarios"], queryFn: listUsuarios });
   const associadoResumoQuery = useQuery({

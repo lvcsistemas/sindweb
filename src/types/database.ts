@@ -328,12 +328,11 @@ export type AtendimentoMedicoConvenioEspecialidadeInsert = Omit<AtendimentoMedic
 };
 
 export type AtendimentoMedicoConvenioEspecialidadeLista = AtendimentoMedicoConvenioEspecialidade & {
-  especialidade: Pick<AtendimentoMedicoEspecialidade, "id" | "tipo" | "nm_especialidade"> | null;
+  especialidade: Pick<AtendimentoMedicoEspecialidade, "id" | "nm_especialidade"> | null;
 };
 
 export type AtendimentoMedicoEspecialidade = {
   id: number;
-  tipo: string;
   nm_especialidade: string;
   created_at: string;
   updated_at: string;

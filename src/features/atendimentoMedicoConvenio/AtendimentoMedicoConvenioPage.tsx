@@ -232,7 +232,7 @@ export function AtendimentoMedicoConvenioPage() {
           <label className="field">
             <select value={selectedEspecialidadeId} onChange={(event) => setSelectedEspecialidadeId(event.target.value)} disabled={especialidadesDisponiveis.length === 0}>
               {especialidadesDisponiveis.length === 0 ? <option value="">Nenhuma especialidade disponivel</option> : null}
-              {especialidadesDisponiveis.map((item) => <option key={item.id} value={item.id}>{item.tipo} - {item.nm_especialidade}</option>)}
+              {especialidadesDisponiveis.map((item) => <option key={item.id} value={item.id}>{item.nm_especialidade}</option>)}
             </select>
             <span>Especialidade</span>
           </label>
@@ -245,7 +245,6 @@ export function AtendimentoMedicoConvenioPage() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Tipo</th>
                 <th>Especialidade</th>
                 <th className="numeric-cell">Excluir</th>
               </tr>
@@ -253,7 +252,6 @@ export function AtendimentoMedicoConvenioPage() {
             <tbody>
               {convenioEspecialidades.map((item) => (
                 <tr key={item.id}>
-                  <td>{item.especialidade?.tipo ?? "-"}</td>
                   <td>{item.especialidade?.nm_especialidade ?? "-"}</td>
                   <td className="numeric-cell">
                     <button type="button" className="icon-button danger-icon" title="Excluir" onClick={() => handleDeleteEspecialidade(item.id, item.especialidade?.nm_especialidade ?? "especialidade")} disabled={deleteEspecialidadeMutation.isPending}>

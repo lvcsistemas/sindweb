@@ -3,14 +3,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Save, Search } from "lucide-react";
 import { Breadcrumb } from "../../shared/Breadcrumb";
 import type { AtendimentoMedicoEspecialidade, AtendimentoMedicoEspecialidadeInsert } from "../../types/database";
-import {
-  ATENDIMENTO_MEDICO_ESPECIALIDADE_TIPOS,
-  listAtendimentoMedicoEspecialidades,
-  saveAtendimentoMedicoEspecialidade
-} from "./atendimentoMedicoEspecialidadeApi";
+import { listAtendimentoMedicoEspecialidades, saveAtendimentoMedicoEspecialidade } from "./atendimentoMedicoEspecialidadeApi";
 
 const emptyForm: AtendimentoMedicoEspecialidadeInsert = {
-  tipo: "ESPECIALIDADE",
   nm_especialidade: ""
 };
 
@@ -35,7 +30,6 @@ export function AtendimentoMedicoEspecialidadePage() {
 
     setForm({
       id: selected.id,
-      tipo: selected.tipo,
       nm_especialidade: selected.nm_especialidade
     });
   }, [selected]);
@@ -69,43 +63,32 @@ export function AtendimentoMedicoEspecialidadePage() {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage(null);
-    saveMutation.mutate(form);
+    saveMutation.mutate({ ...form, nm_especialidade: form.nm_especialidade.toUpperCase() });
   }
 
   return (
-
     <main className="module-page">
       <Breadcrumb items={[{ label: "Cadastros" }, { label: "Atendimento Médico Especialidades" }]} />
       <section className="module-header">
         <div>
           <h1>Atendimento Médico Especialidades</h1>
-          <p>Tabela auxiliar de tipos e especialidades para atendimento médico.</p>
+          <p>Cadastro de especialidades para atendimento médico.</p>
         </div>
         <button onClick={handleNew}><Plus size={16} /> Novo</button>
       </section>
 
       <section className={`split-view ${formOpen ? "" : "list-only"}`}>
         <div className="list-panel">
-          <label className="search-box"><Search size={16} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por tipo ou especialidade" /></label>
+          <label className="search-box"><Search size={16} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por especialidade" /></label>
           <div className="list-summary">{totalLabel}</div>
           <div className="record-list">
             {especialidadesQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
             {especialidades.map((item) => (
-              <div key={item.id} 
-                className={`record-row my-action ${item.id === selectedId ? "selected" : ""}`} 
-                onClick={() => handleSelect(item)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    handleSelect(item);
-                  }
-                }}>
+              <button key={item.id} className={`record-row simple ${item.id === selectedId ? "selected" : ""}`} onClick={() => handleSelect(item)}>
                 <div>
                   <strong>{item.nm_especialidade}</strong>
-                  <span>{item.tipo}</span>
                 </div>
-              </div>
+              </button>
             ))}
             {!especialidadesQuery.isLoading && especialidades.length === 0 ? <div className="empty-state">Nenhuma especialidade encontrada.</div> : null}
           </div>
@@ -114,13 +97,7 @@ export function AtendimentoMedicoEspecialidadePage() {
         {formOpen ? <div className="detail-panel">
           <form className="form-panel" onSubmit={handleSubmit}>
             <label className="field">
-              <select value={form.tipo} onChange={(event) => setForm({ ...form, tipo: event.target.value })}>
-                {ATENDIMENTO_MEDICO_ESPECIALIDADE_TIPOS.map((tipo) => <option key={tipo} value={tipo}>{tipo}</option>)}
-              </select>
-              <span>Tipo</span>
-            </label>
-            <label className="field">
-              <input value={form.nm_especialidade} maxLength={50} onChange={(event) => setForm({ ...form, nm_especialidade: event.target.value })} placeholder=" " required />
+              <input value={form.nm_especialidade} maxLength={50} onChange={(event) => setForm({ ...form, nm_especialidade: event.target.value.toUpperCase() })} placeholder=" " required />
               <span>Nome da Especialidade</span>
             </label>
 

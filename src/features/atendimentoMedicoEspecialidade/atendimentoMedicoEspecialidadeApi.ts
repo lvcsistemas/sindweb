@@ -3,25 +3,15 @@ import type { AtendimentoMedicoEspecialidade, AtendimentoMedicoEspecialidadeInse
 
 const supabaseUnsafe = supabase as any;
 
-export const ATENDIMENTO_MEDICO_ESPECIALIDADE_TIPOS = [
-  "ESPECIALIDADE",
-  "FEZES-URINA",
-  "OUTROS",
-  "RADIOLOGIA",
-  "EXAME DE SANGUE",
-  "ULTRASSONOGRAFIA"
-] as const;
-
 export async function listAtendimentoMedicoEspecialidades(search: string) {
   let query = supabaseUnsafe
     .from("atendimento_medico_especialidades")
     .select("*")
-    .order("tipo", { ascending: true })
     .order("nm_especialidade", { ascending: true });
 
   const term = search.trim();
   if (term) {
-    query = query.or(`tipo.ilike.%${term}%,nm_especialidade.ilike.%${term}%`);
+    query = query.ilike("nm_especialidade", `%${term}%`);
   }
 
   const { data, error } = await query;
@@ -29,21 +19,9 @@ export async function listAtendimentoMedicoEspecialidades(search: string) {
   return data as AtendimentoMedicoEspecialidade[];
 }
 
-export async function listAtendimentoMedicoEspecialidadesByTipo(tipo: string) {
-  const { data, error } = await supabaseUnsafe
-    .from("atendimento_medico_especialidades")
-    .select("*")
-    .eq("tipo", tipo)
-    .order("nm_especialidade", { ascending: true });
-
-  if (error) throw error;
-  return data as AtendimentoMedicoEspecialidade[];
-}
-
 export async function saveAtendimentoMedicoEspecialidade(values: AtendimentoMedicoEspecialidadeInsert) {
   const payload = {
     ...values,
-    tipo: values.tipo.trim().toUpperCase(),
     nm_especialidade: values.nm_especialidade.trim().toUpperCase()
   };
 
