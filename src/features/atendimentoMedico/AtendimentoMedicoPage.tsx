@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState }              from "react";
 import { useMutation, useQuery, useQueryClient }                from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, Plus, Save, Search }         from "lucide-react";
+import { ChevronLeft, ChevronRight, Minus, Plus, Save, Search }  from "lucide-react";
 import { Breadcrumb }                                           from "../../shared/Breadcrumb";
 import type { AtendimentoMedicoInsert, AtendimentoMedicoLista } from "../../types/database";
 import { listAssociados }                                       from "../associados/associadosApi";
@@ -8,7 +8,9 @@ import { listAtendimentoMedicoConvenios }                       from "../atendim
 import { listAtendimentoMedicoEspecialidadesByTipo }            from "../atendimentoMedicoEspecialidade/atendimentoMedicoEspecialidadeApi";
 import { listDependentesByAssociado }                           from "../dependentes/dependentesApi";
 import { listUsuarios }                                         from "../usuarios/usuariosApi";
-import { getAtendimentoAssociadoResumo, listAtendimentosMedicos, saveAtendimentoMedico, type AtendimentoAssociadoResumo, type AtendimentoMedicoFilters, type AtendimentoMedicoSearchType } from "./atendimentoMedicoApi";
+import { getAtendimentoAssociadoResumo, listAtendimentosAssociadoMes, listAtendimentosMedicos, saveAtendimentoMedico, type AtendimentoAssociadoResumo, type AtendimentoMedicoFilters, type AtendimentoMedicoSearchType } from "./atendimentoMedicoApi";
+
+type AtendimentoFormTab = "atendimento" | "consultas";
 
 const pesquisaOptions: Array<{ value: AtendimentoMedicoSearchType; label: string }> = [
   { value: "T",                 label: "TODOS" },
@@ -164,6 +166,8 @@ export function AtendimentoMedicoPage() {
   const [draftFilters, setDraftFilters]       = useState<AtendimentoMedicoFilters>(emptyFilters);
   const [selectedId, setSelectedId]           = useState<number | null>(null);
   const [formOpen, setFormOpen]               = useState(false);
+  const [activeFormTab, setActiveFormTab]     = useState<AtendimentoFormTab>("atendimento");
+  const [associadoCardOpen, setAssociadoCardOpen] = useState(false);
   const [form, setForm]                       = useState<AtendimentoMedicoInsert>(newEmptyForm);
   const [calendarMonth, setCalendarMonth]     = useState(() => monthStartFromValue(localDateTimeValue()));
   const [associadoSearch, setAssociadoSearch] = useState("");
@@ -179,6 +183,11 @@ export function AtendimentoMedicoPage() {
     queryFn: () => getAtendimentoAssociadoResumo(Number(form.associado_id)),
     enabled: Boolean(form.associado_id)
   });
+  const associadoAtendimentosMesQuery = useQuery({
+    queryKey: ["atendimento-associado-mes", form.associado_id],
+    queryFn: () => listAtendimentosAssociadoMes(Number(form.associado_id)),
+    enabled: Boolean(form.associado_id)
+  });
   const dependentesQuery    = useQuery({
     queryKey: ["atendimento-medico-dependentes", form.associado_id],
     queryFn: () => listDependentesByAssociado(Number(form.associado_id)),
@@ -191,6 +200,7 @@ export function AtendimentoMedicoPage() {
   const associados      = associadosQuery.data      ?? [];
   const usuarios        = usuariosQuery.data        ?? [];
   const associadoResumo = associadoResumoQuery.data ?? null;
+  const associadoAtendimentosMes = associadoAtendimentosMesQuery.data ?? [];
   const dependentes     = dependentesQuery.data     ?? [];
   const selected        = atendimentos.find((item) => item.id === selectedId) ?? null;
   const calendarDays    = useMemo(() => buildCalendarDays(calendarMonth), [calendarMonth]);
@@ -220,6 +230,8 @@ export function AtendimentoMedicoPage() {
     });
     setAssociadoSearch(item.nm_associado ?? "");
     setCalendarMonth(monthStartFromValue(item.dt_agendado));
+    setActiveFormTab("atendimento");
+    setAssociadoCardOpen(false);
     setFormOpen(true);
   }
 
@@ -247,6 +259,8 @@ export function AtendimentoMedicoPage() {
     const nextForm = newEmptyForm();
     setForm(nextForm);
     setCalendarMonth(monthStartFromValue(nextForm.dt_agendado));
+    setActiveFormTab("atendimento");
+    setAssociadoCardOpen(false);
     setFormOpen(true);
   }
 
@@ -272,8 +286,13 @@ export function AtendimentoMedicoPage() {
 
     return (
       <section className="detail-card atendimento-associado-card">
-        <div className="detail-card-title"><strong>Dados do Associado</strong></div>
-        <div className="detail-card-body">
+        <div className="detail-card-title">
+          <strong>Dados do Associado</strong>
+          <button type="button" className="icon-button" onClick={() => setAssociadoCardOpen((open) => !open)} aria-label={associadoCardOpen ? "Recolher dados do associado" : "Expandir dados do associado"}>
+            {associadoCardOpen ? <Minus size={16} /> : <Plus size={16} />}
+          </button>
+        </div>
+        {associadoCardOpen ? <div className="detail-card-body">
           {associadoResumoQuery.isLoading ? <div className="empty-state">Carregando dados do associado...</div> : null}
           {!associadoResumoQuery.isLoading && resumo ? <>
             <div className="info-grid associado-info-grid">
@@ -314,14 +333,59 @@ export function AtendimentoMedicoPage() {
             </div>
           </> : null}
           {!associadoResumoQuery.isLoading && associadoResumoQuery.isError ? <div className="form-error">Não foi possível carregar os dados do associado.</div> : null}
-        </div>
+        </div> : null}
       </section>
+    );
+  }
+
+  function renderConsultasExamesTab() {
+    if (!form.associado_id) {
+      return <div className="empty-state tab-empty atendimento-full-grid">Selecione um associado para consultar os atendimentos do mês.</div>;
+    }
+
+    return (
+      <div className="related-panel atendimento-full-grid">
+        <div className="data-table-wrap">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Agendado</th>
+                <th>Situação</th>
+                <th>Tipo</th>
+                <th>Convênio</th>
+                <th>Paciente</th>
+              </tr>
+            </thead>
+            <tbody>
+              {associadoAtendimentosMes.map((item) => (
+                <tr key={item.id}>
+                  <td>{item.id}</td>
+                  <td>{formatDateTime(item.dt_agendado)}</td>
+                  <td>{item.situacao}</td>
+                  <td>{item.tipo}</td>
+                  <td>{item.nm_convenio ?? "-"}</td>
+                  <td>{item.nm_dependente ? `Dependente: ${item.nm_dependente}` : `Associado: ${item.nm_associado ?? "-"}`}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {associadoAtendimentosMesQuery.isLoading ? <div className="empty-state">Carregando consultas e exames...</div> : null}
+          {!associadoAtendimentosMesQuery.isLoading && associadoAtendimentosMes.length === 0 ? <div className="empty-state">Nenhum atendimento encontrado no mês corrente.</div> : null}
+        </div>
+      </div>
     );
   }
 
   const atendimentoForm = formOpen ? (
     <section className="detail-panel atendimento-form-panel">
       <form className="form-panel" onSubmit={handleSubmit}>
+        <div className="tabs atendimento-full-grid">
+          <button type="button" className={activeFormTab === "atendimento" ? "active" : ""} onClick={() => setActiveFormTab("atendimento")}>Atendimento</button>
+          <button type="button" className={activeFormTab === "consultas" ? "active" : ""} onClick={() => setActiveFormTab("consultas")}>Consultas/Exames</button>
+        </div>
+
+        {activeFormTab === "atendimento" ? <>
         <div className="atendimento-form-header">
           <div className="mini-calendar" aria-label="Calendario do mes">
             <div className="mini-calendar-nav">
@@ -414,6 +478,7 @@ export function AtendimentoMedicoPage() {
           <button type="button" className="secondary-button" onClick={() => setFormOpen(false)}>Sair</button>
           <button type="submit" disabled={saveMutation.isPending}><Save size={16} /> {saveMutation.isPending ? "Salvando..." : "Salvar"}</button>
         </div>
+        </> : renderConsultasExamesTab()}
       </form>
     </section>
   ) : null;

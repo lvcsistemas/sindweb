@@ -242,3 +242,17 @@ export async function getAtendimentoAssociadoResumo(associadoId: number) {
     contribuicoes: (contribuicoesResult.data ?? []) as AssociadoContribuicaoLista[]
   } satisfies AtendimentoAssociadoResumo;
 }
+
+export async function listAtendimentosAssociadoMes(associadoId: number) {
+  const { start, end } = currentMonthRange();
+  const { data, error } = await supabaseUnsafe
+    .from("atendimento_medico_lista")
+    .select("*")
+    .eq("associado_id", associadoId)
+    .gte("dt_agendado", start)
+    .lt("dt_agendado", end)
+    .order("dt_agendado", { ascending: false });
+
+  raiseSupabaseError(error);
+  return data as AtendimentoMedicoLista[];
+}
