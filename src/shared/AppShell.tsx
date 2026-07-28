@@ -1,9 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { BriefcaseBusiness, Building2, ChevronRight, Coins, FileText, Folder, Handshake, ListTree, LogOut, MapPin, Menu, Settings, Stethoscope, UserCog, UsersRound } from "lucide-react";
 import { useAuth } from "../features/auth/AuthProvider";
 import { AUXILIAR_GRUPOS } from "../features/auxiliares/auxiliaresConfig";
 
+function isVisibleButton(button: HTMLButtonElement) {
+  return !button.disabled && Boolean(button.offsetParent) && button.getAttribute("aria-hidden") !== "true";
+}
+
+function clickFirstVisibleButtonByText(label: string) {
+  const normalizedLabel = label.toUpperCase();
+  const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>("button"));
+  const button = buttons.find((item) => isVisibleButton(item) && item.textContent?.trim().toUpperCase().includes(normalizedLabel));
+  button?.click();
+  return Boolean(button);
+}
 export function AppShell() {
   const { signOut, user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -11,6 +22,28 @@ export function AppShell() {
   const [atendimentosOpen, setAtendimentosOpen] = useState(false);
   const [financeiroOpen, setFinanceiroOpen] = useState(false);
   const [auxiliaresOpen, setAuxiliaresOpen] = useState(false);
+
+
+  useEffect(() => {
+    function handleShortcut(event: KeyboardEvent) {
+      if (!event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.repeat) return;
+
+      const key = event.key.toLowerCase();
+      if (key !== "s" && key !== "n") return;
+
+      const handled = key === "s"
+        ? clickFirstVisibleButtonByText("Salvar")
+        : clickFirstVisibleButtonByText("Novo");
+
+      if (handled) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }
+
+    window.addEventListener("keydown", handleShortcut);
+    return () => window.removeEventListener("keydown", handleShortcut);
+  }, []);
 
   return (
     <div className={`app-shell ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
