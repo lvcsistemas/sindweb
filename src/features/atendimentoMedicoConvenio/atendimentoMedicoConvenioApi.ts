@@ -71,7 +71,7 @@ export async function deleteAtendimentoMedicoConvenio(id: number) {
 export async function listConvenioEspecialidades(convenioId: number) {
   const { data, error } = await supabaseUnsafe
     .from("atendimento_medico_convenios_especialidades")
-    .select("id, convenio_id, especialidade_id, created_at, especialidade:atendimento_medico_especialidades(id, nm_especialidade)")
+    .select("id, convenio_id, especialidade_id, created_at, especialidade:auxiliares(id, nome)")
     .eq("convenio_id", convenioId)
     .order("created_at", { ascending: false });
 
@@ -83,7 +83,7 @@ export async function addConvenioEspecialidade(convenioId: number, especialidade
   const { data, error } = await supabaseUnsafe
     .from("atendimento_medico_convenios_especialidades")
     .insert({ convenio_id: convenioId, especialidade_id: especialidadeId })
-    .select("id, convenio_id, especialidade_id, created_at, especialidade:atendimento_medico_especialidades(id, nm_especialidade)")
+    .select("id, convenio_id, especialidade_id, created_at, especialidade:auxiliares(id, nome)")
     .single();
 
   if (error) throw error;

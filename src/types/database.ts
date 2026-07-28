@@ -10,7 +10,6 @@ export type Database = {
       atendimento_medico: { Row: AtendimentoMedico; Insert: AtendimentoMedicoInsert; Update: Partial<AtendimentoMedicoInsert> };
       atendimento_medico_convenios: { Row: AtendimentoMedicoConvenio; Insert: AtendimentoMedicoConvenioInsert; Update: Partial<AtendimentoMedicoConvenioInsert> };
       atendimento_medico_convenios_especialidades: { Row: AtendimentoMedicoConvenioEspecialidade; Insert: AtendimentoMedicoConvenioEspecialidadeInsert; Update: Partial<AtendimentoMedicoConvenioEspecialidadeInsert> };
-      atendimento_medico_especialidades: { Row: AtendimentoMedicoEspecialidade; Insert: AtendimentoMedicoEspecialidadeInsert; Update: Partial<AtendimentoMedicoEspecialidadeInsert> };
       atendimento_medico_exames: { Row: AtendimentoMedicoExame; Insert: AtendimentoMedicoExameInsert; Update: Partial<AtendimentoMedicoExameInsert> };
       cnaes: { Row: Cnae; Insert: CnaeInsert; Update: Partial<CnaeInsert> };
       config: { Row: Config; Insert: ConfigInsert; Update: Partial<ConfigInsert> };
@@ -328,17 +327,8 @@ export type AtendimentoMedicoConvenioEspecialidadeInsert = Omit<AtendimentoMedic
 };
 
 export type AtendimentoMedicoConvenioEspecialidadeLista = AtendimentoMedicoConvenioEspecialidade & {
-  especialidade: Pick<AtendimentoMedicoEspecialidade, "id" | "nm_especialidade"> | null;
+  especialidade: Pick<Auxiliar, "id" | "nome"> | null;
 };
-
-export type AtendimentoMedicoEspecialidade = {
-  id: number;
-  nm_especialidade: string;
-  created_at: string;
-  updated_at: string;
-};
-
-export type AtendimentoMedicoEspecialidadeInsert = Omit<AtendimentoMedicoEspecialidade, "id" | "created_at" | "updated_at"> & { id?: number };
 
 export type AtendimentoMedicoExame = {
   id: number;

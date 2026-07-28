@@ -60,7 +60,6 @@ export function AppShell() {
                 <NavLink className="nav-leaf direct" to="/empresas"><Building2 size={17} /> Empresas</NavLink>
                 <NavLink className="nav-leaf direct" to="/associados"><UsersRound size={17} /> Associados</NavLink>
                 <NavLink className="nav-leaf direct" to="/atendimento-medico-convenios"><Stethoscope size={17} /> Atendimento Médico Convênios</NavLink>
-                <NavLink className="nav-leaf direct" to="/atendimento-medico-especialidades"><Stethoscope size={17} /> Atendimento Médico Especialidades</NavLink>
                 <NavLink className="nav-leaf direct" to="/atendimento-medico-exames"><Stethoscope size={17} /> Atendimento Médico Exames</NavLink>
                 <NavLink className="nav-leaf direct" to="/cnae"><FileText size={17} /> CNAE</NavLink>
                 <NavLink className="nav-leaf direct" to="/escritorios"><Building2 size={17} /> Escritórios</NavLink>

@@ -5,6 +5,7 @@ export type AuxiliarGrupoConfig = {
 };
 
 export const AUXILIAR_GRUPOS: AuxiliarGrupoConfig[] = [
+  { key: "atendimento_medico_especialidade", path: "atendimento-medico-especialidade", label: "Atendimento Médico Especialidade" },
   { key: "atendimento_medico_tipo", path: "atendimento-medico-tipo", label: "Atendimento Médico Tipo" },
   { key: "convencao", path: "convencao", label: "Convenção" },
   { key: "escolaridade", path: "escolaridade", label: "Escolaridade" },

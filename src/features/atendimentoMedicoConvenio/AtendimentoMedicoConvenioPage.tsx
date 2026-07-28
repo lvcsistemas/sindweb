@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Save, Search, Trash2 } from "lucide-react";
 import { Breadcrumb } from "../../shared/Breadcrumb";
 import type { AtendimentoMedicoConvenio, AtendimentoMedicoConvenioInsert } from "../../types/database";
-import { listAtendimentoMedicoEspecialidades } from "../atendimentoMedicoEspecialidade/atendimentoMedicoEspecialidadeApi";
+import { listAuxiliares } from "../auxiliares/auxiliaresApi";
 import { addConvenioEspecialidade, deleteConvenioEspecialidade, listAtendimentoMedicoConvenios, listConvenioEspecialidades, saveAtendimentoMedicoConvenio } from "./atendimentoMedicoConvenioApi";
 
 type ConvenioTab = "dados" | "especialidades";
@@ -39,7 +39,7 @@ export function AtendimentoMedicoConvenioPage() {
   const [especialidadeMessage, setEspecialidadeMessage] = useState<string | null>(null);
 
   const conveniosQuery = useQuery({ queryKey: ["atendimento-medico-convenios", search], queryFn: () => listAtendimentoMedicoConvenios(search) });
-  const especialidadesQuery = useQuery({ queryKey: ["atendimento-medico-especialidades-options"], queryFn: () => listAtendimentoMedicoEspecialidades("") });
+  const especialidadesQuery = useQuery({ queryKey: ["auxiliares", "atendimento_medico_especialidade", "options"], queryFn: () => listAuxiliares("atendimento_medico_especialidade", "") });
   const convenioEspecialidadesQuery = useQuery({
     queryKey: ["atendimento-medico-convenio-especialidades", selectedId],
     queryFn: () => listConvenioEspecialidades(Number(selectedId)),
@@ -232,7 +232,7 @@ export function AtendimentoMedicoConvenioPage() {
           <label className="field">
             <select value={selectedEspecialidadeId} onChange={(event) => setSelectedEspecialidadeId(event.target.value)} disabled={especialidadesDisponiveis.length === 0}>
               {especialidadesDisponiveis.length === 0 ? <option value="">Nenhuma especialidade disponivel</option> : null}
-              {especialidadesDisponiveis.map((item) => <option key={item.id} value={item.id}>{item.nm_especialidade}</option>)}
+              {especialidadesDisponiveis.map((item) => <option key={item.id} value={item.id}>{item.nome}</option>)}
             </select>
             <span>Especialidade</span>
           </label>
@@ -252,9 +252,9 @@ export function AtendimentoMedicoConvenioPage() {
             <tbody>
               {convenioEspecialidades.map((item) => (
                 <tr key={item.id}>
-                  <td>{item.especialidade?.nm_especialidade ?? "-"}</td>
+                  <td>{item.especialidade?.nome ?? "-"}</td>
                   <td className="numeric-cell">
-                    <button type="button" className="icon-button danger-icon" title="Excluir" onClick={() => handleDeleteEspecialidade(item.id, item.especialidade?.nm_especialidade ?? "especialidade")} disabled={deleteEspecialidadeMutation.isPending}>
+                    <button type="button" className="icon-button danger-icon" title="Excluir" onClick={() => handleDeleteEspecialidade(item.id, item.especialidade?.nome ?? "especialidade")} disabled={deleteEspecialidadeMutation.isPending}>
                       <Trash2 size={16} />
                     </button>
                   </td>

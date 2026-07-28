@@ -5,7 +5,7 @@ import { Breadcrumb }                                           from "../../shar
 import type { AtendimentoMedicoInsert, AtendimentoMedicoLista } from "../../types/database";
 import { listAssociados }                                       from "../associados/associadosApi";
 import { listAtendimentoMedicoConvenios }                       from "../atendimentoMedicoConvenio/atendimentoMedicoConvenioApi";
-import { listAtendimentoMedicoEspecialidades }                  from "../atendimentoMedicoEspecialidade/atendimentoMedicoEspecialidadeApi";
+import { listAuxiliares }                                       from "../auxiliares/auxiliaresApi";
 import { listDependentesByAssociado }                           from "../dependentes/dependentesApi";
 import { listUsuarios }                                         from "../usuarios/usuariosApi";
 import { getAtendimentoAssociadoResumo, listAtendimentosAssociadoMes, listAtendimentosMedicos, saveAtendimentoMedico, type AtendimentoAssociadoResumo, type AtendimentoMedicoFilters, type AtendimentoMedicoSearchType } from "./atendimentoMedicoApi";
@@ -175,7 +175,7 @@ export function AtendimentoMedicoPage() {
 
   const atendimentosQuery   = useQuery({ queryKey: ["atendimento-medico", filters], queryFn: () => listAtendimentosMedicos(filters) });
   const conveniosQuery      = useQuery({ queryKey: ["atendimento-medico-convenios", ""], queryFn: () => listAtendimentoMedicoConvenios("") });
-  const especialidadesQuery = useQuery({ queryKey: ["atendimento-medico-especialidades", "all"], queryFn: () => listAtendimentoMedicoEspecialidades("") });
+  const especialidadesQuery = useQuery({ queryKey: ["auxiliares", "atendimento_medico_especialidade"], queryFn: () => listAuxiliares("atendimento_medico_especialidade", "") });
   const associadosQuery     = useQuery({ queryKey: ["atendimento-medico-associados", associadoSearch], queryFn: () => listAssociados(associadoSearch), enabled: formOpen });
   const usuariosQuery       = useQuery({ queryKey: ["usuarios"], queryFn: listUsuarios });
   const associadoResumoQuery = useQuery({
@@ -433,7 +433,7 @@ export function AtendimentoMedicoPage() {
           <label className="field">
             <select value={form.tipo} onChange={(event) => setForm({ ...form, tipo: event.target.value })} required>
               <option value="">Selecione</option>
-              {especialidades.map((especialidade) => <option key={especialidade.id} value={especialidade.nm_especialidade}>{especialidade.nm_especialidade}</option>)}
+              {especialidades.map((especialidade) => <option key={especialidade.id} value={especialidade.nome}>{especialidade.nome}</option>)}
             </select>
             <span>Tipo</span>
           </label>
