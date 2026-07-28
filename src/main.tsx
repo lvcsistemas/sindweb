@@ -10,6 +10,7 @@ import { AssociadosPage } from "./features/associados/AssociadosPage";
 import { AtendimentoMedicoPage } from "./features/atendimentoMedico/AtendimentoMedicoPage";
 import { AtendimentoMedicoConvenioPage } from "./features/atendimentoMedicoConvenio/AtendimentoMedicoConvenioPage";
 import { AtendimentoMedicoEspecialidadePage } from "./features/atendimentoMedicoEspecialidade/AtendimentoMedicoEspecialidadePage";
+import { AtendimentoMedicoExamesPage } from "./features/atendimentoMedicoExames/AtendimentoMedicoExamesPage";
 import { AuxiliaresPage } from "./features/auxiliares/AuxiliaresPage";
 import { CnaePage } from "./features/cnae/CnaePage";
 import { ConfigPage } from "./features/config/ConfigPage";
@@ -39,6 +40,7 @@ const router = createBrowserRouter([
       { path: "empresas", element: <EmpresaPage /> },
       { path: "atendimento-medico-convenios", element: <AtendimentoMedicoConvenioPage /> },
       { path: "atendimento-medico-especialidades", element: <AtendimentoMedicoEspecialidadePage /> },
+      { path: "atendimento-medico-exames", element: <AtendimentoMedicoExamesPage /> },
       { path: "auxiliares/:grupoPath", element: <AuxiliaresPage /> },
       { path: "cnae", element: <CnaePage /> },
       { path: "config", element: <ConfigPage /> },
