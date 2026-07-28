@@ -1,5 +1,5 @@
 import { supabase } from "../../lib/supabase";
-import type { AtendimentoMedicoConvenio, AtendimentoMedicoConvenioInsert } from "../../types/database";
+import type { AtendimentoMedicoConvenio, AtendimentoMedicoConvenioEspecialidadeLista, AtendimentoMedicoConvenioInsert } from "../../types/database";
 
 const supabaseUnsafe = supabase as any;
 
@@ -66,5 +66,35 @@ export async function saveAtendimentoMedicoConvenio(values: AtendimentoMedicoCon
 
 export async function deleteAtendimentoMedicoConvenio(id: number) {
   const { error } = await supabaseUnsafe.from("atendimento_medico_convenios").delete().eq("id", id);
+  if (error) throw error;
+}
+export async function listConvenioEspecialidades(convenioId: number) {
+  const { data, error } = await supabaseUnsafe
+    .from("atendimento_medico_convenios_especialidades")
+    .select("id, convenio_id, especialidade_id, created_at, especialidade:atendimento_medico_especialidades(id, tipo, nm_especialidade)")
+    .eq("convenio_id", convenioId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data as AtendimentoMedicoConvenioEspecialidadeLista[];
+}
+
+export async function addConvenioEspecialidade(convenioId: number, especialidadeId: number) {
+  const { data, error } = await supabaseUnsafe
+    .from("atendimento_medico_convenios_especialidades")
+    .insert({ convenio_id: convenioId, especialidade_id: especialidadeId })
+    .select("id, convenio_id, especialidade_id, created_at, especialidade:atendimento_medico_especialidades(id, tipo, nm_especialidade)")
+    .single();
+
+  if (error) throw error;
+  return data as AtendimentoMedicoConvenioEspecialidadeLista;
+}
+
+export async function deleteConvenioEspecialidade(id: number) {
+  const { error } = await supabaseUnsafe
+    .from("atendimento_medico_convenios_especialidades")
+    .delete()
+    .eq("id", id);
+
   if (error) throw error;
 }

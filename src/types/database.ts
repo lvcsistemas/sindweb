@@ -9,6 +9,7 @@ export type Database = {
       auxiliares: { Row: Auxiliar; Insert: AuxiliarInsert; Update: Partial<AuxiliarInsert> };
       atendimento_medico: { Row: AtendimentoMedico; Insert: AtendimentoMedicoInsert; Update: Partial<AtendimentoMedicoInsert> };
       atendimento_medico_convenios: { Row: AtendimentoMedicoConvenio; Insert: AtendimentoMedicoConvenioInsert; Update: Partial<AtendimentoMedicoConvenioInsert> };
+      atendimento_medico_convenios_especialidades: { Row: AtendimentoMedicoConvenioEspecialidade; Insert: AtendimentoMedicoConvenioEspecialidadeInsert; Update: Partial<AtendimentoMedicoConvenioEspecialidadeInsert> };
       atendimento_medico_especialidades: { Row: AtendimentoMedicoEspecialidade; Insert: AtendimentoMedicoEspecialidadeInsert; Update: Partial<AtendimentoMedicoEspecialidadeInsert> };
       cnaes: { Row: Cnae; Insert: CnaeInsert; Update: Partial<CnaeInsert> };
       config: { Row: Config; Insert: ConfigInsert; Update: Partial<ConfigInsert> };
@@ -312,6 +313,22 @@ export type AtendimentoMedicoConvenio = {
 };
 
 export type AtendimentoMedicoConvenioInsert = Omit<AtendimentoMedicoConvenio, "id" | "created_at" | "updated_at"> & { id?: number };
+
+export type AtendimentoMedicoConvenioEspecialidade = {
+  id: number;
+  convenio_id: number;
+  especialidade_id: number;
+  created_at: string;
+};
+
+export type AtendimentoMedicoConvenioEspecialidadeInsert = Omit<AtendimentoMedicoConvenioEspecialidade, "id" | "created_at"> & {
+  id?: number;
+  created_at?: string;
+};
+
+export type AtendimentoMedicoConvenioEspecialidadeLista = AtendimentoMedicoConvenioEspecialidade & {
+  especialidade: Pick<AtendimentoMedicoEspecialidade, "id" | "tipo" | "nm_especialidade"> | null;
+};
 
 export type AtendimentoMedicoEspecialidade = {
   id: number;
