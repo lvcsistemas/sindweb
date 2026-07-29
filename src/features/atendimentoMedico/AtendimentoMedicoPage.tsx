@@ -14,6 +14,7 @@ import { getAtendimentoAssociadoResumo, listAtendimentoMedicoItens, listAtendime
 type AtendimentoFormTab = "atendimento" | "consultas";
 
 const exameModalTipos = ["ULTRASSONOGRAFIA", "RADIOLOGIA", "OUTROS"];
+const exameSangueModalTipos = ["SANGUE", "FEZES/URINA"];
 
 const pesquisaOptions: Array<{ value: AtendimentoMedicoSearchType; label: string }> = [
   { value: "T",                 label: "TODOS" },
@@ -178,6 +179,12 @@ export function AtendimentoMedicoPage() {
   const [calendarMonth, setCalendarMonth]     = useState(() => monthStartFromValue(localDateTimeValue()));
   const [associadoSearch, setAssociadoSearch] = useState("");
   const [message, setMessage]                 = useState<string | null>(null);
+  const isConsulta      = form.tipo?.toUpperCase() === "CONSULTA";
+  const isExame         = form.tipo?.toUpperCase() === "EXAME";
+  const isExameSangue   = form.tipo?.toUpperCase() === "EXAME DE SANGUE";
+  const activeExameTipos = isExameSangue ? exameSangueModalTipos : exameModalTipos;
+  const isExamePicker   = isExame || isExameSangue;
+  const showItensPicker = isConsulta || isExamePicker;
 
   const atendimentosQuery   = useQuery({ queryKey: ["atendimento-medico", filters], queryFn: () => listAtendimentosMedicos(filters) });
   const conveniosQuery      = useQuery({ queryKey: ["atendimento-medico-convenios", ""], queryFn: () => listAtendimentoMedicoConvenios("") });
@@ -210,9 +217,9 @@ export function AtendimentoMedicoPage() {
     enabled: itensModalOpen && form.tipo?.toUpperCase() === "CONSULTA" && Boolean(form.convenio_id)
   });
   const examesModalQuery = useQuery({
-    queryKey: ["atendimento-medico-exames-modal", exameModalTipos],
-    queryFn: () => listAtendimentoMedicoExamesByTipos(exameModalTipos),
-    enabled: itensModalOpen && form.tipo?.toUpperCase() === "EXAME"
+    queryKey: ["atendimento-medico-exames-modal", activeExameTipos],
+    queryFn: () => listAtendimentoMedicoExamesByTipos(activeExameTipos),
+    enabled: itensModalOpen && isExamePicker
   });
 
   const atendimentos    = atendimentosQuery.data    ?? [];
@@ -226,18 +233,15 @@ export function AtendimentoMedicoPage() {
   const convenioEspecialidades = convenioEspecialidadesQuery.data ?? [];
   const examesModal     = examesModalQuery.data     ?? [];
   const selected        = atendimentos.find((item) => item.id === selectedId) ?? null;
-  const isConsulta      = form.tipo?.toUpperCase() === "CONSULTA";
-  const isExame         = form.tipo?.toUpperCase() === "EXAME";
-  const showItensPicker = isConsulta || isExame;
-  const groupedExames   = useMemo(() => exameModalTipos.map((tipo) => ({
+  const groupedExames   = useMemo(() => activeExameTipos.map((tipo) => ({
     tipo,
     itens: examesModal.filter((item) => item.tipo === tipo)
-  })), [examesModal]);
+  })), [activeExameTipos, examesModal]);
   const visibleAtendimentoItens = useMemo(() => {
-    if (isExame) return atendimentoItens.filter((item) => exameModalTipos.includes(item.tipo));
+    if (isExamePicker) return atendimentoItens.filter((item) => activeExameTipos.includes(item.tipo));
     if (isConsulta) return atendimentoItens.filter((item) => item.tipo === "ESPECIALIDADE");
     return [];
-  }, [atendimentoItens, isConsulta, isExame]);
+  }, [activeExameTipos, atendimentoItens, isConsulta, isExamePicker]);
   const calendarDays    = useMemo(() => buildCalendarDays(calendarMonth), [calendarMonth]);
   const calendarTitle   = useMemo(() => new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(calendarMonth), [calendarMonth]);
   const selectedDate    = datePart(form.dt_agendado);
@@ -354,7 +358,7 @@ export function AtendimentoMedicoPage() {
 
   function handleOpenItensModal() {
     setModalSelectedDescricoes(atendimentoItens
-      .filter((item) => isExame ? exameModalTipos.includes(item.tipo) : item.tipo === "ESPECIALIDADE")
+      .filter((item) => isExamePicker ? activeExameTipos.includes(item.tipo) : item.tipo === "ESPECIALIDADE")
       .map((item) => item.descricao));
     setItensModalOpen(true);
   }
@@ -381,7 +385,7 @@ export function AtendimentoMedicoPage() {
         descricao: item.especialidade!.nome
       }));
     setAtendimentoItens((current) => [
-      ...current.filter((item) => isExame ? !exameModalTipos.includes(item.tipo) : item.tipo !== "ESPECIALIDADE"),
+      ...current.filter((item) => isExamePicker ? !activeExameTipos.includes(item.tipo) : item.tipo !== "ESPECIALIDADE"),
       ...nextItens
     ]);
     setItensModalOpen(false);
@@ -640,7 +644,7 @@ export function AtendimentoMedicoPage() {
                 ))}
               </div>
             ) : null}
-            {isExame ? (
+            {isExamePicker ? (
               <div className="modal-form">
                 {examesModalQuery.isLoading ? <div className="empty-state">Carregando exames...</div> : null}
                 {!examesModalQuery.isLoading && examesModal.length === 0 ? <div className="empty-state">Nenhum exame encontrado para os tipos configurados.</div> : null}
