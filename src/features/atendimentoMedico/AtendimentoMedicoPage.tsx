@@ -369,7 +369,7 @@ export function AtendimentoMedicoPage() {
 
   function handleConfirmItensModal() {
     const selectedSet = new Set(modalSelectedDescricoes);
-    const nextItens = isExame
+    const nextItens = isExamePicker
       ? examesModal
         .filter((item) => selectedSet.has(item.exame))
         .map((item) => ({
