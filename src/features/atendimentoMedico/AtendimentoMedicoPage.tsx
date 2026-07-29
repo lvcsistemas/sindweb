@@ -15,9 +15,9 @@ import { getAtendimentoAssociadoResumo, listAtendimentoMedicoItens, listAtendime
 
 type AtendimentoFormTab = "atendimento" | "consultas";
 
-const exameModalTipos = ["ULTRASSONOGRAFIA", "RADIOLOGIA", "OUTROS"];
-const exameSangueModalTipos = ["SANGUE", "FEZES/URINA"];
-const situacoesAtendimentoAlerta = new Set(["DESFILIADO", "DEMITIDO", "BLOQUEADO"]);
+const exameModalTipos               = ["ULTRASSONOGRAFIA", "RADIOLOGIA", "OUTROS"];
+const exameSangueModalTipos         = ["SANGUE", "FEZES/URINA"];
+const situacoesAtendimentoAlerta    = new Set(["DESFILIADO", "DEMITIDO", "BLOQUEADO"]);
 const situacoesAtendimentoBloqueio = new Set(["DESFILIADO", "DEMITIDO"]);
 
 const pesquisaOptions: Array<{ value: AtendimentoMedicoSearchType; label: string }> = [
@@ -75,9 +75,9 @@ function combineDateTime(date: string, time: string) {
 }
 
 function dateToInputValue(date: Date) {
-  const year = date.getFullYear();
+  const year  = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
+  const day   = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
 
@@ -96,7 +96,7 @@ function shiftMonth(month: Date, amount: number) {
 }
 
 function buildCalendarDays(month: Date) {
-  const firstDay = new Date(month.getFullYear(), month.getMonth(), 1).getDay();
+  const firstDay    = new Date(month.getFullYear(), month.getMonth(), 1).getDay();
   const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
   const days: Array<Date | null> = Array.from({ length: firstDay }, () => null);
   for (let day = 1; day <= daysInMonth; day += 1) {
@@ -108,16 +108,16 @@ function buildCalendarDays(month: Date) {
 
 function weekDayLabel(date: string) {
   if (!date) return "";
-  const [year, month, day] = date.split("-").map(Number);
-  const parsed = new Date(year, month - 1, day);
+  const [year, month, day]  = date.split("-").map(Number);
+  const parsed              = new Date(year, month - 1, day);
   if (Number.isNaN(parsed.getTime())) return "";
   return new Intl.DateTimeFormat("pt-BR", { weekday: "long" }).format(parsed);
 }
 
 function formatDateTime(value: string | null | undefined) {
   if (!value) return "-";
-  const [date = "", time = ""] = value.slice(0, 19).split("T");
-  const [year, month, day] = date.split("-");
+  const [date = "", time = ""]  = value.slice(0, 19).split("T");
+  const [year, month, day]      = date.split("-");
   return `${day}/${month}/${year} ${time}`;
 }
 
@@ -219,35 +219,35 @@ function newEmptyForm(): AtendimentoMedicoInsert {
 }
 
 export function AtendimentoMedicoPage() {
-  const queryClient                           = useQueryClient();
-  const [filters, setFilters]                 = useState<AtendimentoMedicoFilters>(emptyFilters);
-  const [draftFilters, setDraftFilters]       = useState<AtendimentoMedicoFilters>(emptyFilters);
-  const [selectedId, setSelectedId]           = useState<number | null>(null);
-  const [formOpen, setFormOpen]               = useState(false);
-  const [activeFormTab, setActiveFormTab]     = useState<AtendimentoFormTab>("atendimento");
+  const queryClient                               = useQueryClient();
+  const [filters, setFilters]                     = useState<AtendimentoMedicoFilters>(emptyFilters);
+  const [draftFilters, setDraftFilters]           = useState<AtendimentoMedicoFilters>(emptyFilters);
+  const [selectedId, setSelectedId]               = useState<number | null>(null);
+  const [formOpen, setFormOpen]                   = useState(false);
+  const [activeFormTab, setActiveFormTab]         = useState<AtendimentoFormTab>("atendimento");
   const [associadoCardOpen, setAssociadoCardOpen] = useState(false);
-  const [form, setForm]                       = useState<AtendimentoMedicoInsert>(newEmptyForm);
-  const [atendimentoItens, setAtendimentoItens] = useState<AtendimentoMedicoItemInsert[]>([]);
-  const [itensModalOpen, setItensModalOpen]   = useState(false);
+  const [form, setForm]                           = useState<AtendimentoMedicoInsert>(newEmptyForm);
+  const [atendimentoItens, setAtendimentoItens]   = useState<AtendimentoMedicoItemInsert[]>([]);
+  const [itensModalOpen, setItensModalOpen]       = useState(false);
   const [modalSelectedDescricoes, setModalSelectedDescricoes] = useState<string[]>([]);
-  const [calendarMonth, setCalendarMonth]     = useState(() => monthStartFromValue(localDateTimeValue()));
-  const [associadoSearch, setAssociadoSearch] = useState("");
-  const [message, setMessage]                 = useState<string | null>(null);
+  const [calendarMonth, setCalendarMonth]         = useState(() => monthStartFromValue(localDateTimeValue()));
+  const [associadoSearch, setAssociadoSearch]     = useState("");
+  const [message, setMessage]                     = useState<string | null>(null);
   const [lastSituacaoAlertKey, setLastSituacaoAlertKey] = useState<string | null>(null);
-  const isConsulta      = form.tipo?.toUpperCase() === "CONSULTA";
-  const isExame         = form.tipo?.toUpperCase() === "EXAME";
-  const isExameSangue   = form.tipo?.toUpperCase() === "EXAME DE SANGUE";
-  const activeExameTipos = isExameSangue ? exameSangueModalTipos : exameModalTipos;
-  const isExamePicker   = isExame || isExameSangue;
-  const showItensPicker = isConsulta || isExamePicker;
+  const isConsulta        = form.tipo?.toUpperCase() === "CONSULTA";
+  const isExame           = form.tipo?.toUpperCase() === "EXAME";
+  const isExameSangue     = form.tipo?.toUpperCase() === "EXAME DE SANGUE";
+  const activeExameTipos  = isExameSangue ? exameSangueModalTipos : exameModalTipos;
+  const isExamePicker     = isExame || isExameSangue;
+  const showItensPicker   = isConsulta || isExamePicker;
 
-  const atendimentosQuery   = useQuery({ queryKey: ["atendimento-medico", filters], queryFn: () => listAtendimentosMedicos(filters) });
-  const conveniosQuery      = useQuery({ queryKey: ["atendimento-medico-convenios", ""], queryFn: () => listAtendimentoMedicoConvenios("") });
-  const configQuery         = useQuery({ queryKey: ["config"], queryFn: getConfig });
-  const tiposQuery          = useQuery({ queryKey: ["auxiliares", "atendimento_medico_tipo"], queryFn: () => listAuxiliares("atendimento_medico_tipo", "") });
-  const associadosQuery     = useQuery({ queryKey: ["atendimento-medico-associados", associadoSearch], queryFn: () => listAssociados(associadoSearch), enabled: formOpen });
-  const usuariosQuery       = useQuery({ queryKey: ["usuarios"], queryFn: listUsuarios });
-  const associadoResumoQuery = useQuery({
+  const atendimentosQuery     = useQuery({ queryKey: ["atendimento-medico", filters], queryFn: () => listAtendimentosMedicos(filters) });
+  const conveniosQuery        = useQuery({ queryKey: ["atendimento-medico-convenios", ""], queryFn: () => listAtendimentoMedicoConvenios("") });
+  const configQuery           = useQuery({ queryKey: ["config"], queryFn: getConfig });
+  const tiposQuery            = useQuery({ queryKey: ["auxiliares", "atendimento_medico_tipo"], queryFn: () => listAuxiliares("atendimento_medico_tipo", "") });
+  const associadosQuery       = useQuery({ queryKey: ["atendimento-medico-associados", associadoSearch], queryFn: () => listAssociados(associadoSearch), enabled: formOpen });
+  const usuariosQuery         = useQuery({ queryKey: ["usuarios"], queryFn: listUsuarios });
+  const associadoResumoQuery  = useQuery({
     queryKey: ["atendimento-associado-resumo", form.associado_id],
     queryFn: () => getAtendimentoAssociadoResumo(Number(form.associado_id)),
     enabled: Boolean(form.associado_id)
@@ -278,19 +278,19 @@ export function AtendimentoMedicoPage() {
     enabled: itensModalOpen && isExamePicker
   });
 
-  const atendimentos    = atendimentosQuery.data    ?? [];
-  const convenios       = conveniosQuery.data       ?? [];
-  const tipos           = tiposQuery.data           ?? [];
-  const associados      = associadosQuery.data      ?? [];
-  const usuarios        = usuariosQuery.data        ?? [];
-  const associadoResumo = associadoResumoQuery.data ?? null;
-  const associadoAtendimentosMes = associadoAtendimentosMesQuery.data ?? [];
-  const dependentes     = dependentesQuery.data     ?? [];
-  const convenioEspecialidades = convenioEspecialidadesQuery.data ?? [];
-  const examesModal     = examesModalQuery.data     ?? [];
-  const config          = configQuery.data           ?? null;
-  const selected        = atendimentos.find((item) => item.id === selectedId) ?? null;
-  const groupedExames   = useMemo(() => activeExameTipos.map((tipo) => ({
+  const atendimentos              = atendimentosQuery.data    ?? [];
+  const convenios                 = conveniosQuery.data       ?? [];
+  const tipos                     = tiposQuery.data           ?? [];
+  const associados                = associadosQuery.data      ?? [];
+  const usuarios                  = usuariosQuery.data        ?? [];
+  const associadoResumo           = associadoResumoQuery.data ?? null;
+  const associadoAtendimentosMes  = associadoAtendimentosMesQuery.data ?? [];
+  const dependentes               = dependentesQuery.data     ?? [];
+  const convenioEspecialidades    = convenioEspecialidadesQuery.data ?? [];
+  const examesModal               = examesModalQuery.data     ?? [];
+  const config                    = configQuery.data          ?? null;
+  const selected                  = atendimentos.find((item) => item.id === selectedId) ?? null;
+  const groupedExames             = useMemo(() => activeExameTipos.map((tipo) => ({
     tipo,
     itens: examesModal.filter((item) => item.tipo === tipo)
   })), [activeExameTipos, examesModal]);
@@ -299,10 +299,10 @@ export function AtendimentoMedicoPage() {
     if (isConsulta) return atendimentoItens.filter((item) => item.tipo === "ESPECIALIDADE");
     return [];
   }, [activeExameTipos, atendimentoItens, isConsulta, isExamePicker]);
-  const calendarDays    = useMemo(() => buildCalendarDays(calendarMonth), [calendarMonth]);
-  const calendarTitle   = useMemo(() => new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(calendarMonth), [calendarMonth]);
-  const selectedDate    = datePart(form.dt_agendado);
-  const todayDate       = dateToInputValue(new Date());
+  const calendarDays            = useMemo(() => buildCalendarDays(calendarMonth), [calendarMonth]);
+  const calendarTitle           = useMemo(() => new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(calendarMonth), [calendarMonth]);
+  const selectedDate            = datePart(form.dt_agendado);
+  const todayDate               = dateToInputValue(new Date());
   const associadoSituacaoAlerta = associadoResumo?.situacao?.trim().toUpperCase() ?? "";
   const shouldHighlightAtendimentoForm = formOpen && situacoesAtendimentoAlerta.has(associadoSituacaoAlerta);
   const associadoOptions = useMemo(() => {
@@ -363,8 +363,8 @@ export function AtendimentoMedicoPage() {
 
   const saveMutation = useMutation({
     mutationFn: async (values: AtendimentoMedicoInsert) => {
-      const tipo = values.tipo?.trim().toUpperCase() ?? "";
-      const agendado = values.dt_agendado?.slice(0, 16) ?? "";
+      const tipo      = values.tipo?.trim().toUpperCase() ?? "";
+      const agendado  = values.dt_agendado?.slice(0, 16) ?? "";
 
       if (!Number(values.associado_id)) {
         throw new Error("Selecione o associado antes de salvar o atendimento.");
@@ -375,7 +375,7 @@ export function AtendimentoMedicoPage() {
       }
 
       if (!Number(values.convenio_id)) {
-        throw new Error("Selecione o convenio antes de salvar o atendimento.");
+        throw new Error("Selecione o convênio antes de salvar o atendimento.");
       }
 
       if (!agendado) {
@@ -383,11 +383,11 @@ export function AtendimentoMedicoPage() {
       }
 
       if (agendado < localDateTimeValue()) {
-        throw new Error("A data do agendamento nao pode ser menor que a data atual.");
+        throw new Error("A data do agendamento não pode ser menor que a data atual.");
       }
 
       if (situacoesAtendimentoBloqueio.has(associadoSituacaoAlerta)) {
-        throw new Error(`O Associado encontra-se: ${associadoSituacaoAlerta} e nao podera ser atendido.`);
+        throw new Error(`O Associado encontra-se: ${associadoSituacaoAlerta} e não poderá ser atendido.`);
       }
 
       if (["CONSULTA", "EXAME", "EXAME DE SANGUE"].includes(tipo) && visibleAtendimentoItens.length === 0) {
@@ -395,7 +395,7 @@ export function AtendimentoMedicoPage() {
       }
 
       const limitKind = getAtendimentoLimitKind(values.tipo);
-      const limite = limitKind === "consulta" ? Number(config?.qtd_consultas ?? 0) : limitKind === "exame" ? Number(config?.qtd_exames ?? 0) : 0;
+      const limite    = limitKind === "consulta" ? Number(config?.qtd_consultas ?? 0) : limitKind === "exame" ? Number(config?.qtd_exames ?? 0) : 0;
 
       if (limitKind && limite > 0) {
         const atendimentosDoMes = await queryClient.fetchQuery({
@@ -460,7 +460,7 @@ export function AtendimentoMedicoPage() {
         descricao: atendimentoItem.descricao
       })));
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Nao foi possivel carregar as especialidades/exames.");
+      setMessage(error instanceof Error ? error.message : "Não foi possivel carregar as especialidades/exames.");
     }
   }
 
@@ -631,7 +631,7 @@ export function AtendimentoMedicoPage() {
     return (
       <section className="detail-card atendimento-associado-card">
         <div className="detail-card-title">
-          <strong>Dados do Associado</strong>
+          <strong>DADOS DO ASSOCIADO</strong>
           <button type="button" className="icon-button" onClick={() => setAssociadoCardOpen((open) => !open)} aria-label={associadoCardOpen ? "Recolher dados do associado" : "Expandir dados do associado"}>
             {associadoCardOpen ? <Minus size={16} /> : <Plus size={16} />}
           </button>
@@ -693,7 +693,7 @@ export function AtendimentoMedicoPage() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>ID</th>
+                <th>#</th>
                 <th>Agendado</th>
                 <th>Situação</th>
                 <th>Tipo</th>
