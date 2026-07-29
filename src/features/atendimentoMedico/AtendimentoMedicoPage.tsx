@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useMemo, useState }              from "react";
 import { useMutation, useQuery, useQueryClient }                from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Minus, Plus, Printer, Save, Search } from "lucide-react";
 import { Breadcrumb }                                           from "../../shared/Breadcrumb";
+import { applyAtendimentoDateRangePreference, getAtendimentoDateRangePreference, setAtendimentoDateRangePreference } from "../../shared/dateRangePreference";
 import type { AtendimentoMedicoExame, AtendimentoMedicoInsert, AtendimentoMedicoItemInsert, AtendimentoMedicoLista } from "../../types/database";
 import { listAssociados }                                       from "../associados/associadosApi";
 import { listAtendimentoMedicoConvenios, listConvenioEspecialidades } from "../atendimentoMedicoConvenio/atendimentoMedicoConvenioApi";
@@ -181,10 +182,11 @@ function getAtendimentoRowClass(item: AtendimentoMedicoLista) {
 }
 
 function emptyFilters(): AtendimentoMedicoFilters {
-  return { pesquisa: "T", inicio: todayAt("start"), fim: todayAt("end"), usuarioId: "TODOS", valor: "" };
+  return applyAtendimentoDateRangePreference({ pesquisa: "T", inicio: todayAt("start"), fim: todayAt("end"), usuarioId: "TODOS", valor: "" });
 }
 
 function newEmptyForm(): AtendimentoMedicoInsert {
+  const preferredRange = getAtendimentoDateRangePreference();
   return {
     created_by: null,
     updated_by: null,
@@ -194,7 +196,7 @@ function newEmptyForm(): AtendimentoMedicoInsert {
     associado_id: 0,
     dependente_id: 0,
     qtd: 0,
-    dt_agendado: localDateTimeValue(),
+    dt_agendado: preferredRange?.inicio ?? localDateTimeValue(),
     situacao: "AGENDADO",
     tipo: "CONSULTA",
     obs: ""
@@ -418,6 +420,7 @@ export function AtendimentoMedicoPage() {
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setAtendimentoDateRangePreference({ inicio: draftFilters.inicio, fim: draftFilters.fim });
     setFilters(draftFilters);
   }
 
@@ -891,8 +894,16 @@ export function AtendimentoMedicoPage() {
                 </select>
                 <span>Pesquisar por</span>
               </label>
-              <label className="field"><input type="datetime-local" value={draftFilters.inicio} onChange={(event) => setDraftFilters({ ...draftFilters, inicio: event.target.value })} placeholder=" " /><span>Inicial</span></label>
-              <label className="field"><input type="datetime-local" value={draftFilters.fim} onChange={(event) => setDraftFilters({ ...draftFilters, fim: event.target.value })} placeholder=" " /><span>Final</span></label>
+              <label className="field"><input type="datetime-local" value={draftFilters.inicio} onChange={(event) => {
+                const nextFilters = { ...draftFilters, inicio: event.target.value };
+                setDraftFilters(nextFilters);
+                setAtendimentoDateRangePreference({ inicio: nextFilters.inicio, fim: nextFilters.fim });
+              }} placeholder=" " /><span>Inicial</span></label>
+              <label className="field"><input type="datetime-local" value={draftFilters.fim} onChange={(event) => {
+                const nextFilters = { ...draftFilters, fim: event.target.value };
+                setDraftFilters(nextFilters);
+                setAtendimentoDateRangePreference({ inicio: nextFilters.inicio, fim: nextFilters.fim });
+              }} placeholder=" " /><span>Final</span></label>
               <label className="field">
                 <select value={draftFilters.usuarioId} onChange={(event) => {
                   const nextFilters = { ...draftFilters, usuarioId: event.target.value };
