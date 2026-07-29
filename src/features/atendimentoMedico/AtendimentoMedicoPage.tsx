@@ -721,7 +721,7 @@ export function AtendimentoMedicoPage() {
           {renderAssociadoResumoCard(associadoResumo)}
         </div>
 
-        <div className="form-grid atendimento-full-grid">
+        <div className="form-grid atendimento-associado-grid">
           <label className="field">
             <select value={form.dependente_id} onChange={(event) => setForm({ ...form, dependente_id: Number(event.target.value) })}>
               <option value={0}>Sem dependente</option>
@@ -731,7 +731,12 @@ export function AtendimentoMedicoPage() {
           </label>
         </div>
 
-        <label className="field"><textarea rows={3} value={form.obs ?? ""} onChange={(event) => setForm({ ...form, obs: event.target.value })} placeholder=" " /><span>Observação</span></label>
+        <div className="form-grid atendimento-associado-grid">
+          <label className="field">
+            <textarea rows={3} value={form.obs ?? ""} onChange={(event) => setForm({ ...form, obs: event.target.value })} placeholder=" " /><span>Observação</span>
+          </label>
+        </div>
+        
         {showItensPicker ? (
           <section className="related-panel atendimento-full-grid">
             <div className="related-toolbar">
