@@ -836,7 +836,6 @@ export function AtendimentoMedicoPage() {
         {showItensPicker ? (
           <section className="related-panel atendimento-full-grid">
             <div className="related-toolbar">
-              <strong>Especialidades/Exames</strong>
               <button type="button" onClick={handleOpenItensModal} disabled={isConsulta && !form.convenio_id}>
                 <Plus size={16} /> Especialidades/Exames
               </button>
