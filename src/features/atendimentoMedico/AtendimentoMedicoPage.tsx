@@ -244,7 +244,6 @@ export function AtendimentoMedicoPage() {
       obs: item.obs ?? ""
     });
     setAssociadoSearch(item.nm_associado ?? "");
-    setAtendimentoItens([]);
     setCalendarMonth(monthStartFromValue(item.dt_agendado));
     setActiveFormTab("atendimento");
     setAssociadoCardOpen(false);
@@ -252,7 +251,8 @@ export function AtendimentoMedicoPage() {
   }
 
   useEffect(() => {
-    if (selected) openFormForAtendimento(selected);
+    if (!selected) return;
+    openFormForAtendimento(selected);
   }, [selected]);
 
   useEffect(() => {
@@ -301,10 +301,26 @@ export function AtendimentoMedicoPage() {
     setFormOpen(true);
   }
 
-  function handleSelect(item: AtendimentoMedicoLista) {
+  async function handleSelect(item: AtendimentoMedicoLista) {
     setSelectedId(item.id);
     openFormForAtendimento(item);
+    setAtendimentoItens([]);
     setMessage(null);
+    try {
+      const itens = await queryClient.fetchQuery({
+        queryKey: ["atendimento-medico-itens", item.id],
+        queryFn: () => listAtendimentoMedicoItens(item.id)
+      });
+      setAtendimentoItens(itens.map((atendimentoItem) => ({
+        id: atendimentoItem.id,
+        atendimento_id: atendimentoItem.atendimento_id,
+        item_id: atendimentoItem.item_id,
+        tipo: atendimentoItem.tipo,
+        descricao: atendimentoItem.descricao
+      })));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Nao foi possivel carregar as especialidades/exames.");
+    }
   }
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
