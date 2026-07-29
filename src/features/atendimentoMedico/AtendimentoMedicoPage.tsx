@@ -2,13 +2,13 @@ import { FormEvent, useEffect, useMemo, useState }              from "react";
 import { useMutation, useQuery, useQueryClient }                from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Minus, Plus, Save, Search }  from "lucide-react";
 import { Breadcrumb }                                           from "../../shared/Breadcrumb";
-import type { AtendimentoMedicoInsert, AtendimentoMedicoLista } from "../../types/database";
+import type { AtendimentoMedicoInsert, AtendimentoMedicoItemInsert, AtendimentoMedicoLista } from "../../types/database";
 import { listAssociados }                                       from "../associados/associadosApi";
-import { listAtendimentoMedicoConvenios }                       from "../atendimentoMedicoConvenio/atendimentoMedicoConvenioApi";
+import { listAtendimentoMedicoConvenios, listConvenioEspecialidades } from "../atendimentoMedicoConvenio/atendimentoMedicoConvenioApi";
 import { listAuxiliares }                                       from "../auxiliares/auxiliaresApi";
 import { listDependentesByAssociado }                           from "../dependentes/dependentesApi";
 import { listUsuarios }                                         from "../usuarios/usuariosApi";
-import { getAtendimentoAssociadoResumo, listAtendimentosAssociadoMes, listAtendimentosMedicos, saveAtendimentoMedico, type AtendimentoAssociadoResumo, type AtendimentoMedicoFilters, type AtendimentoMedicoSearchType } from "./atendimentoMedicoApi";
+import { getAtendimentoAssociadoResumo, listAtendimentoMedicoItens, listAtendimentosAssociadoMes, listAtendimentosMedicos, replaceAtendimentoMedicoItens, saveAtendimentoMedico, type AtendimentoAssociadoResumo, type AtendimentoMedicoFilters, type AtendimentoMedicoSearchType } from "./atendimentoMedicoApi";
 
 type AtendimentoFormTab = "atendimento" | "consultas";
 
@@ -169,6 +169,9 @@ export function AtendimentoMedicoPage() {
   const [activeFormTab, setActiveFormTab]     = useState<AtendimentoFormTab>("atendimento");
   const [associadoCardOpen, setAssociadoCardOpen] = useState(false);
   const [form, setForm]                       = useState<AtendimentoMedicoInsert>(newEmptyForm);
+  const [atendimentoItens, setAtendimentoItens] = useState<AtendimentoMedicoItemInsert[]>([]);
+  const [itensModalOpen, setItensModalOpen]   = useState(false);
+  const [modalSelectedIds, setModalSelectedIds] = useState<number[]>([]);
   const [calendarMonth, setCalendarMonth]     = useState(() => monthStartFromValue(localDateTimeValue()));
   const [associadoSearch, setAssociadoSearch] = useState("");
   const [message, setMessage]                 = useState<string | null>(null);
@@ -193,6 +196,16 @@ export function AtendimentoMedicoPage() {
     queryFn: () => listDependentesByAssociado(Number(form.associado_id)),
     enabled: Boolean(form.associado_id)
   });
+  const atendimentoItensQuery = useQuery({
+    queryKey: ["atendimento-medico-itens", selectedId],
+    queryFn: () => listAtendimentoMedicoItens(Number(selectedId)),
+    enabled: Boolean(selectedId) && formOpen
+  });
+  const convenioEspecialidadesQuery = useQuery({
+    queryKey: ["atendimento-medico-convenio-especialidades-modal", form.convenio_id],
+    queryFn: () => listConvenioEspecialidades(Number(form.convenio_id)),
+    enabled: itensModalOpen && form.tipo?.toUpperCase() === "CONSULTA" && Boolean(form.convenio_id)
+  });
 
   const atendimentos    = atendimentosQuery.data    ?? [];
   const convenios       = conveniosQuery.data       ?? [];
@@ -202,7 +215,9 @@ export function AtendimentoMedicoPage() {
   const associadoResumo = associadoResumoQuery.data ?? null;
   const associadoAtendimentosMes = associadoAtendimentosMesQuery.data ?? [];
   const dependentes     = dependentesQuery.data     ?? [];
+  const convenioEspecialidades = convenioEspecialidadesQuery.data ?? [];
   const selected        = atendimentos.find((item) => item.id === selectedId) ?? null;
+  const isConsulta      = form.tipo?.toUpperCase() === "CONSULTA";
   const calendarDays    = useMemo(() => buildCalendarDays(calendarMonth), [calendarMonth]);
   const calendarTitle   = useMemo(() => new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(calendarMonth), [calendarMonth]);
   const selectedDate    = datePart(form.dt_agendado);
@@ -229,6 +244,7 @@ export function AtendimentoMedicoPage() {
       obs: item.obs ?? ""
     });
     setAssociadoSearch(item.nm_associado ?? "");
+    setAtendimentoItens([]);
     setCalendarMonth(monthStartFromValue(item.dt_agendado));
     setActiveFormTab("atendimento");
     setAssociadoCardOpen(false);
@@ -239,13 +255,31 @@ export function AtendimentoMedicoPage() {
     if (selected) openFormForAtendimento(selected);
   }, [selected]);
 
+  useEffect(() => {
+    if (!selectedId) return;
+    if (!atendimentoItensQuery.data) return;
+
+    setAtendimentoItens(atendimentoItensQuery.data.map((item) => ({
+      id: item.id,
+      atendimento_id: item.atendimento_id,
+      item_id: item.item_id,
+      tipo: item.tipo,
+      descricao: item.descricao
+    })));
+  }, [atendimentoItensQuery.data, selectedId]);
+
   const saveMutation = useMutation({
-    mutationFn: saveAtendimentoMedico,
+    mutationFn: async (values: AtendimentoMedicoInsert) => {
+      const saved = await saveAtendimentoMedico(values);
+      await replaceAtendimentoMedicoItens(saved.id, isConsulta ? atendimentoItens : []);
+      return saved;
+    },
     onSuccess: async (saved) => {
       setSelectedId(saved.id);
       setFormOpen(false);
       setMessage("Atendimento salvo com sucesso.");
       await queryClient.invalidateQueries({ queryKey: ["atendimento-medico"] });
+      await queryClient.invalidateQueries({ queryKey: ["atendimento-medico-itens", saved.id] });
     },
     onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel salvar o atendimento.")
   });
@@ -256,6 +290,9 @@ export function AtendimentoMedicoPage() {
     setSelectedId(null);
     setAssociadoSearch("");
     setMessage(null);
+    setAtendimentoItens([]);
+    setModalSelectedIds([]);
+    setItensModalOpen(false);
     const nextForm = newEmptyForm();
     setForm(nextForm);
     setCalendarMonth(monthStartFromValue(nextForm.dt_agendado));
@@ -279,6 +316,28 @@ export function AtendimentoMedicoPage() {
     event.preventDefault();
     setMessage(null);
     saveMutation.mutate(form);
+  }
+
+  function handleOpenItensModal() {
+    setModalSelectedIds(atendimentoItens.map((item) => item.item_id));
+    setItensModalOpen(true);
+  }
+
+  function toggleModalItem(id: number) {
+    setModalSelectedIds((current) => current.includes(id) ? current.filter((itemId) => itemId !== id) : [...current, id]);
+  }
+
+  function handleConfirmItensModal() {
+    const selectedSet = new Set(modalSelectedIds);
+    setAtendimentoItens(convenioEspecialidades
+      .filter((item) => selectedSet.has(item.especialidade_id) && item.especialidade?.nome)
+      .map((item) => ({
+        atendimento_id: Number(form.id || 0),
+        item_id: item.especialidade_id,
+        tipo: "ESPECIALIDADE",
+        descricao: item.especialidade!.nome
+      })));
+    setItensModalOpen(false);
   }
 
   function renderAssociadoResumoCard(resumo: AtendimentoAssociadoResumo | null) {
@@ -438,7 +497,11 @@ export function AtendimentoMedicoPage() {
             <span>Tipo</span>
           </label>
           <label className="field">
-            <select value={form.convenio_id} onChange={(event) => setForm({ ...form, convenio_id: Number(event.target.value) })} required>
+            <select value={form.convenio_id} onChange={(event) => {
+              setForm({ ...form, convenio_id: Number(event.target.value) });
+              setAtendimentoItens([]);
+              setModalSelectedIds([]);
+            }} required>
               <option value={0}>Selecione</option>
               {convenios.map((convenio) => <option key={convenio.id} value={convenio.id}>{convenio.nm_convenio}</option>)}
             </select>
@@ -472,6 +535,35 @@ export function AtendimentoMedicoPage() {
         </div>
 
         <label className="field"><textarea rows={3} value={form.obs ?? ""} onChange={(event) => setForm({ ...form, obs: event.target.value })} placeholder=" " /><span>Observação</span></label>
+        {isConsulta ? (
+          <section className="related-panel atendimento-full-grid">
+            <div className="related-toolbar">
+              <strong>Especialidades/Exames</strong>
+              <button type="button" onClick={handleOpenItensModal} disabled={!form.convenio_id}>
+                <Plus size={16} /> Especialidades/Exames
+              </button>
+            </div>
+            <div className="data-table-wrap">
+              <table className="data-table atendimento-itens-table">
+                <thead>
+                  <tr>
+                    <th>Tipo</th>
+                    <th>Especialidade/Exame</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {atendimentoItens.map((item) => (
+                    <tr key={`${item.tipo}-${item.item_id}`}>
+                      <td>{item.tipo}</td>
+                      <td>{item.descricao}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {atendimentoItens.length === 0 ? <div className="empty-state">Nenhuma especialidade/exame selecionado.</div> : null}
+            </div>
+          </section>
+        ) : null}
         {message ? <div className={saveMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
 
         <div className="form-actions atendimento-full-grid">
@@ -480,6 +572,30 @@ export function AtendimentoMedicoPage() {
         </div>
         </> : renderConsultasExamesTab()}
       </form>
+      {itensModalOpen ? (
+        <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="atendimento-itens-title">
+          <section className="modal-panel atendimento-itens-modal">
+            <h2 id="atendimento-itens-title">Especialidades/Exames</h2>
+            {!form.convenio_id ? <div className="empty-state">Selecione um convênio antes de escolher as especialidades.</div> : null}
+            {form.convenio_id ? (
+              <div className="modal-form">
+                {convenioEspecialidadesQuery.isLoading ? <div className="empty-state">Carregando especialidades...</div> : null}
+                {!convenioEspecialidadesQuery.isLoading && convenioEspecialidades.length === 0 ? <div className="empty-state">Nenhuma especialidade vinculada a este convênio.</div> : null}
+                {convenioEspecialidades.map((item) => (
+                  <label key={item.id} className="check-row">
+                    <input type="checkbox" checked={modalSelectedIds.includes(item.especialidade_id)} onChange={() => toggleModalItem(item.especialidade_id)} />
+                    <span>{item.especialidade?.nome ?? "Especialidade sem nome"}</span>
+                  </label>
+                ))}
+              </div>
+            ) : null}
+            <div className="modal-actions">
+              <button type="button" className="secondary-button" onClick={() => setItensModalOpen(false)}>Cancelar</button>
+              <button type="button" onClick={handleConfirmItensModal} disabled={!form.convenio_id || convenioEspecialidadesQuery.isLoading}>OK</button>
+            </div>
+          </section>
+        </div>
+      ) : null}
     </section>
   ) : null;
 

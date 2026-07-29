@@ -1,5 +1,5 @@
 import { supabase } from "../../lib/supabase";
-import type { AssociadoContribuicaoLista, AtendimentoMedicoInsert, AtendimentoMedicoLista } from "../../types/database";
+import type { AssociadoContribuicaoLista, AtendimentoMedicoInsert, AtendimentoMedicoItem, AtendimentoMedicoItemInsert, AtendimentoMedicoLista } from "../../types/database";
 
 const supabaseUnsafe = supabase as any;
 
@@ -163,6 +163,43 @@ export async function saveAtendimentoMedico(values: AtendimentoMedicoInsert) {
     .single();
   raiseSupabaseError(error);
   return data as AtendimentoMedicoLista;
+}
+
+export async function listAtendimentoMedicoItens(atendimentoId: number) {
+  const { data, error } = await supabaseUnsafe
+    .from("atendimento_medico_itens")
+    .select("*")
+    .eq("atendimento_id", atendimentoId)
+    .order("descricao", { ascending: true });
+
+  raiseSupabaseError(error);
+  return data as AtendimentoMedicoItem[];
+}
+
+export async function replaceAtendimentoMedicoItens(atendimentoId: number, itens: AtendimentoMedicoItemInsert[]) {
+  const { error: deleteError } = await supabaseUnsafe
+    .from("atendimento_medico_itens")
+    .delete()
+    .eq("atendimento_id", atendimentoId);
+  raiseSupabaseError(deleteError);
+
+  const payload = itens.map((item) => ({
+    atendimento_id: atendimentoId,
+    item_id: toNumber(item.item_id),
+    tipo: item.tipo.trim().toUpperCase(),
+    descricao: item.descricao.trim().toUpperCase()
+  })).filter((item) => item.item_id && item.descricao);
+
+  if (payload.length === 0) return [] as AtendimentoMedicoItem[];
+
+  const { data, error } = await supabaseUnsafe
+    .from("atendimento_medico_itens")
+    .insert(payload)
+    .select()
+    .order("descricao", { ascending: true });
+
+  raiseSupabaseError(error);
+  return data as AtendimentoMedicoItem[];
 }
 
 export async function getAtendimentoAssociadoResumo(associadoId: number) {
