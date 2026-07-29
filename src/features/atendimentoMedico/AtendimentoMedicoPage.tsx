@@ -350,7 +350,7 @@ export function AtendimentoMedicoPage() {
   const saveMutation = useMutation({
     mutationFn: async (values: AtendimentoMedicoInsert) => {
       const tipo = values.tipo?.trim().toUpperCase() ?? "";
-      const agendado = values.dt_agendado ? new Date(values.dt_agendado) : null;
+      const agendado = values.dt_agendado?.slice(0, 16) ?? "";
 
       if (!Number(values.associado_id)) {
         throw new Error("Selecione o associado antes de salvar o atendimento.");
@@ -364,11 +364,11 @@ export function AtendimentoMedicoPage() {
         throw new Error("Selecione o convenio antes de salvar o atendimento.");
       }
 
-      if (!agendado || Number.isNaN(agendado.getTime())) {
+      if (!agendado) {
         throw new Error("Informe a data do agendamento antes de salvar o atendimento.");
       }
 
-      if (agendado < new Date()) {
+      if (agendado < localDateTimeValue()) {
         throw new Error("A data do agendamento nao pode ser menor que a data atual.");
       }
 
