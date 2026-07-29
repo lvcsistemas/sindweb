@@ -7,6 +7,7 @@ import { listAssociados }                                       from "../associa
 import { listAtendimentoMedicoConvenios, listConvenioEspecialidades } from "../atendimentoMedicoConvenio/atendimentoMedicoConvenioApi";
 import { listAtendimentoMedicoExamesByTipos }                   from "../atendimentoMedicoExames/atendimentoMedicoExamesApi";
 import { listAuxiliares }                                       from "../auxiliares/auxiliaresApi";
+import { getConfig }                                            from "../config/configApi";
 import { listDependentesByAssociado }                           from "../dependentes/dependentesApi";
 import { listUsuarios }                                         from "../usuarios/usuariosApi";
 import { getAtendimentoAssociadoResumo, listAtendimentoMedicoItens, listAtendimentosAssociadoMes, listAtendimentosMedicos, replaceAtendimentoMedicoItens, saveAtendimentoMedico, type AtendimentoAssociadoResumo, type AtendimentoMedicoFilters, type AtendimentoMedicoSearchType } from "./atendimentoMedicoApi";
@@ -163,6 +164,13 @@ function printItemTipo(tipo: string | null | undefined) {
   return tipo?.toUpperCase() === "SANGUE" ? "EXAME DE SANGUE" : tipo ?? "";
 }
 
+function getAtendimentoLimitKind(tipo: string | null | undefined) {
+  const normalized = tipo?.trim().toUpperCase() ?? "";
+  if (normalized === "CONSULTA") return "consulta";
+  if (normalized.includes("EXAME")) return "exame";
+  return null;
+}
+
 function getAtendimentoRowClass(item: AtendimentoMedicoLista) {
   const situacao = item.situacao?.toUpperCase();
   const agendado = new Date(toDateTimeLocal(item.dt_agendado));
@@ -218,6 +226,7 @@ export function AtendimentoMedicoPage() {
 
   const atendimentosQuery   = useQuery({ queryKey: ["atendimento-medico", filters], queryFn: () => listAtendimentosMedicos(filters) });
   const conveniosQuery      = useQuery({ queryKey: ["atendimento-medico-convenios", ""], queryFn: () => listAtendimentoMedicoConvenios("") });
+  const configQuery         = useQuery({ queryKey: ["config"], queryFn: getConfig });
   const tiposQuery          = useQuery({ queryKey: ["auxiliares", "atendimento_medico_tipo"], queryFn: () => listAuxiliares("atendimento_medico_tipo", "") });
   const associadosQuery     = useQuery({ queryKey: ["atendimento-medico-associados", associadoSearch], queryFn: () => listAssociados(associadoSearch), enabled: formOpen });
   const usuariosQuery       = useQuery({ queryKey: ["usuarios"], queryFn: listUsuarios });
@@ -262,6 +271,7 @@ export function AtendimentoMedicoPage() {
   const dependentes     = dependentesQuery.data     ?? [];
   const convenioEspecialidades = convenioEspecialidadesQuery.data ?? [];
   const examesModal     = examesModalQuery.data     ?? [];
+  const config          = configQuery.data           ?? null;
   const selected        = atendimentos.find((item) => item.id === selectedId) ?? null;
   const groupedExames   = useMemo(() => activeExameTipos.map((tipo) => ({
     tipo,
@@ -336,6 +346,24 @@ export function AtendimentoMedicoPage() {
 
   const saveMutation = useMutation({
     mutationFn: async (values: AtendimentoMedicoInsert) => {
+      const limitKind = getAtendimentoLimitKind(values.tipo);
+      const limite = limitKind === "consulta" ? Number(config?.qtd_consultas ?? 0) : limitKind === "exame" ? Number(config?.qtd_exames ?? 0) : 0;
+
+      if (limitKind && limite > 0) {
+        const atendimentosDoMes = await queryClient.fetchQuery({
+          queryKey: ["atendimento-associado-mes", values.associado_id],
+          queryFn: () => listAtendimentosAssociadoMes(Number(values.associado_id))
+        });
+        const totalUsado = atendimentosDoMes.filter((item) => {
+          if (item.id === values.id) return false;
+          return getAtendimentoLimitKind(item.tipo) === limitKind;
+        }).length;
+
+        if (totalUsado >= limite) {
+          throw new Error(`Limite de ${limitKind === "consulta" ? "consultas" : "exames"} do associado atingido no mes corrente. Permitido: ${limite}.`);
+        }
+      }
+
       const saved = await saveAtendimentoMedico(values);
       await replaceAtendimentoMedicoItens(saved.id, showItensPicker ? visibleAtendimentoItens : []);
       return saved;
