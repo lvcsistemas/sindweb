@@ -68,8 +68,13 @@ export async function listAtendimentosHomologacao(filters: AtendimentoHomologaca
 }
 
 export async function saveAtendimentoHomologacao(values: AtendimentoHomologacaoInsert) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.id) throw new Error("Sessao expirada. Entre novamente para salvar o atendimento de homologacao.");
+
   const payload = {
     ...values,
+    created_by: values.id ? values.created_by ?? user.id : user.id,
+    updated_by: user.id,
     sede_id: toNumber(values.sede_id),
     empresa_id: toNumber(values.empresa_id),
     dt_agendado: values.dt_agendado || new Date().toISOString(),

@@ -166,6 +166,8 @@ export function AtendimentoHomologacaoPage() {
     setSelectedId(item.id);
     setForm({
       id: item.id,
+      created_by: item.created_by,
+      updated_by: item.updated_by,
       sede_id: item.sede_id,
       empresa_id: item.empresa_id,
       dt_agendado: toDateTimeLocal(item.dt_agendado),
@@ -301,6 +303,7 @@ export function AtendimentoHomologacaoPage() {
                     <th>Sede</th>
                     <th>Homologador</th>
                     <th>Qtd</th>
+                    <th>Cadastrado</th>
                     <th>Alterado</th>
                   </tr>
                 </thead>
@@ -313,7 +316,8 @@ export function AtendimentoHomologacaoPage() {
                       <td>{item.nm_sede ?? "-"}</td>
                       <td>{item.nm_homologador}</td>
                       <td>{item.qtd}</td>
-                      <td>{formatTimestampLocal(item.updated_at)}</td>
+                      <td><strong>{formatTimestampLocal(item.created_at)}</strong><span>{item.created_by_codinome || item.created_by_nome || "-"}</span></td>
+                      <td><strong>{formatTimestampLocal(item.updated_at)}</strong><span>{item.updated_by_codinome || item.updated_by_nome || "-"}</span></td>
                     </tr>
                   ))}
                 </tbody>

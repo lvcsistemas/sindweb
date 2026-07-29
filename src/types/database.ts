@@ -260,6 +260,8 @@ export type EmpresaContribuicaoLista = EmpresaContribuicao & {
 
 export type AtendimentoHomologacao = {
   id: number;
+  created_by: string | null;
+  updated_by: string | null;
   sede_id: number;
   empresa_id: number;
   dt_agendado: string;
@@ -271,8 +273,10 @@ export type AtendimentoHomologacao = {
   updated_at: string;
 };
 
-export type AtendimentoHomologacaoInsert = Omit<AtendimentoHomologacao, "id" | "created_at" | "updated_at"> & {
+export type AtendimentoHomologacaoInsert = Omit<AtendimentoHomologacao, "id" | "created_by" | "updated_by" | "created_at" | "updated_at"> & {
   id?: number;
+  created_by?: string | null;
+  updated_by?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -282,6 +286,10 @@ export type AtendimentoHomologacaoLista = AtendimentoHomologacao & {
   nm_empresa: string | null;
   razao_social: string | null;
   cei_cnpj: string | null;
+  created_by_codinome: string | null;
+  created_by_nome: string | null;
+  updated_by_codinome: string | null;
+  updated_by_nome: string | null;
 };
 
 export type AtendimentoMedico = {
