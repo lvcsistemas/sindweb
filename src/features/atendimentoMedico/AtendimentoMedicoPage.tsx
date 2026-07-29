@@ -718,14 +718,12 @@ export function AtendimentoMedicoPage() {
             <span>Associado</span>
           </label>
         </div>
-        </div>
-        </div>
 
-        <div className="form-grid atendimento-associado-grid">
+        <div className="form-grid atendimento-full-grid">
           {renderAssociadoResumoCard(associadoResumo)}
         </div>
 
-        <div className="form-grid atendimento-associado-grid">
+        <div className="form-grid atendimento-full-grid">
           <label className="field">
             <select value={form.dependente_id} onChange={(event) => setForm({ ...form, dependente_id: Number(event.target.value) })}>
               <option value={0}>Sem dependente</option>
@@ -733,6 +731,8 @@ export function AtendimentoMedicoPage() {
             </select>
             <span>Dependente</span>
           </label>
+        </div>
+        </div>
         </div>
 
         <div className="form-grid atendimento-full-grid">
