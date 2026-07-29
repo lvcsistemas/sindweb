@@ -233,6 +233,11 @@ export function AtendimentoMedicoPage() {
     tipo,
     itens: examesModal.filter((item) => item.tipo === tipo)
   })), [examesModal]);
+  const visibleAtendimentoItens = useMemo(() => {
+    if (isExame) return atendimentoItens.filter((item) => exameModalTipos.includes(item.tipo));
+    if (isConsulta) return atendimentoItens.filter((item) => item.tipo === "ESPECIALIDADE");
+    return [];
+  }, [atendimentoItens, isConsulta, isExame]);
   const calendarDays    = useMemo(() => buildCalendarDays(calendarMonth), [calendarMonth]);
   const calendarTitle   = useMemo(() => new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(calendarMonth), [calendarMonth]);
   const selectedDate    = datePart(form.dt_agendado);
@@ -285,7 +290,7 @@ export function AtendimentoMedicoPage() {
   const saveMutation = useMutation({
     mutationFn: async (values: AtendimentoMedicoInsert) => {
       const saved = await saveAtendimentoMedico(values);
-      await replaceAtendimentoMedicoItens(saved.id, showItensPicker ? atendimentoItens : []);
+      await replaceAtendimentoMedicoItens(saved.id, showItensPicker ? visibleAtendimentoItens : []);
       return saved;
     },
     onSuccess: async (saved) => {
@@ -375,7 +380,10 @@ export function AtendimentoMedicoPage() {
         tipo: "ESPECIALIDADE",
         descricao: item.especialidade!.nome
       }));
-    setAtendimentoItens(nextItens);
+    setAtendimentoItens((current) => [
+      ...current.filter((item) => isExame ? !exameModalTipos.includes(item.tipo) : item.tipo !== "ESPECIALIDADE"),
+      ...nextItens
+    ]);
     setItensModalOpen(false);
   }
 
@@ -531,7 +539,6 @@ export function AtendimentoMedicoPage() {
           <label className="field">
             <select value={form.tipo} onChange={(event) => {
               setForm({ ...form, tipo: event.target.value });
-              setAtendimentoItens([]);
               setModalSelectedDescricoes([]);
               setItensModalOpen(false);
             }} required>
@@ -543,7 +550,7 @@ export function AtendimentoMedicoPage() {
           <label className="field">
             <select value={form.convenio_id} onChange={(event) => {
               setForm({ ...form, convenio_id: Number(event.target.value) });
-              setAtendimentoItens([]);
+              setAtendimentoItens((current) => current.filter((item) => item.tipo !== "ESPECIALIDADE"));
               setModalSelectedDescricoes([]);
             }} required>
               <option value={0}>Selecione</option>
@@ -596,7 +603,7 @@ export function AtendimentoMedicoPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {atendimentoItens.map((item) => (
+                  {visibleAtendimentoItens.map((item) => (
                     <tr key={`${item.tipo}-${item.descricao}`}>
                       <td>{item.tipo}</td>
                       <td>{item.descricao}</td>
@@ -604,7 +611,7 @@ export function AtendimentoMedicoPage() {
                   ))}
                 </tbody>
               </table>
-              {atendimentoItens.length === 0 ? <div className="empty-state">Nenhuma especialidade/exame selecionado.</div> : null}
+              {visibleAtendimentoItens.length === 0 ? <div className="empty-state">Nenhuma especialidade/exame selecionado.</div> : null}
             </div>
           </section>
         ) : null}
