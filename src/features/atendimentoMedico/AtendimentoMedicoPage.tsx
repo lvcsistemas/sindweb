@@ -18,6 +18,7 @@ type AtendimentoFormTab = "atendimento" | "consultas";
 const exameModalTipos = ["ULTRASSONOGRAFIA", "RADIOLOGIA", "OUTROS"];
 const exameSangueModalTipos = ["SANGUE", "FEZES/URINA"];
 const situacoesAtendimentoAlerta = new Set(["DESFILIADO", "DEMITIDO", "BLOQUEADO"]);
+const situacoesAtendimentoBloqueio = new Set(["DESFILIADO", "DEMITIDO"]);
 
 const pesquisaOptions: Array<{ value: AtendimentoMedicoSearchType; label: string }> = [
   { value: "T",                 label: "TODOS" },
@@ -348,6 +349,37 @@ export function AtendimentoMedicoPage() {
 
   const saveMutation = useMutation({
     mutationFn: async (values: AtendimentoMedicoInsert) => {
+      const tipo = values.tipo?.trim().toUpperCase() ?? "";
+      const agendado = values.dt_agendado ? new Date(values.dt_agendado) : null;
+
+      if (!Number(values.associado_id)) {
+        throw new Error("Selecione o associado antes de salvar o atendimento.");
+      }
+
+      if (!tipo) {
+        throw new Error("Selecione o tipo antes de salvar o atendimento.");
+      }
+
+      if (!Number(values.convenio_id)) {
+        throw new Error("Selecione o convenio antes de salvar o atendimento.");
+      }
+
+      if (!agendado || Number.isNaN(agendado.getTime())) {
+        throw new Error("Informe a data do agendamento antes de salvar o atendimento.");
+      }
+
+      if (agendado < new Date()) {
+        throw new Error("A data do agendamento nao pode ser menor que a data atual.");
+      }
+
+      if (situacoesAtendimentoBloqueio.has(associadoSituacaoAlerta)) {
+        throw new Error(`O Associado encontra-se: ${associadoSituacaoAlerta} e nao podera ser atendido.`);
+      }
+
+      if (["CONSULTA", "EXAME", "EXAME DE SANGUE"].includes(tipo) && visibleAtendimentoItens.length === 0) {
+        throw new Error("Informe pelo menos uma especialidade/exame antes de salvar o atendimento.");
+      }
+
       const limitKind = getAtendimentoLimitKind(values.tipo);
       const limite = limitKind === "consulta" ? Number(config?.qtd_consultas ?? 0) : limitKind === "exame" ? Number(config?.qtd_exames ?? 0) : 0;
 
