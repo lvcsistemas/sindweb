@@ -141,6 +141,7 @@ textarea { resize: vertical; }
 .form-error { color: #a33b2f; background: #fff3f0; border: 1px solid #f0c7bf; border-radius: 6px; padding: 10px; }
 .form-success { color: #30343a; background: #f1f2f4; border: 1px solid #cfd4da; border-radius: 6px; padding: 10px; }
 .form-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 8px; }
+.form-actions-spacer { flex: 1; }
 .photo-field { display: flex; align-items: center; gap: 14px; padding-top: 2px; }
 .related-panel { display: grid; gap: 14px; }
 .related-form { display: grid; gap: 14px; padding-top: 14px; border-top: 1px solid #e6e8eb; }

@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState }              from "react";
 import { useMutation, useQuery, useQueryClient }                from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, Minus, Plus, Printer, Save, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, LogOut, Minus, Plus, Printer, Save, Search } from "lucide-react";
 import { Breadcrumb }                                           from "../../shared/Breadcrumb";
 import { applyAtendimentoDateRangePreference, getAtendimentoDateRangePreference, setAtendimentoDateRangePreference } from "../../shared/dateRangePreference";
 import type { AtendimentoMedicoExame, AtendimentoMedicoInsert, AtendimentoMedicoItemInsert, AtendimentoMedicoLista } from "../../types/database";
@@ -866,7 +866,8 @@ export function AtendimentoMedicoPage() {
 
         <div className="form-actions atendimento-full-grid">
           {form.id ? <button type="button" className="secondary-button" onClick={handlePrintGuia}><Printer size={16} /> Imprimir Guia</button> : null}
-          <button type="button" className="secondary-button" onClick={() => setFormOpen(false)}>Sair</button>
+          <span className="form-actions-spacer" />
+          <button type="button" className="secondary-button" onClick={() => setFormOpen(false)}><LogOut size={16} /> Sair</button>
           <button type="submit" disabled={saveMutation.isPending}><Save size={16} /> {saveMutation.isPending ? "Salvando..." : "Salvar"}</button>
         </div>
         </> : renderConsultasExamesTab()}
