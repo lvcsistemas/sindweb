@@ -638,6 +638,7 @@ export function AtendimentoMedicoPage() {
         </div>
 
         {activeFormTab === "atendimento" ? <>
+        <div className="atendimento-top-layout atendimento-full-grid">
         <div className="atendimento-form-header">
           <div className="mini-calendar" aria-label="Calendario do mes">
             <div className="mini-calendar-nav">
@@ -664,6 +665,7 @@ export function AtendimentoMedicoPage() {
           </div>
         </div>
 
+        <div className="atendimento-top-fields">
         <div className="form-grid atendimento-agendamento-grid">
           <label className="field"><input type="date" value={datePart(form.dt_agendado)} onChange={(event) => {
             setForm({ ...form, dt_agendado: combineDateTime(event.target.value, timePart(form.dt_agendado)) });
@@ -716,12 +718,14 @@ export function AtendimentoMedicoPage() {
             <span>Associado</span>
           </label>
         </div>
+        </div>
+        </div>
 
-        <div className="form-grid atendimento-associado-grid">
+        <div className="form-grid atendimento-full-grid">
           {renderAssociadoResumoCard(associadoResumo)}
         </div>
 
-        <div className="form-grid atendimento-associado-grid">
+        <div className="form-grid atendimento-full-grid">
           <label className="field">
             <select value={form.dependente_id} onChange={(event) => setForm({ ...form, dependente_id: Number(event.target.value) })}>
               <option value={0}>Sem dependente</option>
@@ -731,7 +735,7 @@ export function AtendimentoMedicoPage() {
           </label>
         </div>
 
-        <div className="form-grid atendimento-associado-grid">
+        <div className="form-grid atendimento-full-grid">
           <label className="field">
             <textarea rows={3} value={form.obs ?? ""} onChange={(event) => setForm({ ...form, obs: event.target.value })} placeholder=" " /><span>Observação</span>
           </label>
