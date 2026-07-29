@@ -717,7 +717,7 @@ export function AtendimentoMedicoPage() {
           </label>
         </div>
 
-        <div className="form-grid atendimento-full-grid">
+        <div className="form-grid atendimento-associado-grid">
           {renderAssociadoResumoCard(associadoResumo)}
         </div>
 
