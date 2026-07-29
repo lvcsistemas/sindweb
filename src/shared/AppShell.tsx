@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { useEffect, useState }  from "react";
+import { NavLink, Outlet }      from "react-router-dom";
 import { BriefcaseBusiness, Building2, ChevronRight, Coins, FileText, Folder, Handshake, ListTree, LogOut, MapPin, Menu, Settings, Stethoscope, UserCog, UsersRound } from "lucide-react";
-import { useAuth } from "../features/auth/AuthProvider";
-import { AUXILIAR_GRUPOS } from "../features/auxiliares/auxiliaresConfig";
+import { useAuth }              from "../features/auth/AuthProvider";
+import { AUXILIAR_GRUPOS }      from "../features/auxiliares/auxiliaresConfig";
 
 function isVisibleButton(button: HTMLButtonElement) {
   return !button.disabled && Boolean(button.offsetParent) && button.getAttribute("aria-hidden") !== "true";
@@ -10,18 +10,18 @@ function isVisibleButton(button: HTMLButtonElement) {
 
 function clickFirstVisibleButtonByText(label: string) {
   const normalizedLabel = label.toUpperCase();
-  const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>("button"));
-  const button = buttons.find((item) => isVisibleButton(item) && item.textContent?.trim().toUpperCase().includes(normalizedLabel));
+  const buttons         = Array.from(document.querySelectorAll<HTMLButtonElement>("button"));
+  const button          = buttons.find((item) => isVisibleButton(item) && item.textContent?.trim().toUpperCase().includes(normalizedLabel));
   button?.click();
   return Boolean(button);
 }
 export function AppShell() {
-  const { signOut, user } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [cadastrosOpen, setCadastrosOpen] = useState(false);
+  const { signOut, user }                       = useAuth();
+  const [sidebarOpen, setSidebarOpen]           = useState(true);
+  const [cadastrosOpen, setCadastrosOpen]       = useState(false);
   const [atendimentosOpen, setAtendimentosOpen] = useState(false);
-  const [financeiroOpen, setFinanceiroOpen] = useState(false);
-  const [auxiliaresOpen, setAuxiliaresOpen] = useState(false);
+  const [financeiroOpen, setFinanceiroOpen]     = useState(false);
+  const [auxiliaresOpen, setAuxiliaresOpen]     = useState(false);
 
 
   useEffect(() => {
@@ -76,7 +76,7 @@ export function AppShell() {
             </button>
             {atendimentosOpen ? (
               <div className="nav-subgroup">
-                <NavLink className="nav-leaf direct" to="/atendimento-homologacao"><Handshake size={17} /> Homologação</NavLink>
+                <NavLink className="nav-leaf direct" to="/atendimento-homologacao"><Handshake size={17} /> HomologaÃ§Ã£o</NavLink>
                 <NavLink className="nav-leaf direct" to="/atendimento-medico"><Stethoscope size={17} /> MÃ©dico</NavLink>
               </div>
             ) : null}

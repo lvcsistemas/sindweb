@@ -1,10 +1,10 @@
 const { Client } = require('pg');
 
-const service = process.env.SUPABASE_SERVICE_ROLE;
-const anon = process.env.SUPABASE_ANON_KEY;
-const baseUrl = 'https://qpylbiywcpvcxrroljmj.supabase.co';
-const email = 'admin@lvcsistemas.com.br';
-const password = 'SindWeb#2026!Admin';
+const service   = process.env.SUPABASE_SERVICE_ROLE;
+const anon      = process.env.SUPABASE_ANON_KEY;
+const baseUrl   = 'https://qpylbiywcpvcxrroljmj.supabase.co';
+const email     = 'admin@lvcsistemas.com.br';
+const password  = 'SindWeb#2026!Admin';
 
 async function request(path, options = {}) {
   const key = options.service ? service : anon;
