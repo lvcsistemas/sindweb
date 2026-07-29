@@ -144,7 +144,8 @@ export async function saveAtendimentoMedico(values: AtendimentoMedicoInsert) {
     dt_agendado: values.dt_agendado || new Date().toISOString(),
     situacao: values.situacao.trim().toUpperCase(),
     tipo: values.tipo.trim().toUpperCase(),
-    obs: values.obs?.trim() || null
+    obs: values.obs?.trim() || null,
+    updated_at: values.id ? new Date().toISOString() : values.updated_at
   };
 
   if (payload.id) {

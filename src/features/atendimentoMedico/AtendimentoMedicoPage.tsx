@@ -121,6 +121,20 @@ function formatDateTime(value: string | null | undefined) {
   return `${day}/${month}/${year} ${time}`;
 }
 
+function formatTimestampLocal(value: string | null | undefined) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return formatDateTime(value);
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  }).format(date);
+}
+
 function formatDate(value: string | null | undefined) {
   if (!value) return "-";
   const [year, month, day] = value.slice(0, 10).split("-");
@@ -973,8 +987,8 @@ export function AtendimentoMedicoPage() {
                       <td><strong>{formatDateTime(item.dt_agendado)}</strong><span>{item.situacao}</span></td>
                       <td><strong>{item.nm_convenio ?? "-"}</strong><span>{item.tipo || "-"}</span></td>
                       <td><strong>{item.nm_associado ?? "-"}</strong><span>{item.nm_dependente || "-"}</span></td>
-                      <td><strong>{formatDateTime(item.created_at)}</strong><span>{item.created_by_codinome || item.created_by_nome || "-"}</span></td>
-                      <td><strong>{formatDateTime(item.updated_at)}</strong><span>{item.updated_by_codinome || item.updated_by_nome || "-"}</span></td>
+                      <td><strong>{formatTimestampLocal(item.created_at)}</strong><span>{item.created_by_codinome || item.created_by_nome || "-"}</span></td>
+                      <td><strong>{formatTimestampLocal(item.updated_at)}</strong><span>{item.updated_by_codinome || item.updated_by_nome || "-"}</span></td>
                     </tr>
                   ))}
                 </tbody>
