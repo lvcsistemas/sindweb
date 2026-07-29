@@ -158,6 +158,10 @@ function joinText(parts: Array<string | null | undefined>, separator = " ") {
   return parts.filter((part) => part && part.trim()).join(separator);
 }
 
+function printItemTipo(tipo: string | null | undefined) {
+  return tipo?.toUpperCase() === "SANGUE" ? "EXAME DE SANGUE" : tipo ?? "";
+}
+
 function getAtendimentoRowClass(item: AtendimentoMedicoLista) {
   const situacao = item.situacao?.toUpperCase();
   const agendado = new Date(toDateTimeLocal(item.dt_agendado));
@@ -436,8 +440,8 @@ export function AtendimentoMedicoPage() {
       formatPhone(associadoResumo?.tel3)
     ], " / ");
     const itensRows = visibleAtendimentoItens.length
-      ? visibleAtendimentoItens.map((item) => `<tr><td>${printValue(item.descricao)}</td></tr>`).join("")
-      : `<tr><td>&nbsp;</td></tr>`;
+      ? visibleAtendimentoItens.map((item) => `<tr><td>${printValue(printItemTipo(item.tipo))}</td><td>${printValue(item.descricao)}</td></tr>`).join("")
+      : `<tr><td>&nbsp;</td><td>&nbsp;</td></tr>`;
     const printWindow = window.open("", "_blank", "width=900,height=700");
 
     if (!printWindow) {
@@ -508,8 +512,8 @@ export function AtendimentoMedicoPage() {
     <tr><td>${printValue(form.obs)}</td></tr>
   </table>
   <hr>
-  <table><tr><th class="center">${pacienteItensTitulo}</th></tr></table>
-  <table class="bordered">${itensRows}</table>
+  <table><tr><th class="center" colspan="2">${pacienteItensTitulo}</th></tr></table>
+  <table class="bordered"><tr><th style="width: 28%;">TIPO</th><th>ESPECIALIDADE/EXAME</th></tr>${itensRows}</table>
   <table class="bordered" style="margin-top: 4px;"><tr><th class="center">OBSERVACOES</th></tr><tr><td>&nbsp;</td></tr></table>
   <div class="stamp">CARIMBO E ASSINATURA DO MEDICO</div>
   <div class="emissao">EMISSAO: ${printValue(formatDateTime(localDateTimeValue()))}&nbsp;&nbsp;&nbsp;REALIZACAO: ${printValue(formatDateTime(form.dt_agendado))}</div>
