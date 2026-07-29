@@ -87,7 +87,7 @@ button:disabled, .secondary-button.disabled { box-shadow: none; filter: none; }
 .list-panel, .detail-panel, .form-panel { background: rgba(255,255,255,0.96); border: 1px solid #d7dbe0; border-radius: 8px; box-shadow: 0 8px 22px rgba(17, 24, 39, 0.05); }
 .list-panel { padding: 14px; }
 .detail-panel { padding: 0; overflow: hidden; }
-.search-box { height: 42px; display: flex; align-items: center; gap: 8px; border: 1px solid #cfd4da; border-radius: 6px; padding: 0 12px; margin-bottom: 12px; background: linear-gradient(180deg, #ffffff 0%, #f8f9fb 100%); }
+.search-box { height: 42px; display: flex; align-items: center; gap: 8px; border: 1px solid #cfd4da; border-radius: 6px; padding: 0 12px; margin-bottom: 6px; background: linear-gradient(180deg, #ffffff 0%, #f8f9fb 100%); }
 .search-box input { border: 0; outline: 0; width: 100%; }
 .record-list { display: grid; gap: 8px; max-height: calc(100vh - 185px); overflow: auto; }
 .record-row { width: 100%; border: 1px solid #dde1e6; background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%); color: #15171a; border-radius: 6px; padding: 10px; display: grid; grid-template-columns: 42px 1fr auto; gap: 10px; text-align: left; align-items: center; cursor: pointer; }
@@ -109,7 +109,7 @@ button:disabled, .secondary-button.disabled { box-shadow: none; filter: none; }
 .status-ok { color: #30343a; }
 .status-muted { color: #6b7280; }
 .empty-state { color: #6b7280; padding: 18px; text-align: center; }
-.list-summary { color: #6b7280; font-size: 0.86rem; margin: -2px 0 10px; }
+.list-summary { color: #6b7280; font-size: 0.86rem; margin: -4px 0 4px; text-align: right; }
 
 .record-row.my-action { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .record-row.my-action > div:first-child { flex: 1; min-width: 0; }
@@ -178,7 +178,8 @@ textarea { resize: vertical; }
 .form-grid.classe-profissional-grid { grid-template-columns: minmax(130px, 150px) minmax(180px, 1fr) minmax(180px, 1fr) minmax(140px, 170px); }
 .related-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: stretch; }
 .toolbar-right { display: flex; justify-content: flex-end; margin-bottom: 12px; }
-.atendimento-search-panel { margin-bottom: 0; }
+.atendimento-search-panel { margin-bottom: 0; padding-bottom: 10px; }
+.atendimento-search-panel + .form-panel { padding-top: 8px; }
 .atendimento-search-grid { display: grid; grid-template-columns: minmax(190px, 1.4fr) minmax(165px, 1fr) minmax(165px, 1fr) minmax(170px, 1fr) minmax(180px, 1fr) auto; gap: 10px; align-items: stretch; }
 .atendimento-agendamento-grid { grid-template-columns: minmax(150px, 170px) minmax(110px, 130px) minmax(140px, 1fr) minmax(150px, 170px); align-items: stretch; }
 .weekday-label { display: flex; align-items: center; min-height: 44px; padding: 0 12px; border: 1px solid #d7dbe0; border-radius: 8px; background: #f8fafb; color: #4b5563; font-weight: 750; text-transform: capitalize; }
