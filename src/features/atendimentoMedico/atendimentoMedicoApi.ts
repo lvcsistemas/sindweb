@@ -185,10 +185,9 @@ export async function replaceAtendimentoMedicoItens(atendimentoId: number, itens
 
   const payload = itens.map((item) => ({
     atendimento_id: atendimentoId,
-    item_id: toNumber(item.item_id),
     tipo: item.tipo.trim().toUpperCase(),
     descricao: item.descricao.trim().toUpperCase()
-  })).filter((item) => item.item_id && item.descricao);
+  })).filter((item) => item.descricao);
 
   if (payload.length === 0) return [] as AtendimentoMedicoItem[];
 

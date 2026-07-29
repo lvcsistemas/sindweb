@@ -222,6 +222,8 @@ textarea { resize: vertical; }
 .check-row { display: grid; grid-template-columns: 18px 1fr; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid #e0e3e7; border-radius: 6px; background: #fff; }
 .check-row input { width: 16px; min-height: 16px; margin: 0; }
 .check-row span { font-weight: 650; color: #15171a; }
+.modal-section { display: grid; gap: 8px; }
+.modal-section h3 { margin: 4px 0 0; padding-bottom: 6px; border-bottom: 1px solid #d7dbe0; font-size: 0.9rem; color: #30343a; text-transform: uppercase; }
 .choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .lookup-summary { display: grid; gap: 8px; border: 1px solid #d7dbe0; border-radius: 8px; padding: 12px; background: linear-gradient(180deg, #f8f9fb 0%, #f1f3f6 100%); }
 .lookup-summary div { display: grid; grid-template-columns: 130px 1fr; gap: 10px; align-items: start; }

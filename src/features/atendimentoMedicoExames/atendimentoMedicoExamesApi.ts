@@ -28,6 +28,18 @@ export async function listAtendimentoMedicoExames(search: string) {
   return data as AtendimentoMedicoExame[];
 }
 
+export async function listAtendimentoMedicoExamesByTipos(tipos: string[]) {
+  const { data, error } = await supabaseUnsafe
+    .from("atendimento_medico_exames")
+    .select("*")
+    .in("tipo", tipos)
+    .order("tipo", { ascending: true })
+    .order("exame", { ascending: true });
+
+  if (error) throw error;
+  return data as AtendimentoMedicoExame[];
+}
+
 export async function saveAtendimentoMedicoExame(values: AtendimentoMedicoExameInsert) {
   const payload = {
     ...values,

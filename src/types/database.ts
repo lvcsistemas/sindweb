@@ -294,7 +294,6 @@ export type AtendimentoMedicoLista = AtendimentoMedico & {
 export type AtendimentoMedicoItem = {
   id: number;
   atendimento_id: number;
-  item_id: number;
   tipo: string;
   descricao: string;
   created_at: string;

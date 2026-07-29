@@ -2,15 +2,18 @@ import { FormEvent, useEffect, useMemo, useState }              from "react";
 import { useMutation, useQuery, useQueryClient }                from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Minus, Plus, Save, Search }  from "lucide-react";
 import { Breadcrumb }                                           from "../../shared/Breadcrumb";
-import type { AtendimentoMedicoInsert, AtendimentoMedicoItemInsert, AtendimentoMedicoLista } from "../../types/database";
+import type { AtendimentoMedicoExame, AtendimentoMedicoInsert, AtendimentoMedicoItemInsert, AtendimentoMedicoLista } from "../../types/database";
 import { listAssociados }                                       from "../associados/associadosApi";
 import { listAtendimentoMedicoConvenios, listConvenioEspecialidades } from "../atendimentoMedicoConvenio/atendimentoMedicoConvenioApi";
+import { listAtendimentoMedicoExamesByTipos }                   from "../atendimentoMedicoExames/atendimentoMedicoExamesApi";
 import { listAuxiliares }                                       from "../auxiliares/auxiliaresApi";
 import { listDependentesByAssociado }                           from "../dependentes/dependentesApi";
 import { listUsuarios }                                         from "../usuarios/usuariosApi";
 import { getAtendimentoAssociadoResumo, listAtendimentoMedicoItens, listAtendimentosAssociadoMes, listAtendimentosMedicos, replaceAtendimentoMedicoItens, saveAtendimentoMedico, type AtendimentoAssociadoResumo, type AtendimentoMedicoFilters, type AtendimentoMedicoSearchType } from "./atendimentoMedicoApi";
 
 type AtendimentoFormTab = "atendimento" | "consultas";
+
+const exameModalTipos = ["ULTRASSONOGRAFIA", "RADIOLOGIA", "OUTROS"];
 
 const pesquisaOptions: Array<{ value: AtendimentoMedicoSearchType; label: string }> = [
   { value: "T",                 label: "TODOS" },
@@ -171,7 +174,7 @@ export function AtendimentoMedicoPage() {
   const [form, setForm]                       = useState<AtendimentoMedicoInsert>(newEmptyForm);
   const [atendimentoItens, setAtendimentoItens] = useState<AtendimentoMedicoItemInsert[]>([]);
   const [itensModalOpen, setItensModalOpen]   = useState(false);
-  const [modalSelectedIds, setModalSelectedIds] = useState<number[]>([]);
+  const [modalSelectedDescricoes, setModalSelectedDescricoes] = useState<string[]>([]);
   const [calendarMonth, setCalendarMonth]     = useState(() => monthStartFromValue(localDateTimeValue()));
   const [associadoSearch, setAssociadoSearch] = useState("");
   const [message, setMessage]                 = useState<string | null>(null);
@@ -206,6 +209,11 @@ export function AtendimentoMedicoPage() {
     queryFn: () => listConvenioEspecialidades(Number(form.convenio_id)),
     enabled: itensModalOpen && form.tipo?.toUpperCase() === "CONSULTA" && Boolean(form.convenio_id)
   });
+  const examesModalQuery = useQuery({
+    queryKey: ["atendimento-medico-exames-modal", exameModalTipos],
+    queryFn: () => listAtendimentoMedicoExamesByTipos(exameModalTipos),
+    enabled: itensModalOpen && form.tipo?.toUpperCase() === "EXAME"
+  });
 
   const atendimentos    = atendimentosQuery.data    ?? [];
   const convenios       = conveniosQuery.data       ?? [];
@@ -216,8 +224,15 @@ export function AtendimentoMedicoPage() {
   const associadoAtendimentosMes = associadoAtendimentosMesQuery.data ?? [];
   const dependentes     = dependentesQuery.data     ?? [];
   const convenioEspecialidades = convenioEspecialidadesQuery.data ?? [];
+  const examesModal     = examesModalQuery.data     ?? [];
   const selected        = atendimentos.find((item) => item.id === selectedId) ?? null;
   const isConsulta      = form.tipo?.toUpperCase() === "CONSULTA";
+  const isExame         = form.tipo?.toUpperCase() === "EXAME";
+  const showItensPicker = isConsulta || isExame;
+  const groupedExames   = useMemo(() => exameModalTipos.map((tipo) => ({
+    tipo,
+    itens: examesModal.filter((item) => item.tipo === tipo)
+  })), [examesModal]);
   const calendarDays    = useMemo(() => buildCalendarDays(calendarMonth), [calendarMonth]);
   const calendarTitle   = useMemo(() => new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(calendarMonth), [calendarMonth]);
   const selectedDate    = datePart(form.dt_agendado);
@@ -262,7 +277,6 @@ export function AtendimentoMedicoPage() {
     setAtendimentoItens(atendimentoItensQuery.data.map((item) => ({
       id: item.id,
       atendimento_id: item.atendimento_id,
-      item_id: item.item_id,
       tipo: item.tipo,
       descricao: item.descricao
     })));
@@ -271,7 +285,7 @@ export function AtendimentoMedicoPage() {
   const saveMutation = useMutation({
     mutationFn: async (values: AtendimentoMedicoInsert) => {
       const saved = await saveAtendimentoMedico(values);
-      await replaceAtendimentoMedicoItens(saved.id, isConsulta ? atendimentoItens : []);
+      await replaceAtendimentoMedicoItens(saved.id, showItensPicker ? atendimentoItens : []);
       return saved;
     },
     onSuccess: async (saved) => {
@@ -291,7 +305,7 @@ export function AtendimentoMedicoPage() {
     setAssociadoSearch("");
     setMessage(null);
     setAtendimentoItens([]);
-    setModalSelectedIds([]);
+    setModalSelectedDescricoes([]);
     setItensModalOpen(false);
     const nextForm = newEmptyForm();
     setForm(nextForm);
@@ -314,7 +328,6 @@ export function AtendimentoMedicoPage() {
       setAtendimentoItens(itens.map((atendimentoItem) => ({
         id: atendimentoItem.id,
         atendimento_id: atendimentoItem.atendimento_id,
-        item_id: atendimentoItem.item_id,
         tipo: atendimentoItem.tipo,
         descricao: atendimentoItem.descricao
       })));
@@ -335,24 +348,33 @@ export function AtendimentoMedicoPage() {
   }
 
   function handleOpenItensModal() {
-    setModalSelectedIds(atendimentoItens.map((item) => item.item_id));
+    const currentTipo = isExame ? "EXAME" : "ESPECIALIDADE";
+    setModalSelectedDescricoes(atendimentoItens.filter((item) => item.tipo === currentTipo).map((item) => item.descricao));
     setItensModalOpen(true);
   }
 
-  function toggleModalItem(id: number) {
-    setModalSelectedIds((current) => current.includes(id) ? current.filter((itemId) => itemId !== id) : [...current, id]);
+  function toggleModalItem(descricao: string) {
+    setModalSelectedDescricoes((current) => current.includes(descricao) ? current.filter((item) => item !== descricao) : [...current, descricao]);
   }
 
   function handleConfirmItensModal() {
-    const selectedSet = new Set(modalSelectedIds);
-    setAtendimentoItens(convenioEspecialidades
-      .filter((item) => selectedSet.has(item.especialidade_id) && item.especialidade?.nome)
-      .map((item) => ({
+    const selectedSet = new Set(modalSelectedDescricoes);
+    const nextItens = isExame
+      ? examesModal
+        .filter((item) => selectedSet.has(item.exame))
+        .map((item) => ({
+          atendimento_id: Number(form.id || 0),
+          tipo: "EXAME",
+          descricao: item.exame
+        }))
+      : convenioEspecialidades
+        .filter((item) => item.especialidade?.nome && selectedSet.has(item.especialidade.nome))
+        .map((item) => ({
         atendimento_id: Number(form.id || 0),
-        item_id: item.especialidade_id,
         tipo: "ESPECIALIDADE",
         descricao: item.especialidade!.nome
-      })));
+      }));
+    setAtendimentoItens(nextItens);
     setItensModalOpen(false);
   }
 
@@ -506,7 +528,12 @@ export function AtendimentoMedicoPage() {
 
         <div className="form-grid atendimento-tipo-grid">
           <label className="field">
-            <select value={form.tipo} onChange={(event) => setForm({ ...form, tipo: event.target.value })} required>
+            <select value={form.tipo} onChange={(event) => {
+              setForm({ ...form, tipo: event.target.value });
+              setAtendimentoItens([]);
+              setModalSelectedDescricoes([]);
+              setItensModalOpen(false);
+            }} required>
               <option value="">Selecione</option>
               {tipos.map((tipo) => <option key={tipo.id} value={tipo.nome}>{tipo.nome}</option>)}
             </select>
@@ -516,7 +543,7 @@ export function AtendimentoMedicoPage() {
             <select value={form.convenio_id} onChange={(event) => {
               setForm({ ...form, convenio_id: Number(event.target.value) });
               setAtendimentoItens([]);
-              setModalSelectedIds([]);
+              setModalSelectedDescricoes([]);
             }} required>
               <option value={0}>Selecione</option>
               {convenios.map((convenio) => <option key={convenio.id} value={convenio.id}>{convenio.nm_convenio}</option>)}
@@ -551,11 +578,11 @@ export function AtendimentoMedicoPage() {
         </div>
 
         <label className="field"><textarea rows={3} value={form.obs ?? ""} onChange={(event) => setForm({ ...form, obs: event.target.value })} placeholder=" " /><span>Observação</span></label>
-        {isConsulta ? (
+        {showItensPicker ? (
           <section className="related-panel atendimento-full-grid">
             <div className="related-toolbar">
               <strong>Especialidades/Exames</strong>
-              <button type="button" onClick={handleOpenItensModal} disabled={!form.convenio_id}>
+              <button type="button" onClick={handleOpenItensModal} disabled={isConsulta && !form.convenio_id}>
                 <Plus size={16} /> Especialidades/Exames
               </button>
             </div>
@@ -569,7 +596,7 @@ export function AtendimentoMedicoPage() {
                 </thead>
                 <tbody>
                   {atendimentoItens.map((item) => (
-                    <tr key={`${item.tipo}-${item.item_id}`}>
+                    <tr key={`${item.tipo}-${item.descricao}`}>
                       <td>{item.tipo}</td>
                       <td>{item.descricao}</td>
                     </tr>
@@ -592,22 +619,40 @@ export function AtendimentoMedicoPage() {
         <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="atendimento-itens-title">
           <section className="modal-panel atendimento-itens-modal">
             <h2 id="atendimento-itens-title">Especialidades/Exames</h2>
-            {!form.convenio_id ? <div className="empty-state">Selecione um convênio antes de escolher as especialidades.</div> : null}
-            {form.convenio_id ? (
+            {isConsulta && !form.convenio_id ? <div className="empty-state">Selecione um convênio antes de escolher as especialidades.</div> : null}
+            {isConsulta && form.convenio_id ? (
               <div className="modal-form">
                 {convenioEspecialidadesQuery.isLoading ? <div className="empty-state">Carregando especialidades...</div> : null}
                 {!convenioEspecialidadesQuery.isLoading && convenioEspecialidades.length === 0 ? <div className="empty-state">Nenhuma especialidade vinculada a este convênio.</div> : null}
                 {convenioEspecialidades.map((item) => (
                   <label key={item.id} className="check-row">
-                    <input type="checkbox" checked={modalSelectedIds.includes(item.especialidade_id)} onChange={() => toggleModalItem(item.especialidade_id)} />
+                    <input type="checkbox" checked={modalSelectedDescricoes.includes(item.especialidade?.nome ?? "")} onChange={() => toggleModalItem(item.especialidade?.nome ?? "")} />
                     <span>{item.especialidade?.nome ?? "Especialidade sem nome"}</span>
                   </label>
                 ))}
               </div>
             ) : null}
+            {isExame ? (
+              <div className="modal-form">
+                {examesModalQuery.isLoading ? <div className="empty-state">Carregando exames...</div> : null}
+                {!examesModalQuery.isLoading && examesModal.length === 0 ? <div className="empty-state">Nenhum exame encontrado para os tipos configurados.</div> : null}
+                {groupedExames.map((grupo) => (
+                  <section key={grupo.tipo} className="modal-section">
+                    <h3>{grupo.tipo}</h3>
+                    {grupo.itens.length === 0 ? <div className="empty-state small">Nenhum item cadastrado.</div> : null}
+                    {grupo.itens.map((item: AtendimentoMedicoExame) => (
+                      <label key={item.id} className="check-row">
+                        <input type="checkbox" checked={modalSelectedDescricoes.includes(item.exame)} onChange={() => toggleModalItem(item.exame)} />
+                        <span>{item.exame}</span>
+                      </label>
+                    ))}
+                  </section>
+                ))}
+              </div>
+            ) : null}
             <div className="modal-actions">
               <button type="button" className="secondary-button" onClick={() => setItensModalOpen(false)}>Cancelar</button>
-              <button type="button" onClick={handleConfirmItensModal} disabled={!form.convenio_id || convenioEspecialidadesQuery.isLoading}>OK</button>
+              <button type="button" onClick={handleConfirmItensModal} disabled={(isConsulta && !form.convenio_id) || convenioEspecialidadesQuery.isLoading || examesModalQuery.isLoading}>OK</button>
             </div>
           </section>
         </div>
