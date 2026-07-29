@@ -87,7 +87,7 @@ export async function listAtendimentosMedicos(filters: AtendimentoMedicoFilters)
   let query = supabaseUnsafe
     .from("atendimento_medico_lista")
     .select("*")
-    .order("dt_agendado", { ascending: false });
+    .order("dt_agendado", { ascending: true });
 
   if (filters.pesquisa === "CADASTRO") {
     query = query.gte("created_at", filters.inicio).lte("created_at", dateEnd(filters.fim));
