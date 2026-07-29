@@ -76,6 +76,7 @@ export function AppShell() {
             </button>
             {atendimentosOpen ? (
               <div className="nav-subgroup">
+                <NavLink className="nav-leaf direct" to="/atendimento-homologacao"><Handshake size={17} /> Homologação</NavLink>
                 <NavLink className="nav-leaf direct" to="/atendimento-medico"><Stethoscope size={17} /> MÃ©dico</NavLink>
               </div>
             ) : null}

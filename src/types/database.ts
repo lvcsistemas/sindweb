@@ -7,6 +7,7 @@ export type Database = {
       associados_contribuicoes: { Row: AssociadoContribuicao; Insert: AssociadoContribuicaoInsert; Update: Partial<AssociadoContribuicaoInsert> };
       associados_dependentes: { Row: AssociadoDependente; Insert: AssociadoDependenteInsert; Update: Partial<AssociadoDependenteInsert> };
       auxiliares: { Row: Auxiliar; Insert: AuxiliarInsert; Update: Partial<AuxiliarInsert> };
+      atendimento_homologacao: { Row: AtendimentoHomologacao; Insert: AtendimentoHomologacaoInsert; Update: Partial<AtendimentoHomologacaoInsert> };
       atendimento_medico: { Row: AtendimentoMedico; Insert: AtendimentoMedicoInsert; Update: Partial<AtendimentoMedicoInsert> };
       atendimento_medico_convenios: { Row: AtendimentoMedicoConvenio; Insert: AtendimentoMedicoConvenioInsert; Update: Partial<AtendimentoMedicoConvenioInsert> };
       atendimento_medico_convenios_especialidades: { Row: AtendimentoMedicoConvenioEspecialidade; Insert: AtendimentoMedicoConvenioEspecialidadeInsert; Update: Partial<AtendimentoMedicoConvenioEspecialidadeInsert> };
@@ -23,6 +24,7 @@ export type Database = {
     };
     Views: {
       associados_lista: { Row: AssociadoLista };
+      atendimento_homologacao_lista: { Row: AtendimentoHomologacaoLista };
       atendimento_medico_lista: { Row: AtendimentoMedicoLista };
     };
     Functions: {
@@ -254,6 +256,32 @@ export type EmpresaContribuicaoInsert = Omit<EmpresaContribuicao, "id" | "create
 
 export type EmpresaContribuicaoLista = EmpresaContribuicao & {
   contribuicao: Pick<Contribuicao, "tipo" | "nm_contribuicao" | "valor_base"> | null;
+};
+
+export type AtendimentoHomologacao = {
+  id: number;
+  sede_id: number;
+  empresa_id: number;
+  dt_agendado: string;
+  situacao: string;
+  nm_homologador: string;
+  qtd: number;
+  obs: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AtendimentoHomologacaoInsert = Omit<AtendimentoHomologacao, "id" | "created_at" | "updated_at"> & {
+  id?: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type AtendimentoHomologacaoLista = AtendimentoHomologacao & {
+  nm_sede: string | null;
+  nm_empresa: string | null;
+  razao_social: string | null;
+  cei_cnpj: string | null;
 };
 
 export type AtendimentoMedico = {

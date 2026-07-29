@@ -182,6 +182,7 @@ textarea { resize: vertical; }
 .atendimento-search-panel { margin-bottom: 0; padding-bottom: 10px; }
 .atendimento-search-panel + .form-panel { padding-top: 8px; }
 .atendimento-search-grid { display: grid; grid-template-columns: minmax(190px, 1.4fr) minmax(165px, 1fr) minmax(165px, 1fr) minmax(170px, 1fr) minmax(180px, 1fr) auto; gap: 10px; align-items: stretch; }
+.homologacao-search-grid { grid-template-columns: minmax(190px, 1.4fr) minmax(165px, 1fr) minmax(165px, 1fr) minmax(220px, 1fr) auto; }
 .atendimento-agendamento-grid { grid-template-columns: minmax(150px, 170px) minmax(110px, 130px) minmax(140px, 1fr) minmax(150px, 170px); align-items: stretch; }
 .weekday-label { display: flex; align-items: center; min-height: 44px; padding: 0 12px; border: 1px solid #d7dbe0; border-radius: 8px; background: #f8fafb; color: #4b5563; font-weight: 750; text-transform: capitalize; }
 .atendimento-form-panel { margin-top: 16px; margin-bottom: 16px; overflow: hidden; }

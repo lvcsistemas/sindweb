@@ -7,6 +7,7 @@ import { AuthProvider } from "./features/auth/AuthProvider";
 import { LoginPage } from "./features/auth/LoginPage";
 import { ProtectedRoute } from "./features/auth/ProtectedRoute";
 import { AssociadosPage } from "./features/associados/AssociadosPage";
+import { AtendimentoHomologacaoPage } from "./features/atendimentoHomologacao/AtendimentoHomologacaoPage";
 import { AtendimentoMedicoPage } from "./features/atendimentoMedico/AtendimentoMedicoPage";
 import { AtendimentoMedicoConvenioPage } from "./features/atendimentoMedicoConvenio/AtendimentoMedicoConvenioPage";
 import { AtendimentoMedicoExamesPage } from "./features/atendimentoMedicoExames/AtendimentoMedicoExamesPage";
@@ -35,6 +36,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <DashboardPage /> },
       { path: "associados", element: <AssociadosPage /> },
+      { path: "atendimento-homologacao", element: <AtendimentoHomologacaoPage /> },
       { path: "atendimento-medico", element: <AtendimentoMedicoPage /> },
       { path: "empresas", element: <EmpresaPage /> },
       { path: "atendimento-medico-convenios", element: <AtendimentoMedicoConvenioPage /> },
