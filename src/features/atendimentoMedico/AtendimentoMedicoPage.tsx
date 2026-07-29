@@ -348,8 +348,9 @@ export function AtendimentoMedicoPage() {
   }
 
   function handleOpenItensModal() {
-    const currentTipo = isExame ? "EXAME" : "ESPECIALIDADE";
-    setModalSelectedDescricoes(atendimentoItens.filter((item) => item.tipo === currentTipo).map((item) => item.descricao));
+    setModalSelectedDescricoes(atendimentoItens
+      .filter((item) => isExame ? exameModalTipos.includes(item.tipo) : item.tipo === "ESPECIALIDADE")
+      .map((item) => item.descricao));
     setItensModalOpen(true);
   }
 
@@ -364,7 +365,7 @@ export function AtendimentoMedicoPage() {
         .filter((item) => selectedSet.has(item.exame))
         .map((item) => ({
           atendimento_id: Number(form.id || 0),
-          tipo: "EXAME",
+          tipo: item.tipo,
           descricao: item.exame
         }))
       : convenioEspecialidades
