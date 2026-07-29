@@ -183,6 +183,7 @@ textarea { resize: vertical; }
 .atendimento-agendamento-grid { grid-template-columns: minmax(150px, 170px) minmax(110px, 130px) minmax(140px, 1fr) minmax(150px, 170px); align-items: stretch; }
 .weekday-label { display: flex; align-items: center; min-height: 44px; padding: 0 12px; border: 1px solid #d7dbe0; border-radius: 8px; background: #f8fafb; color: #4b5563; font-weight: 750; text-transform: capitalize; }
 .atendimento-form-panel { margin-top: 16px; margin-bottom: 16px; overflow: hidden; }
+.atendimento-form-panel-alert { animation: atendimento-alert-border 2s steps(1, end) infinite; }
 .atendimento-form-panel .form-panel { grid-template-columns: 1fr; align-items: start; row-gap: 12px; }
 .atendimento-form-panel .form-grid { gap: 12px; }
 .atendimento-top-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 260px); gap: 12px; align-items: start; }
@@ -217,6 +218,10 @@ textarea { resize: vertical; }
 .atendimento-row.canceled { color: #b45f06; }
 .atendimento-row.overdue { color: #c62828; }
 .numeric-cell { text-align: right; white-space: nowrap; }
+@keyframes atendimento-alert-border {
+  0%, 49% { border-color: #d32f2f; box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.7), 0 8px 22px rgba(17, 24, 39, 0.05); }
+  50%, 100% { border-color: #d7dbe0; box-shadow: 0 8px 22px rgba(17, 24, 39, 0.05); }
+}
 .modal-backdrop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 18px; background: rgba(23, 32, 42, 0.42); }
 .modal-panel { width: min(560px, 100%); max-height: calc(100dvh - 36px); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 14px; overflow: hidden; background: linear-gradient(180deg, #ffffff 0%, #f7f8fa 100%); border: 1px solid #d7dbe0; border-radius: 8px; box-shadow: 0 18px 48px rgba(20, 33, 45, 0.18); padding: 18px; }
 .modal-panel h2 { margin: 0 0 4px; font-size: 1.2rem; }

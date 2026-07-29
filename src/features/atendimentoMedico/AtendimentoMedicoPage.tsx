@@ -15,6 +15,7 @@ type AtendimentoFormTab = "atendimento" | "consultas";
 
 const exameModalTipos = ["ULTRASSONOGRAFIA", "RADIOLOGIA", "OUTROS"];
 const exameSangueModalTipos = ["SANGUE", "FEZES/URINA"];
+const situacoesAtendimentoAlerta = new Set(["DESFILIADO", "DEMITIDO", "BLOQUEADO"]);
 
 const pesquisaOptions: Array<{ value: AtendimentoMedicoSearchType; label: string }> = [
   { value: "T",                 label: "TODOS" },
@@ -207,6 +208,7 @@ export function AtendimentoMedicoPage() {
   const [calendarMonth, setCalendarMonth]     = useState(() => monthStartFromValue(localDateTimeValue()));
   const [associadoSearch, setAssociadoSearch] = useState("");
   const [message, setMessage]                 = useState<string | null>(null);
+  const [lastSituacaoAlertKey, setLastSituacaoAlertKey] = useState<string | null>(null);
   const isConsulta      = form.tipo?.toUpperCase() === "CONSULTA";
   const isExame         = form.tipo?.toUpperCase() === "EXAME";
   const isExameSangue   = form.tipo?.toUpperCase() === "EXAME DE SANGUE";
@@ -274,6 +276,8 @@ export function AtendimentoMedicoPage() {
   const calendarTitle   = useMemo(() => new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(calendarMonth), [calendarMonth]);
   const selectedDate    = datePart(form.dt_agendado);
   const todayDate       = dateToInputValue(new Date());
+  const associadoSituacaoAlerta = associadoResumo?.situacao?.trim().toUpperCase() ?? "";
+  const shouldHighlightAtendimentoForm = formOpen && situacoesAtendimentoAlerta.has(associadoSituacaoAlerta);
   const associadoOptions = useMemo(() => {
     if (!form.associado_id || associados.some((associado) => associado.id === form.associado_id)) return associados;
     return [{ id: form.associado_id, nome: selected?.nm_associado ?? `Associado #${form.associado_id}`, matricula: selected?.matricula ?? null }, ...associados];
@@ -318,6 +322,17 @@ export function AtendimentoMedicoPage() {
       descricao: item.descricao
     })));
   }, [atendimentoItensQuery.data, selectedId]);
+
+  useEffect(() => {
+    if (!formOpen || !form.associado_id || !associadoSituacaoAlerta) return;
+    if (!situacoesAtendimentoAlerta.has(associadoSituacaoAlerta)) return;
+
+    const alertKey = `${form.associado_id}-${associadoSituacaoAlerta}`;
+    if (lastSituacaoAlertKey === alertKey) return;
+
+    window.alert(`O Associado encontra-se: ${associadoSituacaoAlerta} e não poderá ser atendido.`);
+    setLastSituacaoAlertKey(alertKey);
+  }, [associadoSituacaoAlerta, form.associado_id, formOpen, lastSituacaoAlertKey]);
 
   const saveMutation = useMutation({
     mutationFn: async (values: AtendimentoMedicoInsert) => {
@@ -630,7 +645,7 @@ export function AtendimentoMedicoPage() {
   }
 
   const atendimentoForm = formOpen ? (
-    <section className="detail-panel atendimento-form-panel">
+    <section className={`detail-panel atendimento-form-panel${shouldHighlightAtendimentoForm ? " atendimento-form-panel-alert" : ""}`}>
       <form className="form-panel" onSubmit={handleSubmit}>
         <div className="tabs atendimento-full-grid">
           <button type="button" className={activeFormTab === "atendimento" ? "active" : ""} onClick={() => setActiveFormTab("atendimento")}>Atendimento</button>
