@@ -42,8 +42,10 @@ export type AtendimentoAssociadoResumo = {
   situacao: string | null;
   data_filiacao: string | null;
   data_nascimento: string | null;
+  sexo: string | null;
   tel1: string | null;
   tel2: string | null;
+  tel3: string | null;
   empresa_id: number | null;
   empresa_nome: string | null;
   convencao: string | null;
@@ -206,7 +208,7 @@ export async function getAtendimentoAssociadoResumo(associadoId: number) {
 
   const { data: associado, error: associadoError } = await supabaseUnsafe
     .from("associados")
-    .select("id, matricula, situacao_id, data_cadastro, data_nascimento, tel1, tel2, empresa_id, local_pagamento_id, observacao")
+    .select("id, matricula, situacao_id, data_cadastro, data_nascimento, sexo, tel1, tel2, tel3, empresa_id, local_pagamento_id, observacao")
     .eq("id", associadoId)
     .single();
   raiseSupabaseError(associadoError);
@@ -266,8 +268,10 @@ export async function getAtendimentoAssociadoResumo(associadoId: number) {
     situacao: situacaoResult.data?.nome ?? null,
     data_filiacao: associado.data_cadastro,
     data_nascimento: associado.data_nascimento,
+    sexo: associado.sexo,
     tel1: associado.tel1,
     tel2: associado.tel2,
+    tel3: associado.tel3,
     empresa_id: empresa?.id ?? null,
     empresa_nome: empresa?.nm_fantasia ?? null,
     convencao: convencao?.nome ?? null,

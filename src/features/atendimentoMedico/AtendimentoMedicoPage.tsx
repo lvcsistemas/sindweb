@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState }              from "react";
 import { useMutation, useQuery, useQueryClient }                from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, Minus, Plus, Save, Search }  from "lucide-react";
+import { ChevronLeft, ChevronRight, Minus, Plus, Printer, Save, Search } from "lucide-react";
 import { Breadcrumb }                                           from "../../shared/Breadcrumb";
 import type { AtendimentoMedicoExame, AtendimentoMedicoInsert, AtendimentoMedicoItemInsert, AtendimentoMedicoLista } from "../../types/database";
 import { listAssociados }                                       from "../associados/associadosApi";
@@ -132,6 +132,30 @@ function calculateAge(value: string | null | undefined) {
   const monthDiff = today.getMonth() - birth.getMonth();
   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age -= 1;
   return `${age}`;
+}
+
+function escapeHtml(value: string | number | null | undefined) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function printValue(value: string | number | null | undefined, fallback = "") {
+  return escapeHtml(value ?? fallback);
+}
+
+function formatPhone(value: string | null | undefined) {
+  const digits = value?.replace(/\D/g, "") ?? "";
+  if (!digits) return "";
+  if (digits.length <= 10) return digits.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, "($1) $2-$3").replace(/-$/, "");
+  return digits.replace(/^(\d{2})(\d{5})(\d{0,4}).*/, "($1) $2-$3").replace(/-$/, "");
+}
+
+function joinText(parts: Array<string | null | undefined>, separator = " ") {
+  return parts.filter((part) => part && part.trim()).join(separator);
 }
 
 function getAtendimentoRowClass(item: AtendimentoMedicoLista) {
@@ -391,6 +415,120 @@ export function AtendimentoMedicoPage() {
     setItensModalOpen(false);
   }
 
+  function handlePrintGuia() {
+    if (!form.id) return;
+
+    const convenio = convenios.find((item) => item.id === Number(form.convenio_id));
+    const dependente = dependentes.find((item) => item.id === Number(form.dependente_id));
+    const associadoNome = selected?.nm_associado ?? associadoOptions.find((item) => item.id === Number(form.associado_id))?.nome ?? "";
+    const pacienteItensTitulo = isConsulta ? "ESPECIALIDADES MEDICAS" : "EXAMES";
+    const convenioEndereco = joinText([
+      convenio?.endereco,
+      convenio?.numero,
+      convenio?.complemento,
+      convenio?.bairro,
+      convenio?.cidade,
+      convenio?.uf
+    ], ", ");
+    const telefonesAssociado = joinText([
+      formatPhone(associadoResumo?.tel1),
+      formatPhone(associadoResumo?.tel2),
+      formatPhone(associadoResumo?.tel3)
+    ], " / ");
+    const itensRows = visibleAtendimentoItens.length
+      ? visibleAtendimentoItens.map((item) => `<tr><td>${printValue(item.descricao)}</td></tr>`).join("")
+      : `<tr><td>&nbsp;</td></tr>`;
+    const printWindow = window.open("", "_blank", "width=900,height=700");
+
+    if (!printWindow) {
+      setMessage("Nao foi possivel abrir a janela de impressao. Verifique o bloqueador de pop-ups.");
+      return;
+    }
+
+    const html = `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Atendimento ${printValue(form.id)}</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 4px 6px; color: #111; background: #fff; font-family: Tahoma, Arial, sans-serif; font-size: 12px; }
+    .brand { width: 90%; height: 58px; margin: 0 auto 4px; display: flex; align-items: center; justify-content: center; border: 1px solid #222; font-size: 22px; font-weight: 700; letter-spacing: 2px; }
+    hr { border: 0; border-top: 1px solid #222; margin: 5px 0; }
+    .title { text-align: center; font-weight: 700; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 2px 3px; vertical-align: top; text-align: left; }
+    th { font-weight: 700; }
+    .right { text-align: right; }
+    .center { text-align: center; }
+    .bordered td, .bordered th { border: 1px solid #222; height: 22px; }
+    .stamp { width: 300px; height: 170px; border: 1px solid #222; float: right; display: flex; align-items: flex-start; justify-content: center; padding-top: 8px; margin-top: 8px; font-size: 11px; }
+    .emissao { clear: both; padding-top: 14px; text-align: center; font-size: 11px; }
+    .signature { width: 50%; margin-top: 28px; text-align: center; font-size: 10px; }
+    @media print {
+      body { padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="brand">SINTA</div>
+  <hr>
+  <div class="title">GUIA DE ENCAMINHAMENTO MEDICO AMBULATORIAL N&ordm; ${printValue(form.id)}</div>
+  <hr>
+  <table>
+    <tr><th>ID</th><th>ASSOCIADO</th><th class="right">IDADE</th><th class="center">SEXO</th><th>TELEFONE</th></tr>
+    <tr>
+      <td>${printValue(form.associado_id)}</td>
+      <td>${printValue(associadoNome)}</td>
+      <td class="right">${printValue(calculateAge(associadoResumo?.data_nascimento))}</td>
+      <td class="center">${printValue(associadoResumo?.sexo)}</td>
+      <td>${printValue(telefonesAssociado)}</td>
+    </tr>
+    <tr><th>ID</th><th>DEPENDENTE</th><th class="right">IDADE</th><th class="center">SEXO</th><th>PARENTESCO</th></tr>
+    <tr>
+      <td>${dependente ? printValue(dependente.id) : ""}</td>
+      <td>${dependente ? printValue(dependente.nm_dependente) : ""}</td>
+      <td class="right">${dependente ? printValue(calculateAge(dependente.dt_nascimento)) : ""}</td>
+      <td class="center">${dependente ? printValue(dependente.sexo) : ""}</td>
+      <td>${dependente ? printValue(dependente.parentesco) : ""}</td>
+    </tr>
+  </table>
+  <hr>
+  <table>
+    <tr><th>CONVENIO</th><th>TELEFONE</th><th>ENDERECO</th></tr>
+    <tr>
+      <td>${printValue(convenio?.nm_convenio)}</td>
+      <td>${printValue(joinText([formatPhone(convenio?.tel1), formatPhone(convenio?.tel2), formatPhone(convenio?.tel3)], " / "))}</td>
+      <td>${printValue(convenioEndereco)}</td>
+    </tr>
+  </table>
+  <hr>
+  <table>
+    <tr><th>OBSERVACAO</th></tr>
+    <tr><td>${printValue(form.obs)}</td></tr>
+  </table>
+  <hr>
+  <table><tr><th class="center">${pacienteItensTitulo}</th></tr></table>
+  <table class="bordered">${itensRows}</table>
+  <table class="bordered" style="margin-top: 4px;"><tr><th class="center">OBSERVACOES</th></tr><tr><td>&nbsp;</td></tr></table>
+  <div class="stamp">CARIMBO E ASSINATURA DO MEDICO</div>
+  <div class="emissao">EMISSAO: ${printValue(formatDateTime(localDateTimeValue()))}&nbsp;&nbsp;&nbsp;REALIZACAO: ${printValue(formatDateTime(form.dt_agendado))}</div>
+  <div class="signature">_______________________<br>ASSINATURA DO SINDICATO</div>
+  <div class="signature">_______________________<br>ASSINATURA DO PACIENTE</div>
+  <script>
+    window.onload = function () {
+      window.focus();
+      window.print();
+    };
+  </script>
+</body>
+</html>`;
+
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+  }
+
   function renderAssociadoResumoCard(resumo: AtendimentoAssociadoResumo | null) {
     if (!form.associado_id) return null;
 
@@ -622,6 +760,7 @@ export function AtendimentoMedicoPage() {
         {message ? <div className={saveMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
 
         <div className="form-actions atendimento-full-grid">
+          {form.id ? <button type="button" className="secondary-button" onClick={handlePrintGuia}><Printer size={16} /> Imprimir Guia</button> : null}
           <button type="button" className="secondary-button" onClick={() => setFormOpen(false)}>Sair</button>
           <button type="submit" disabled={saveMutation.isPending}><Save size={16} /> {saveMutation.isPending ? "Salvando..." : "Salvar"}</button>
         </div>
