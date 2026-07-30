@@ -12,12 +12,14 @@ import { AtendimentoMedicoPage } from "./features/atendimentoMedico/AtendimentoM
 import { AtendimentoMedicoConvenioPage } from "./features/atendimentoMedicoConvenio/AtendimentoMedicoConvenioPage";
 import { AtendimentoMedicoExamesPage } from "./features/atendimentoMedicoExames/AtendimentoMedicoExamesPage";
 import { AuxiliaresPage } from "./features/auxiliares/AuxiliaresPage";
+import { BancosPage } from "./features/bancos/BancosPage";
 import { CnaePage } from "./features/cnae/CnaePage";
 import { ConfigPage } from "./features/config/ConfigPage";
 import { ContribuicaoPage } from "./features/contribuicao/ContribuicaoPage";
 import { DashboardPage } from "./features/dashboard/DashboardPage";
 import { EmpresaPage } from "./features/empresa/EmpresaPage";
 import { EscritorioPage } from "./features/escritorio/EscritorioPage";
+import { FaturasPage } from "./features/faturas/FaturasPage";
 import { LocalTrabalhoPage } from "./features/localTrabalho/LocalTrabalhoPage";
 import { UsuariosPage } from "./features/usuarios/UsuariosPage";
 import "./styles.css";
@@ -42,10 +44,12 @@ const router = createBrowserRouter([
       { path: "atendimento-medico-convenios", element: <AtendimentoMedicoConvenioPage /> },
       { path: "atendimento-medico-exames", element: <AtendimentoMedicoExamesPage /> },
       { path: "auxiliares/:grupoPath", element: <AuxiliaresPage /> },
+      { path: "bancos", element: <BancosPage /> },
       { path: "cnae", element: <CnaePage /> },
       { path: "config", element: <ConfigPage /> },
       { path: "contribuicao", element: <ContribuicaoPage /> },
       { path: "escritorios", element: <EscritorioPage /> },
+      { path: "faturas", element: <FaturasPage /> },
       { path: "local-trabalho", element: <LocalTrabalhoPage /> },
       { path: "usuarios", element: <UsuariosPage /> }
     ]

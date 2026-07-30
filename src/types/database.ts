@@ -13,12 +13,14 @@ export type Database = {
       atendimento_medico_convenios_especialidades: { Row: AtendimentoMedicoConvenioEspecialidade; Insert: AtendimentoMedicoConvenioEspecialidadeInsert; Update: Partial<AtendimentoMedicoConvenioEspecialidadeInsert> };
       atendimento_medico_exames: { Row: AtendimentoMedicoExame; Insert: AtendimentoMedicoExameInsert; Update: Partial<AtendimentoMedicoExameInsert> };
       atendimento_medico_itens: { Row: AtendimentoMedicoItem; Insert: AtendimentoMedicoItemInsert; Update: Partial<AtendimentoMedicoItemInsert> };
+      bancos: { Row: Banco; Insert: BancoInsert; Update: Partial<BancoInsert> };
       cnaes: { Row: Cnae; Insert: CnaeInsert; Update: Partial<CnaeInsert> };
       config: { Row: Config; Insert: ConfigInsert; Update: Partial<ConfigInsert> };
       contribuicoes: { Row: Contribuicao; Insert: ContribuicaoInsert; Update: Partial<ContribuicaoInsert> };
       empresas: { Row: EmpresaCadastro; Insert: EmpresaCadastroInsert; Update: Partial<EmpresaCadastroInsert> };
       empresas_contribuicoes: { Row: EmpresaContribuicao; Insert: EmpresaContribuicaoInsert; Update: Partial<EmpresaContribuicaoInsert> };
       empresas_escritorios: { Row: Escritorio; Insert: EscritorioInsert; Update: Partial<EscritorioInsert> };
+      faturas: { Row: Fatura; Insert: FaturaInsert; Update: Partial<FaturaInsert> };
       locais_trabalho: { Row: LocalTrabalho; Insert: LocalTrabalhoInsert; Update: Partial<LocalTrabalhoInsert> };
       lookup_items: { Row: LookupItem; Insert: Omit<LookupItem, "id" | "created_at">; Update: Partial<Omit<LookupItem, "id" | "created_at">> };
     };
@@ -26,6 +28,7 @@ export type Database = {
       associados_lista: { Row: AssociadoLista };
       atendimento_homologacao_lista: { Row: AtendimentoHomologacaoLista };
       atendimento_medico_lista: { Row: AtendimentoMedicoLista };
+      faturas_lista: { Row: FaturaLista };
     };
     Functions: {
       can_access_module: { Args: { module_key: string; action_key?: string }; Returns: boolean };
@@ -240,6 +243,85 @@ export type Config = {
 
 export type ConfigInsert = Omit<Config, "id" | "created_at" | "updated_at"> & { id?: number };
 export type ConfigUpdate = Partial<ConfigInsert>;
+
+export type Banco = {
+  id: number;
+  ativo: string;
+  banco_numero: string;
+  banco_nome: string;
+  agencia_numero: string;
+  conta_numero: string;
+  telefone: string | null;
+  nome_gerente: string | null;
+  logotipo_path: string | null;
+  nosso_numero_inicio: number;
+  nosso_numero_fim: number;
+  nosso_numero_proximo: number;
+  codigo_cedente: string | null;
+  carteira: string | null;
+  padrao_retorno: string;
+  tx_bancaria: number;
+  multa_percentual: number;
+  juros_dia_percentual: number;
+  desconto_percentual: number;
+  outros_acrescimos: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type BancoInsert = Omit<Banco, "id" | "created_at" | "updated_at"> & { id?: number };
+
+export type Fatura = {
+  id: number;
+  sacado_tipo: string;
+  associado_id: number | null;
+  empresa_id: number | null;
+  contribuicao_id: number;
+  banco_id: number;
+  competencia_mes: number;
+  competencia_ano: number;
+  dt_emissao: string;
+  dt_vencimento: string;
+  valor_base: number;
+  tx_bancaria: number;
+  multa_percentual: number;
+  juros_dia_percentual: number;
+  desconto_percentual: number;
+  outros_acrescimos: number;
+  valor_total: number;
+  nosso_numero: string | null;
+  linha_digitavel: string | null;
+  situacao: string;
+  created_by: string | null;
+  updated_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type FaturaInsert = Omit<Fatura, "id" | "valor_total" | "created_by" | "updated_by" | "created_at" | "updated_at"> & {
+  id?: number;
+  created_by?: string | null;
+  updated_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type FaturaLista = Fatura & {
+  contribuicao_tipo: string | null;
+  nm_contribuicao: string | null;
+  banco_numero: string | null;
+  banco_nome: string | null;
+  agencia_numero: string | null;
+  conta_numero: string | null;
+  associado_nome: string | null;
+  associado_documento: string | null;
+  empresa_nome: string | null;
+  empresa_documento: string | null;
+  created_by_codinome: string | null;
+  created_by_nome: string | null;
+  updated_by_codinome: string | null;
+  updated_by_nome: string | null;
+};
 
 export type EmpresaContribuicao = {
   id: number;

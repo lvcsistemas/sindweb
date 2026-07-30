@@ -86,7 +86,12 @@ export function AppShell() {
               <ChevronRight className="nav-chevron" size={16} />
               <BriefcaseBusiness size={18} /> Financeiro
             </button>
-            {financeiroOpen ? <div className="nav-subgroup empty-state small">Sem itens cadastrados.</div> : null}
+            {financeiroOpen ? (
+              <div className="nav-subgroup">
+                <NavLink className="nav-leaf direct" to="/bancos"><BriefcaseBusiness size={17} /> Bancos</NavLink>
+                <NavLink className="nav-leaf direct" to="/faturas"><FileText size={17} /> Emissão de Faturas</NavLink>
+              </div>
+            ) : null}
           </div>
           <div className="nav-group">
             <button className="nav-toggle" onClick={() => setAuxiliaresOpen((open) => !open)} aria-expanded={auxiliaresOpen}>
