@@ -1,12 +1,12 @@
 import { FormEvent, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText, Search } from "lucide-react";
+import { FileText, Search, Trash2 } from "lucide-react";
 import { Breadcrumb } from "../../shared/Breadcrumb";
 import { listAssociados } from "../associados/associadosApi";
 import { listBancos } from "../bancos/bancosApi";
 import { listContribuicoes } from "../contribuicao/contribuicaoApi";
 import { listEmpresasCadastro } from "../empresa/empresaApi";
-import { gerarFaturas, listFaturas, type FaturaFilters, type GerarFaturasPayload } from "./faturasApi";
+import { cancelarFatura, gerarFaturas, listFaturas, type FaturaFilters, type GerarFaturasPayload } from "./faturasApi";
 
 const currentYear = new Date().getFullYear();
 const currentMonth = new Date().getMonth() + 1;
@@ -88,6 +88,16 @@ export function FaturasPage() {
     onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel gerar as faturas.")
   });
 
+  const cancelarMutation = useMutation({
+    mutationFn: cancelarFatura,
+    onSuccess: async () => {
+      setMessage("Fatura enviada para Faturas Excluidas.");
+      await queryClient.invalidateQueries({ queryKey: ["faturas"] });
+      await queryClient.invalidateQueries({ queryKey: ["faturas-excluidas"] });
+    },
+    onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel excluir a fatura.")
+  });
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage(null);
@@ -97,6 +107,12 @@ export function FaturasPage() {
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFilters(draftFilters);
+  }
+
+  function handleCancelar(id: number) {
+    if (!window.confirm("Confirma excluir esta fatura? Ela ficara disponivel em Faturas Excluidas.")) return;
+    setMessage(null);
+    cancelarMutation.mutate(id);
   }
 
   return (
@@ -149,7 +165,7 @@ export function FaturasPage() {
       <section className="form-panel atendimento-search-panel">
         <form className="atendimento-search-grid homologacao-search-grid" onSubmit={handleSearch}>
           <label className="field"><select value={draftFilters.sacadoTipo} onChange={(event) => setDraftFilters({ ...draftFilters, sacadoTipo: event.target.value as FaturaFilters["sacadoTipo"] })}><option value="TODOS">TODOS</option><option value="ASSOCIADO">ASSOCIADO</option><option value="EMPRESA">EMPRESA</option></select><span>Tipo sacado</span></label>
-          <label className="field"><select value={draftFilters.situacao} onChange={(event) => setDraftFilters({ ...draftFilters, situacao: event.target.value as FaturaFilters["situacao"] })}><option value="TODOS">TODOS</option><option value="ABERTA">ABERTA</option><option value="PAGA">PAGA</option><option value="CANCELADA">CANCELADA</option></select><span>Situação</span></label>
+          <label className="field"><select value={draftFilters.situacao} onChange={(event) => setDraftFilters({ ...draftFilters, situacao: event.target.value as FaturaFilters["situacao"] })}><option value="TODOS">TODOS</option><option value="ABERTA">ABERTA</option><option value="PAGA">PAGA</option></select><span>Situação</span></label>
           <label className="field"><input type="date" value={draftFilters.inicio} onChange={(event) => setDraftFilters({ ...draftFilters, inicio: event.target.value })} placeholder=" " /><span>Vencimento inicial</span></label>
           <label className="field"><input type="date" value={draftFilters.fim} onChange={(event) => setDraftFilters({ ...draftFilters, fim: event.target.value })} placeholder=" " /><span>Vencimento final</span></label>
           <label className="field"><input value={draftFilters.valor} onChange={(event) => setDraftFilters({ ...draftFilters, valor: event.target.value })} placeholder=" " /><span>Valor procurado</span></label>
@@ -171,19 +187,25 @@ export function FaturasPage() {
                 <th>Banco</th>
                 <th className="numeric-cell">Valor</th>
                 <th>Situação</th>
+                <th className="numeric-cell">Excluir</th>
               </tr>
             </thead>
             <tbody>
               {faturas.map((item) => (
                 <tr key={item.id}>
                   <td>{item.id}</td>
-                  <td><strong>{item.sacado_tipo === "ASSOCIADO" ? item.associado_nome : item.empresa_nome}</strong><span>{formatDocumento(item.sacado_tipo === "ASSOCIADO" ? item.associado_documento : item.empresa_documento)}</span></td>
+                  <td><strong>{item.sacado_tipo === "ASSOCIADO" ? item.associado_nome : item.empresa_nome}</strong><span>{item.sacado_tipo} - {formatDocumento(item.sacado_tipo === "ASSOCIADO" ? item.associado_documento : item.empresa_documento)}</span></td>
                   <td><strong>{item.contribuicao_tipo}</strong><span>{item.nm_contribuicao}</span></td>
                   <td>{String(item.competencia_mes).padStart(2, "0")}/{item.competencia_ano}</td>
                   <td>{formatDate(item.dt_vencimento)}</td>
                   <td><strong>{item.banco_numero} - {item.banco_nome}</strong><span>Ag {item.agencia_numero} - Conta {item.conta_numero}</span></td>
                   <td className="numeric-cell">{formatCurrency(item.valor_total)}</td>
                   <td>{item.situacao}</td>
+                  <td className="numeric-cell">
+                    <button type="button" className="icon-button danger-icon" title="Excluir" onClick={() => handleCancelar(item.id)} disabled={cancelarMutation.isPending}>
+                      <Trash2 size={16} />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

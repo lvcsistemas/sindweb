@@ -292,13 +292,15 @@ export type Fatura = {
   nosso_numero: string | null;
   linha_digitavel: string | null;
   situacao: string;
+  cancelada_em: string | null;
+  cancelada_por: string | null;
   created_by: string | null;
   updated_by: string | null;
   created_at: string;
   updated_at: string;
 };
 
-export type FaturaInsert = Omit<Fatura, "id" | "valor_total" | "created_by" | "updated_by" | "created_at" | "updated_at"> & {
+export type FaturaInsert = Omit<Fatura, "id" | "valor_total" | "cancelada_em" | "cancelada_por" | "created_by" | "updated_by" | "created_at" | "updated_at"> & {
   id?: number;
   created_by?: string | null;
   updated_by?: string | null;
@@ -321,6 +323,8 @@ export type FaturaLista = Fatura & {
   created_by_nome: string | null;
   updated_by_codinome: string | null;
   updated_by_nome: string | null;
+  cancelada_por_codinome: string | null;
+  cancelada_por_nome: string | null;
 };
 
 export type EmpresaContribuicao = {

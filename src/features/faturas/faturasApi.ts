@@ -78,10 +78,11 @@ export async function listFaturas(filters: FaturaFilters) {
     .select("*")
     .gte("dt_vencimento", filters.inicio)
     .lte("dt_vencimento", filters.fim)
+    .neq("situacao", "CANCELADA")
     .order("dt_vencimento", { ascending: true });
 
   if (filters.sacadoTipo !== "TODOS") query = query.eq("sacado_tipo", filters.sacadoTipo);
-  if (filters.situacao !== "TODOS") query = query.eq("situacao", filters.situacao);
+  if (filters.situacao !== "TODOS" && filters.situacao !== "CANCELADA") query = query.eq("situacao", filters.situacao);
 
   const term = filters.valor.trim();
   if (term) {
@@ -91,6 +92,53 @@ export async function listFaturas(filters: FaturaFilters) {
   const { data, error } = await query;
   raiseSupabaseError(error);
   return data as FaturaLista[];
+}
+
+export async function listFaturasExcluidas(filters: Omit<FaturaFilters, "situacao">) {
+  let query = supabaseUnsafe
+    .from("faturas_lista")
+    .select("*")
+    .eq("situacao", "CANCELADA")
+    .gte("cancelada_em", `${filters.inicio}T00:00:00`)
+    .lte("cancelada_em", `${filters.fim}T23:59:59`)
+    .order("cancelada_em", { ascending: false });
+
+  if (filters.sacadoTipo !== "TODOS") query = query.eq("sacado_tipo", filters.sacadoTipo);
+
+  const term = filters.valor.trim();
+  if (term) {
+    query = query.or(`associado_nome.ilike.%${term}%,empresa_nome.ilike.%${term}%,associado_documento.ilike.%${term}%,empresa_documento.ilike.%${term}%,nm_contribuicao.ilike.%${term}%,banco_nome.ilike.%${term}%`);
+  }
+
+  const { data, error } = await query;
+  raiseSupabaseError(error);
+  return data as FaturaLista[];
+}
+
+export async function cancelarFatura(id: number) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.id) throw new Error("Sessao expirada. Entre novamente para cancelar a fatura.");
+
+  const { data: fatura, error: faturaError } = await supabaseUnsafe
+    .from("faturas")
+    .select("id, situacao")
+    .eq("id", id)
+    .single();
+  raiseSupabaseError(faturaError);
+
+  if (fatura?.situacao === "PAGA") throw new Error("Fatura paga nao pode ser excluida.");
+  if (fatura?.situacao === "CANCELADA") return;
+
+  const { error } = await supabaseUnsafe
+    .from("faturas")
+    .update({
+      situacao: "CANCELADA",
+      cancelada_em: new Date().toISOString(),
+      cancelada_por: user.id,
+      updated_by: user.id
+    })
+    .eq("id", id);
+  raiseSupabaseError(error);
 }
 
 export async function gerarFaturas(payload: GerarFaturasPayload) {

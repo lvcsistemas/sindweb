@@ -90,6 +90,7 @@ export function AppShell() {
               <div className="nav-subgroup">
                 <NavLink className="nav-leaf direct" to="/bancos"><BriefcaseBusiness size={17} /> Bancos</NavLink>
                 <NavLink className="nav-leaf direct" to="/faturas"><FileText size={17} /> Emissão de Faturas</NavLink>
+                <NavLink className="nav-leaf direct" to="/faturas-excluidas"><FileText size={17} /> Faturas Excluidas</NavLink>
               </div>
             ) : null}
           </div>

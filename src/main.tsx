@@ -20,6 +20,7 @@ import { DashboardPage } from "./features/dashboard/DashboardPage";
 import { EmpresaPage } from "./features/empresa/EmpresaPage";
 import { EscritorioPage } from "./features/escritorio/EscritorioPage";
 import { FaturasPage } from "./features/faturas/FaturasPage";
+import { FaturasExcluidasPage } from "./features/faturas/FaturasExcluidasPage";
 import { LocalTrabalhoPage } from "./features/localTrabalho/LocalTrabalhoPage";
 import { UsuariosPage } from "./features/usuarios/UsuariosPage";
 import "./styles.css";
@@ -50,6 +51,7 @@ const router = createBrowserRouter([
       { path: "contribuicao", element: <ContribuicaoPage /> },
       { path: "escritorios", element: <EscritorioPage /> },
       { path: "faturas", element: <FaturasPage /> },
+      { path: "faturas-excluidas", element: <FaturasExcluidasPage /> },
       { path: "local-trabalho", element: <LocalTrabalhoPage /> },
       { path: "usuarios", element: <UsuariosPage /> }
     ]
