@@ -1,10 +1,10 @@
 const { Client } = require('pg');
 
-const url = 'https://qpylbiywcpvcxrroljmj.supabase.co';
-const anon = process.env.SUPABASE_ANON_KEY;
-const service = process.env.SUPABASE_SERVICE_ROLE;
-const password = 'Teste-' + Math.random().toString(36).slice(2) + 'A1!';
-const email = `codex-test-${Date.now()}@sindweb.local`;
+const url       = 'https://qpylbiywcpvcxrroljmj.supabase.co';
+const anon      = process.env.SUPABASE_ANON_KEY;
+const service   = process.env.SUPABASE_SERVICE_ROLE;
+const password  = 'Teste-' + Math.random().toString(36).slice(2) + 'A1!';
+const email     = `codex-test-${Date.now()}@sindweb.local`;
 
 async function api(path, options = {}) {
   const res = await fetch(url + path, {
@@ -49,7 +49,7 @@ async function api(path, options = {}) {
 
   const rows = await api(`/rest/v1/associados_lista?id=eq.${associadoId}&select=id,nome,cpf,matricula`, { bearer });
   if (!Array.isArray(rows) || rows.length !== 1 || rows[0].nome !== 'TESTE CODEX') {
-    throw new Error('Associado de teste não retornou pela view associados_lista.');
+    throw new Error('Associado de teste nao retornou pela view associados_lista.');
   }
 
   const client = new Client({ connectionString: process.env.SUPABASE_DB_URL, ssl: { rejectUnauthorized: false } });

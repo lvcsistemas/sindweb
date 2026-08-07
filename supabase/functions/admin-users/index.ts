@@ -27,10 +27,10 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const authHeader = req.headers.get("Authorization") ?? "";
+  const supabaseUrl     = Deno.env.get("SUPABASE_URL");
+  const anonKey         = Deno.env.get("SUPABASE_ANON_KEY");
+  const serviceRoleKey  = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const authHeader      = req.headers.get("Authorization") ?? "";
 
   if (!supabaseUrl || !anonKey || !serviceRoleKey) {
     return json({ error: "Configuracao da funcao incompleta." }, 500);
@@ -70,9 +70,9 @@ Deno.serve(async (req) => {
     return json({ error: "Metodo nao permitido." }, 405);
   }
 
-  const payload = await req.json() as UserPayload;
-  const email = payload.email?.trim().toLowerCase();
-  const password = payload.password?.trim();
+  const payload   = await req.json() as UserPayload;
+  const email     = payload.email?.trim().toLowerCase();
+  const password  = payload.password?.trim();
 
   if (!email) {
     return json({ error: "Informe o e-mail do usuario." }, 400);

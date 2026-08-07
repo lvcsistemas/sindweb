@@ -137,8 +137,7 @@ export async function listAuxiliaresOptions(grupo: string) {
 }
 
 export async function listLocaisTrabalhoOptions() {
-  const { data, error } = await supabaseUnsafe
-    .from("locais_trabalho")
+  const { data, error } = await supabaseUnsafe.from("locais_trabalho")
     .select("*")
     .order("nome", { ascending: true })
     .limit(500);
@@ -148,13 +147,11 @@ export async function listLocaisTrabalhoOptions() {
 
 export async function uploadAssociadoFoto(associadoId: number, file: File) {
   const extension = file.name.split(".").pop() ?? "jpg";
-  const path = `${associadoId}/${crypto.randomUUID()}.${extension}`;
+  const path      = `${associadoId}/${crypto.randomUUID()}.${extension}`;
   const { error } = await supabase.storage.from("associados-fotos").upload(path, file, { upsert: false });
   if (error) throw error;
-
   const { error: updateError } = await supabaseUnsafe.from("associados").update({ foto_path: path }).eq("id", associadoId);
   if (updateError) throw updateError;
-
   return path;
 }
 

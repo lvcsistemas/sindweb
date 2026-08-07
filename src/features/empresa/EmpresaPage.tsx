@@ -13,7 +13,7 @@ import type { CnpjConsulta } from "./empresaApi";
 
 type EmpresaTab = "dados" | "associados" | "contribuicoes" | "financeiro";
 type NovoEmpresaStep = "tipo" | "cnpj" | "revisao";
-const EMPRESAS_PAGE_SIZE = 50;
+const EMPRESAS_PAGE_SIZE = 100;
 
 function onlyDigits(value: string | null | undefined) {
   return value?.replace(/\D/g, "") ?? "";
