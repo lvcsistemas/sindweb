@@ -1,19 +1,19 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { FormEvent, useEffect, useMemo, useState }      from "react";
+import { useMutation, useQuery, useQueryClient }        from "@tanstack/react-query";
 import { Building2, Camera, ChevronLeft, ChevronRight, Plus, Save, Search, Trash2 } from "lucide-react";
-import { Breadcrumb } from "../../shared/Breadcrumb";
-import type { EmpresaCadastro, EmpresaCadastroInsert } from "../../types/database";
-import { listAuxiliares } from "../auxiliares/auxiliaresApi";
-import { listCnaes } from "../cnae/cnaeApi";
-import { listContribuicoes } from "../contribuicao/contribuicaoApi";
-import { listEscritorios } from "../escritorio/escritorioApi";
-import { listUsuarios } from "../usuarios/usuariosApi";
+import { Breadcrumb }                                   from "../../shared/Breadcrumb";
+import type { EmpresaCadastro, EmpresaCadastroInsert }  from "../../types/database";
+import { listAuxiliares }                               from "../auxiliares/auxiliaresApi";
+import { listCnaes }                                    from "../cnae/cnaeApi";
+import { listContribuicoes }                            from "../contribuicao/contribuicaoApi";
+import { listEscritorios }                              from "../escritorio/escritorioApi";
+import { listUsuarios }                                 from "../usuarios/usuariosApi";
 import { addEmpresaContribuicao, consultarCep, consultarCnpj, deleteEmpresaCadastro, deleteEmpresaContribuicao, getEmpresaLogoUrl, listEmpresaAssociados, listEmpresaContribuicoes, listEmpresasCadastroPage, saveEmpresaCadastro, uploadEmpresaLogo } from "./empresaApi";
-import type { CnpjConsulta } from "./empresaApi";
+import type { CnpjConsulta }                            from "./empresaApi";
 
-type EmpresaTab = "dados" | "associados" | "contribuicoes" | "financeiro";
-type NovoEmpresaStep = "tipo" | "cnpj" | "revisao";
-const EMPRESAS_PAGE_SIZE = 100;
+type EmpresaTab           = "dados" | "associados" | "contribuicoes" | "financeiro";
+type NovoEmpresaStep      = "tipo" | "cnpj" | "revisao";
+const EMPRESAS_PAGE_SIZE  = 100;
 
 function onlyDigits(value: string | null | undefined) {
   return value?.replace(/\D/g, "") ?? "";
@@ -87,7 +87,6 @@ function formatDateTime(value: string | null | undefined) {
 function findCnaeIdByApiCode(apiCode: string | number | null | undefined, cnaes: Array<{ id: number; codigo_cnae: string }>) {
   const prefix = onlyDigits(String(apiCode ?? "")).slice(0, 2);
   if (!prefix) return 0;
-
   return cnaes.find((item) => onlyDigits(item.codigo_cnae).startsWith(prefix))?.id ?? 0;
 }
 
@@ -102,86 +101,86 @@ function mapCnpjConsultaToForm(data: CnpjConsulta): EmpresaCadastroInsert {
     ativo               : data.descricao_situacao_cadastral ? (data.descricao_situacao_cadastral.toUpperCase() === "ATIVA" ? "S" : "N") : emptyForm.ativo,
     razao_social        : razaoSocial,
     nm_fantasia         : nomeFantasia,
-    cei_cnpj: formatCnpj(data.cnpj),
-    email1: data.email ?? "",
-    tel1: formatTelefone(data.ddd_telefone_1),
-    tel2: formatTelefone(data.ddd_telefone_2),
-    endereco: data.logradouro ?? "",
-    numero: data.numero ?? "",
-    complemento: data.complemento ?? "",
-    bairro: data.bairro ?? "",
-    cidade: data.municipio ?? "",
-    uf: data.uf ?? emptyForm.uf,
-    cep: formatCep(data.cep),
-    capital_social: Number(data.capital_social ?? 0) || 0,
-    obs: data.cnae_fiscal_descricao ? `CNAE fiscal: ${data.cnae_fiscal ?? ""} - ${data.cnae_fiscal_descricao}` : ""
+    cei_cnpj            : formatCnpj(data.cnpj),
+    email1              : data.email ?? "",
+    tel1                : formatTelefone(data.ddd_telefone_1),
+    tel2                : formatTelefone(data.ddd_telefone_2),
+    endereco            : data.logradouro ?? "",
+    numero              : data.numero ?? "",
+    complemento         : data.complemento ?? "",
+    bairro              : data.bairro ?? "",
+    cidade              : data.municipio ?? "",
+    uf                  : data.uf ?? emptyForm.uf,
+    cep                 : formatCep(data.cep),
+    capital_social      : Number(data.capital_social ?? 0) || 0,
+    obs                 : data.cnae_fiscal_descricao ? `CNAE fiscal: ${data.cnae_fiscal ?? ""} - ${data.cnae_fiscal_descricao}` : ""
   };
 }
 
 const emptyForm: EmpresaCadastroInsert = {
-  user_resp_id: "",
-  estabelecimento_id: 1,
-  estabelecimento_tipo_id: 1,
-  escritorio_id: 0,
-  ramo_atividade_id: 0,
-  convencao_id: 0,
-  cnae_id: 0,
-  tipo_cei_cnpj: 1,
-  dt_inicio_atividades: "",
-  ativo: "S",
-  razao_social: "",
-  nm_fantasia: "",
-  cei_cnpj: "",
-  insc_estadual: "",
-  nm_contato1: "",
-  nm_contato2: "",
-  nm_contato3: "",
-  email1: "",
-  email2: "",
-  email3: "",
-  tel1: "",
-  tel2: "",
-  tel3: "",
-  site: "",
-  endereco: "",
-  numero: "",
-  complemento: "",
-  bairro: "",
-  cidade: "",
-  uf: "RJ",
-  cep: "",
-  capital_social: 0,
-  logo_path: null,
-  obs: ""
+  user_resp_id            : "",
+  estabelecimento_id      : 1,
+  estabelecimento_tipo_id : 1,
+  escritorio_id           : 0,
+  ramo_atividade_id       : 0,
+  convencao_id            : 0,
+  cnae_id                 : 0,
+  tipo_cei_cnpj           : 1,
+  dt_inicio_atividades    : "",
+  ativo                   : "S",
+  razao_social            : "",
+  nm_fantasia             : "",
+  cei_cnpj                : "",
+  insc_estadual           : "",
+  nm_contato1             : "",
+  nm_contato2             : "",
+  nm_contato3             : "",
+  email1                  : "",
+  email2                  : "",
+  email3                  : "",
+  tel1                    : "",
+  tel2                    : "",
+  tel3                    : "",
+  site                    : "",
+  endereco                : "",
+  numero                  : "",
+  complemento             : "",
+  bairro                  : "",
+  cidade                  : "",
+  uf                      : "RJ",
+  cep                     : "",
+  capital_social          : 0,
+  logo_path               : null,
+  obs                     : ""
 };
 
 export function EmpresaPage() {
-  const queryClient = useQueryClient();
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [activeTab, setActiveTab] = useState<EmpresaTab>("dados");
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [selectedEmpresa, setSelectedEmpresa] = useState<EmpresaCadastro | null>(null);
-  const [creatingNew, setCreatingNew] = useState(false);
-  const [form, setForm] = useState<EmpresaCadastroInsert>(emptyForm);
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-  const [novoStep, setNovoStep] = useState<NovoEmpresaStep | null>(null);
-  const [cnpjInput, setCnpjInput] = useState("");
-  const [cnpjData, setCnpjData] = useState<CnpjConsulta | null>(null);
-  const [cnpjMessage, setCnpjMessage] = useState<string | null>(null);
+  const queryClient                                         = useQueryClient();
+  const [search, setSearch]                                 = useState("");
+  const [page, setPage]                                     = useState(1);
+  const [activeTab, setActiveTab]                           = useState<EmpresaTab>("dados");
+  const [selectedId, setSelectedId]                         = useState<number | null>(null);
+  const [selectedEmpresa, setSelectedEmpresa]               = useState<EmpresaCadastro | null>(null);
+  const [creatingNew, setCreatingNew]                       = useState(false);
+  const [form, setForm]                                     = useState<EmpresaCadastroInsert>(emptyForm);
+  const [logoFile, setLogoFile]                             = useState<File | null>(null);
+  const [logoPreview, setLogoPreview]                       = useState<string | null>(null);
+  const [message, setMessage]                               = useState<string | null>(null);
+  const [novoStep, setNovoStep]                             = useState<NovoEmpresaStep | null>(null);
+  const [cnpjInput, setCnpjInput]                           = useState("");
+  const [cnpjData, setCnpjData]                             = useState<CnpjConsulta | null>(null);
+  const [cnpjMessage, setCnpjMessage]                       = useState<string | null>(null);
   const [selectedContribuicaoId, setSelectedContribuicaoId] = useState("");
 
-  const empresasQuery = useQuery({ queryKey: ["empresas-cadastro", search, page], queryFn: () => listEmpresasCadastroPage(search, page, EMPRESAS_PAGE_SIZE) });
-  const usuariosQuery = useQuery({ queryKey: ["usuarios"], queryFn: listUsuarios });
-  const contribuicoesQuery = useQuery({ queryKey: ["contribuicoes-options"], queryFn: () => listContribuicoes("") });
-  const cnaesQuery = useQuery({ queryKey: ["cnaes-options"], queryFn: () => listCnaes("") });
-  const estabelecimentosQuery = useQuery({ queryKey: ["auxiliares", "estabelecimento"], queryFn: () => listAuxiliares("estabelecimento", "") });
-  const estabelecimentoTiposQuery = useQuery({ queryKey: ["auxiliares", "estabelecimento_tipo"], queryFn: () => listAuxiliares("estabelecimento_tipo", "") });
-  const ramoAtividadesQuery = useQuery({ queryKey: ["auxiliares", "ramo_atividade"], queryFn: () => listAuxiliares("ramo_atividade", "") });
-  const convencoesQuery = useQuery({ queryKey: ["auxiliares", "convencao"], queryFn: () => listAuxiliares("convencao", "") });
-  const empresaContribuicoesQuery = useQuery({
+  const empresasQuery               = useQuery({ queryKey: ["empresas-cadastro", search, page], queryFn: () => listEmpresasCadastroPage(search, page, EMPRESAS_PAGE_SIZE) });
+  const usuariosQuery               = useQuery({ queryKey: ["usuarios"], queryFn: listUsuarios });
+  const contribuicoesQuery          = useQuery({ queryKey: ["contribuicoes-options"], queryFn: () => listContribuicoes("") });
+  const cnaesQuery                  = useQuery({ queryKey: ["cnaes-options"], queryFn: () => listCnaes("") });
+  const estabelecimentosQuery       = useQuery({ queryKey: ["auxiliares", "estabelecimento"], queryFn: () => listAuxiliares("estabelecimento", "") });
+  const estabelecimentoTiposQuery   = useQuery({ queryKey: ["auxiliares", "estabelecimento_tipo"], queryFn: () => listAuxiliares("estabelecimento_tipo", "") });
+  const ramoAtividadesQuery         = useQuery({ queryKey: ["auxiliares", "ramo_atividade"], queryFn: () => listAuxiliares("ramo_atividade", "") });
+  const convencoesQuery             = useQuery({ queryKey: ["auxiliares", "convencao"], queryFn: () => listAuxiliares("convencao", "") });
+  const empresaContribuicoesQuery   = useQuery({
     queryKey: ["empresa-contribuicoes", selectedId],
     queryFn: () => listEmpresaContribuicoes(selectedId ?? 0),
     enabled: Boolean(selectedId)
@@ -191,26 +190,26 @@ export function EmpresaPage() {
     queryFn: () => listEmpresaAssociados(selectedId ?? 0),
     enabled: Boolean(selectedId)
   });
-  const escritoriosQuery = useQuery({ queryKey: ["empresas-escritorios-options"], queryFn: () => listEscritorios("") });
-  const empresasPage = empresasQuery.data;
-  const empresas = empresasPage?.data ?? [];
-  const empresasTotal = empresasPage?.total ?? 0;
-  const usuarios = usuariosQuery.data ?? [];
-  const contribuicoes = contribuicoesQuery.data ?? [];
-  const cnaes = cnaesQuery.data ?? [];
-  const estabelecimentos = (estabelecimentosQuery.data ?? []).filter((item) => item.ativo === "S");
-  const estabelecimentoTipos = (estabelecimentoTiposQuery.data ?? []).filter((item) => item.ativo === "S");
-  const ramoAtividades = (ramoAtividadesQuery.data ?? []).filter((item) => item.ativo === "S");
-  const convencoes = (convencoesQuery.data ?? []).filter((item) => item.ativo === "S");
-  const defaultEstabelecimentoId = estabelecimentos[0]?.id ?? emptyForm.estabelecimento_id;
-  const defaultEstabelecimentoTipoId = estabelecimentoTipos[0]?.id ?? emptyForm.estabelecimento_tipo_id;
-  const defaultRamoAtividadeId = ramoAtividades[0]?.id ?? emptyForm.ramo_atividade_id;
-  const defaultConvencaoId = convencoes[0]?.id ?? emptyForm.convencao_id;
-  const empresaContribuicoes = empresaContribuicoesQuery.data ?? [];
-  const empresaAssociados = empresaAssociadosQuery.data ?? [];
-  const escritorios = escritoriosQuery.data ?? [];
-  const selected = selectedEmpresa ?? empresas.find((item) => item.id === selectedId) ?? null;
-  const formOpen = creatingNew || Boolean(selectedId);
+  const escritoriosQuery              = useQuery({ queryKey: ["empresas-escritorios-options"], queryFn: () => listEscritorios("") });
+  const empresasPage                  = empresasQuery.data;
+  const empresas                      = empresasPage?.data ?? [];
+  const empresasTotal                 = empresasPage?.total ?? 0;
+  const usuarios                      = usuariosQuery.data ?? [];
+  const contribuicoes                 = contribuicoesQuery.data ?? [];
+  const cnaes                         = cnaesQuery.data ?? [];
+  const estabelecimentos              = (estabelecimentosQuery.data ?? []).filter((item) => item.ativo === "S");
+  const estabelecimentoTipos          = (estabelecimentoTiposQuery.data ?? []).filter((item) => item.ativo === "S");
+  const ramoAtividades                = (ramoAtividadesQuery.data ?? []).filter((item) => item.ativo === "S");
+  const convencoes                    = (convencoesQuery.data ?? []).filter((item) => item.ativo === "S");
+  const defaultEstabelecimentoId      = estabelecimentos[0]?.id ?? emptyForm.estabelecimento_id;
+  const defaultEstabelecimentoTipoId  = estabelecimentoTipos[0]?.id ?? emptyForm.estabelecimento_tipo_id;
+  const defaultRamoAtividadeId        = ramoAtividades[0]?.id ?? emptyForm.ramo_atividade_id;
+  const defaultConvencaoId            = convencoes[0]?.id ?? emptyForm.convencao_id;
+  const empresaContribuicoes          = empresaContribuicoesQuery.data ?? [];
+  const empresaAssociados             = empresaAssociadosQuery.data ?? [];
+  const escritorios                   = escritoriosQuery.data ?? [];
+  const selected                      = selectedEmpresa ?? empresas.find((item) => item.id === selectedId) ?? null;
+  const formOpen                      = creatingNew || Boolean(selectedId);
 
   useEffect(() => {
     setPage(1);
@@ -229,41 +228,41 @@ export function EmpresaPage() {
     }
 
     setForm({
-      id: selected.id,
-      user_resp_id: selected.user_resp_id,
-      estabelecimento_id: selected.estabelecimento_id,
-      estabelecimento_tipo_id: selected.estabelecimento_tipo_id,
-      escritorio_id: selected.escritorio_id,
-      ramo_atividade_id: selected.ramo_atividade_id,
-      convencao_id: selected.convencao_id,
-      cnae_id: selected.cnae_id,
-      tipo_cei_cnpj: selected.tipo_cei_cnpj,
-      dt_inicio_atividades: selected.dt_inicio_atividades ?? "",
-      ativo: selected.ativo,
-      razao_social: selected.razao_social,
-      nm_fantasia: selected.nm_fantasia,
-      cei_cnpj: formatCeiCnpj(selected.cei_cnpj, selected.tipo_cei_cnpj),
-      insc_estadual: selected.insc_estadual ?? "",
-      nm_contato1: selected.nm_contato1 ?? "",
-      nm_contato2: selected.nm_contato2 ?? "",
-      nm_contato3: selected.nm_contato3 ?? "",
-      email1: selected.email1 ?? "",
-      email2: selected.email2 ?? "",
-      email3: selected.email3 ?? "",
-      tel1: formatTelefone(selected.tel1),
-      tel2: formatTelefone(selected.tel2),
-      tel3: formatTelefone(selected.tel3),
-      site: selected.site ?? "",
-      endereco: selected.endereco ?? "",
-      numero: selected.numero ?? "",
-      complemento: selected.complemento ?? "",
-      bairro: selected.bairro ?? "",
-      cidade: selected.cidade ?? "",
-      uf: selected.uf,
-      cep: formatCep(selected.cep),
-      capital_social: selected.capital_social,
-      logo_path: selected.logo_path,
-      obs: selected.obs ?? ""
+      id                      : selected.id,
+      user_resp_id            : selected.user_resp_id,
+      estabelecimento_id      : selected.estabelecimento_id,
+      estabelecimento_tipo_id : selected.estabelecimento_tipo_id,
+      escritorio_id           : selected.escritorio_id,
+      ramo_atividade_id       : selected.ramo_atividade_id,
+      convencao_id            : selected.convencao_id,
+      cnae_id                 : selected.cnae_id,
+      tipo_cei_cnpj           : selected.tipo_cei_cnpj,
+      dt_inicio_atividades    : selected.dt_inicio_atividades ?? "",
+      ativo                   : selected.ativo,
+      razao_social            : selected.razao_social,
+      nm_fantasia             : selected.nm_fantasia,
+      cei_cnpj                : formatCeiCnpj(selected.cei_cnpj, selected.tipo_cei_cnpj),
+      insc_estadual           : selected.insc_estadual ?? "",
+      nm_contato1             : selected.nm_contato1 ?? "",
+      nm_contato2             : selected.nm_contato2 ?? "",
+      nm_contato3             : selected.nm_contato3 ?? "",
+      email1                  : selected.email1 ?? "",
+      email2                  : selected.email2 ?? "",
+      email3                  : selected.email3 ?? "",
+      tel1                    : formatTelefone(selected.tel1),
+      tel2                    : formatTelefone(selected.tel2),
+      tel3                    : formatTelefone(selected.tel3),
+      site                    : selected.site ?? "",
+      endereco                : selected.endereco ?? "",
+      numero                  : selected.numero ?? "",
+      complemento             : selected.complemento ?? "",
+      bairro                  : selected.bairro ?? "",
+      cidade                  : selected.cidade ?? "",
+      uf                      : selected.uf,
+      cep                     : formatCep(selected.cep),
+      capital_social          : selected.capital_social,
+      logo_path               : selected.logo_path,
+      obs                     : selected.obs ?? ""
     });
     setLogoFile(null);
   }, [selected]);
@@ -326,14 +325,13 @@ export function EmpresaPage() {
     onSuccess: (data) => {
       setForm((current) => {
         if (current.endereco?.trim()) return current;
-
         return {
           ...current,
-          cep: formatCep(data.cep),
+          cep     : formatCep(data.cep),
           endereco: data.street ?? current.endereco,
-          bairro: data.neighborhood ?? current.bairro,
-          cidade: data.city ?? current.cidade,
-          uf: data.state ?? current.uf
+          bairro  : data.neighborhood ?? current.bairro,
+          cidade  : data.city ?? current.cidade,
+          uf      : data.state ?? current.uf
         };
       });
     }
@@ -358,10 +356,10 @@ export function EmpresaPage() {
     onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel remover a contribuicao.")
   });
 
-  const totalLabel = useMemo(() => `${empresasTotal} registro${empresasTotal === 1 ? "" : "s"}`, [empresasTotal]);
-  const pageCount = Math.max(1, Math.ceil(empresasTotal / EMPRESAS_PAGE_SIZE));
-  const pageStart = empresasTotal === 0 ? 0 : (page - 1) * EMPRESAS_PAGE_SIZE + 1;
-  const pageEnd = Math.min(page * EMPRESAS_PAGE_SIZE, empresasTotal);
+  const totalLabel  = useMemo(() => `${empresasTotal} registro${empresasTotal === 1 ? "" : "s"}`, [empresasTotal]);
+  const pageCount   = Math.max(1, Math.ceil(empresasTotal / EMPRESAS_PAGE_SIZE));
+  const pageStart   = empresasTotal === 0 ? 0 : (page - 1) * EMPRESAS_PAGE_SIZE + 1;
+  const pageEnd     = Math.min(page * EMPRESAS_PAGE_SIZE, empresasTotal);
 
   function handleNew() {
     setSelectedId(null);
@@ -387,12 +385,12 @@ export function EmpresaPage() {
     setLogoFile(null);
     setForm({
       ...emptyForm,
-      estabelecimento_id: defaultEstabelecimentoId,
-      estabelecimento_tipo_id: defaultEstabelecimentoTipoId,
-      ramo_atividade_id: defaultRamoAtividadeId,
-      convencao_id: defaultConvencaoId,
-      tipo_cei_cnpj: tipo,
-      cei_cnpj: ""
+      estabelecimento_id      : defaultEstabelecimentoId,
+      estabelecimento_tipo_id : defaultEstabelecimentoTipoId,
+      ramo_atividade_id       : defaultRamoAtividadeId,
+      convencao_id            : defaultConvencaoId,
+      tipo_cei_cnpj           : tipo,
+      cei_cnpj                : ""
     });
     setNovoStep(null);
   }
@@ -413,11 +411,11 @@ export function EmpresaPage() {
     setLogoFile(null);
     setForm({
       ...mapCnpjConsultaToForm(cnpjData),
-      estabelecimento_id: defaultEstabelecimentoId,
-      estabelecimento_tipo_id: defaultEstabelecimentoTipoId,
-      ramo_atividade_id: defaultRamoAtividadeId,
-      convencao_id: defaultConvencaoId,
-      cnae_id: findCnaeIdByApiCode(cnpjData.cnae_fiscal, cnaes)
+      estabelecimento_id      : defaultEstabelecimentoId,
+      estabelecimento_tipo_id : defaultEstabelecimentoTipoId,
+      ramo_atividade_id       : defaultRamoAtividadeId,
+      convencao_id            : defaultConvencaoId,
+      cnae_id                 : findCnaeIdByApiCode(cnpjData.cnae_fiscal, cnaes)
     });
     setNovoStep(null);
   }
@@ -445,12 +443,6 @@ export function EmpresaPage() {
     saveMutation.mutate(form);
   }
 
-  function handleDeleteEmpresa(id: number) {
-    if (!window.confirm("Deseja excluir esta empresa?")) return;
-    setMessage(null);
-    deleteMutation.mutate(id);
-  }
-
   function handleTipoCeiCnpjChange(value: number) {
     setForm({ ...form, tipo_cei_cnpj: value, cei_cnpj: formatCeiCnpj(form.cei_cnpj, value) });
   }
@@ -473,7 +465,7 @@ export function EmpresaPage() {
   }
 
   function handleDeleteContribuicao(id: number) {
-    if (!window.confirm("Deseja excluir esta contribuicao da empresa?")) return;
+    if (!window.confirm("Deseja excluir esta contribuição da empresa?")) return;
     setMessage(null);
     deleteContribuicaoMutation.mutate(id);
   }
@@ -587,10 +579,10 @@ export function EmpresaPage() {
         {formOpen ? <div className="detail-panel">
           <form className="form-panel" onSubmit={handleSubmit}>
             <div className="tabs" role="tablist" aria-label="Empresa">
-              <button type="button" className={activeTab === "dados" ? "active" : ""} onClick={() => setActiveTab("dados")}>Dados</button>
-              <button type="button" className={activeTab === "associados" ? "active" : ""} onClick={() => setActiveTab("associados")}>Associados({empresaAssociados.length})</button>
-              <button type="button" className={activeTab === "contribuicoes" ? "active" : ""} onClick={() => setActiveTab("contribuicoes")}>Contribuições({empresaContribuicoes.length})</button>
-              <button type="button" className={activeTab === "financeiro" ? "active" : ""} onClick={() => setActiveTab("financeiro")}>Financeiro</button>
+              <button type="button" className={activeTab === "dados"          ? "active" : ""} onClick={() => setActiveTab("dados")}>Dados</button>
+              <button type="button" className={activeTab === "associados"     ? "active" : ""} onClick={() => setActiveTab("associados")}>Associados({empresaAssociados.length})</button>
+              <button type="button" className={activeTab === "contribuicoes"  ? "active" : ""} onClick={() => setActiveTab("contribuicoes")}>Contribuições({empresaContribuicoes.length})</button>
+              <button type="button" className={activeTab === "financeiro"     ? "active" : ""} onClick={() => setActiveTab("financeiro")}>Financeiro</button>
             </div>
 
             {activeTab === "dados" ? <>
