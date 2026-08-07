@@ -85,7 +85,7 @@ button:disabled, .secondary-button.disabled { box-shadow: none; filter: none; }
 .split-view { display: grid; grid-template-columns: minmax(310px, 38%) 1fr; gap: 16px; align-items: start; }
 .split-view.list-only { grid-template-columns: minmax(310px, 520px); }
 .list-panel, .detail-panel, .form-panel { background: rgba(255,255,255,0.96); border: 1px solid #d7dbe0; border-radius: 8px; box-shadow: 0 8px 22px rgba(17, 24, 39, 0.05); }
-.list-panel { padding: 14px; display: flex; flex-direction: column; max-height: calc(100vh - 154px); min-height: 0; }
+.list-panel { padding: 14px; display: flex; flex-direction: column; max-height: calc(100vh - 196px); min-height: 0; }
 .detail-panel { padding: 0; overflow: hidden; }
 .search-box { height: 42px; display: flex; align-items: center; gap: 8px; border: 1px solid #cfd4da; border-radius: 6px; padding: 0 12px; margin-bottom: 6px; background: linear-gradient(180deg, #ffffff 0%, #f8f9fb 100%); }
 .search-box input { border: 0; outline: 0; width: 100%; }
