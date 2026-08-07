@@ -33,6 +33,11 @@ export type CepConsulta = {
   service?: string | null;
 };
 
+export type EmpresasCadastroPage = {
+  data: EmpresaCadastro[];
+  total: number;
+};
+
 function onlyDigits(value: string | null | undefined) {
   return value?.replace(/\D/g, "") || null;
 }
@@ -56,6 +61,26 @@ export async function listEmpresasCadastro(search: string) {
   const { data, error } = await query;
   if (error) throw error;
   return data as EmpresaCadastro[];
+}
+
+export async function listEmpresasCadastroPage(search: string, page: number, pageSize: number): Promise<EmpresasCadastroPage> {
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  let query = supabaseUnsafe
+    .from("empresas")
+    .select("*", { count: "exact" })
+    .order("razao_social", { ascending: true })
+    .range(from, to);
+
+  const term = search.trim();
+  if (term) {
+    query = query.or(`id.eq.${Number(term) || 0},razao_social.ilike.%${term}%,nm_fantasia.ilike.%${term}%,cei_cnpj.ilike.%${term}%,cidade.ilike.%${term}%`);
+  }
+
+  const { data, error, count } = await query;
+  if (error) throw error;
+  return { data: data as EmpresaCadastro[], total: count ?? 0 };
 }
 
 export async function saveEmpresaCadastro(values: EmpresaCadastroInsert) {

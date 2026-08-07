@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Building2, Camera, Plus, Save, Search, Trash2 } from "lucide-react";
+import { Building2, Camera, ChevronLeft, ChevronRight, Plus, Save, Search, Trash2 } from "lucide-react";
 import { Breadcrumb } from "../../shared/Breadcrumb";
 import type { EmpresaCadastro, EmpresaCadastroInsert } from "../../types/database";
 import { listAuxiliares } from "../auxiliares/auxiliaresApi";
@@ -8,11 +8,12 @@ import { listCnaes } from "../cnae/cnaeApi";
 import { listContribuicoes } from "../contribuicao/contribuicaoApi";
 import { listEscritorios } from "../escritorio/escritorioApi";
 import { listUsuarios } from "../usuarios/usuariosApi";
-import { addEmpresaContribuicao, consultarCep, consultarCnpj, deleteEmpresaCadastro, deleteEmpresaContribuicao, getEmpresaLogoUrl, listEmpresaAssociados, listEmpresaContribuicoes, listEmpresasCadastro, saveEmpresaCadastro, uploadEmpresaLogo } from "./empresaApi";
+import { addEmpresaContribuicao, consultarCep, consultarCnpj, deleteEmpresaCadastro, deleteEmpresaContribuicao, getEmpresaLogoUrl, listEmpresaAssociados, listEmpresaContribuicoes, listEmpresasCadastroPage, saveEmpresaCadastro, uploadEmpresaLogo } from "./empresaApi";
 import type { CnpjConsulta } from "./empresaApi";
 
 type EmpresaTab = "dados" | "associados" | "contribuicoes" | "financeiro";
 type NovoEmpresaStep = "tipo" | "cnpj" | "revisao";
+const EMPRESAS_PAGE_SIZE = 50;
 
 function onlyDigits(value: string | null | undefined) {
   return value?.replace(/\D/g, "") ?? "";
@@ -157,8 +158,10 @@ const emptyForm: EmpresaCadastroInsert = {
 export function EmpresaPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState<EmpresaTab>("dados");
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedEmpresa, setSelectedEmpresa] = useState<EmpresaCadastro | null>(null);
   const [creatingNew, setCreatingNew] = useState(false);
   const [form, setForm] = useState<EmpresaCadastroInsert>(emptyForm);
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -170,7 +173,7 @@ export function EmpresaPage() {
   const [cnpjMessage, setCnpjMessage] = useState<string | null>(null);
   const [selectedContribuicaoId, setSelectedContribuicaoId] = useState("");
 
-  const empresasQuery = useQuery({ queryKey: ["empresas-cadastro", search], queryFn: () => listEmpresasCadastro(search) });
+  const empresasQuery = useQuery({ queryKey: ["empresas-cadastro", search, page], queryFn: () => listEmpresasCadastroPage(search, page, EMPRESAS_PAGE_SIZE) });
   const usuariosQuery = useQuery({ queryKey: ["usuarios"], queryFn: listUsuarios });
   const contribuicoesQuery = useQuery({ queryKey: ["contribuicoes-options"], queryFn: () => listContribuicoes("") });
   const cnaesQuery = useQuery({ queryKey: ["cnaes-options"], queryFn: () => listCnaes("") });
@@ -189,7 +192,9 @@ export function EmpresaPage() {
     enabled: Boolean(selectedId)
   });
   const escritoriosQuery = useQuery({ queryKey: ["empresas-escritorios-options"], queryFn: () => listEscritorios("") });
-  const empresas = empresasQuery.data ?? [];
+  const empresasPage = empresasQuery.data;
+  const empresas = empresasPage?.data ?? [];
+  const empresasTotal = empresasPage?.total ?? 0;
   const usuarios = usuariosQuery.data ?? [];
   const contribuicoes = contribuicoesQuery.data ?? [];
   const cnaes = cnaesQuery.data ?? [];
@@ -204,8 +209,18 @@ export function EmpresaPage() {
   const empresaContribuicoes = empresaContribuicoesQuery.data ?? [];
   const empresaAssociados = empresaAssociadosQuery.data ?? [];
   const escritorios = escritoriosQuery.data ?? [];
-  const selected = empresas.find((item) => item.id === selectedId) ?? null;
+  const selected = selectedEmpresa ?? empresas.find((item) => item.id === selectedId) ?? null;
   const formOpen = creatingNew || Boolean(selectedId);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
+
+  useEffect(() => {
+    if (!selectedId) return;
+    const currentPageSelected = empresas.find((item) => item.id === selectedId);
+    if (currentPageSelected) setSelectedEmpresa(currentPageSelected);
+  }, [empresas, selectedId]);
 
   useEffect(() => {
     if (!selected) {
@@ -274,6 +289,7 @@ export function EmpresaPage() {
     },
     onSuccess: async (saved) => {
       setSelectedId(saved.id);
+      setSelectedEmpresa(saved);
       setCreatingNew(false);
       setLogoFile(null);
       setMessage("Empresa salva com sucesso.");
@@ -286,6 +302,7 @@ export function EmpresaPage() {
     mutationFn: deleteEmpresaCadastro,
     onSuccess: async () => {
       setSelectedId(null);
+      setSelectedEmpresa(null);
       setCreatingNew(false);
       setForm(emptyForm);
       setMessage("Empresa excluida com sucesso.");
@@ -341,10 +358,14 @@ export function EmpresaPage() {
     onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel remover a contribuicao.")
   });
 
-  const totalLabel = useMemo(() => `${empresas.length} registro${empresas.length === 1 ? "" : "s"}`, [empresas.length]);
+  const totalLabel = useMemo(() => `${empresasTotal} registro${empresasTotal === 1 ? "" : "s"}`, [empresasTotal]);
+  const pageCount = Math.max(1, Math.ceil(empresasTotal / EMPRESAS_PAGE_SIZE));
+  const pageStart = empresasTotal === 0 ? 0 : (page - 1) * EMPRESAS_PAGE_SIZE + 1;
+  const pageEnd = Math.min(page * EMPRESAS_PAGE_SIZE, empresasTotal);
 
   function handleNew() {
     setSelectedId(null);
+    setSelectedEmpresa(null);
     setCreatingNew(false);
     setActiveTab("dados");
     setMessage(null);
@@ -357,6 +378,7 @@ export function EmpresaPage() {
 
   function startManualNew(tipo: number) {
     setSelectedId(null);
+    setSelectedEmpresa(null);
     setCreatingNew(true);
     setActiveTab("dados");
     setMessage(null);
@@ -384,6 +406,7 @@ export function EmpresaPage() {
   function fillFormFromCnpj() {
     if (!cnpjData) return;
     setSelectedId(null);
+    setSelectedEmpresa(null);
     setCreatingNew(true);
     setActiveTab("dados");
     setMessage(null);
@@ -408,6 +431,7 @@ export function EmpresaPage() {
 
   function handleSelect(item: EmpresaCadastro) {
     setSelectedId(item.id);
+    setSelectedEmpresa(item);
     setCreatingNew(false);
     setActiveTab("dados");
     setMessage(null);
@@ -524,6 +548,18 @@ export function EmpresaPage() {
         <div className="list-panel">
           <label className="search-box"><Search size={16} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por razao, fantasia, CNPJ ou cidade" /></label>
           <div className="list-summary">{totalLabel}</div>
+          <div className="pagination-bar">
+            <span>{pageStart}-{pageEnd} de {empresasTotal}</span>
+            <div>
+              <button type="button" className="icon-button" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={page <= 1} aria-label="Pagina anterior">
+                <ChevronLeft size={16} />
+              </button>
+              <span>Pagina {page} de {pageCount}</span>
+              <button type="button" className="icon-button" onClick={() => setPage((current) => Math.min(pageCount, current + 1))} disabled={page >= pageCount} aria-label="Proxima pagina">
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
           <div className="record-list">
             {empresasQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
             {empresas.map((item) => (
