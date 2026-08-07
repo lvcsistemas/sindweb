@@ -158,18 +158,18 @@ export function FaturasPage() {
 
           <div className="form-actions faturas-generate-actions">
             <button type="submit" disabled={gerarMutation.isPending}><FileText size={16} /> {gerarMutation.isPending ? "Gerando..." : "Gerar Faturas"}</button>
+            <button type="submit" form="faturas-search-form"><Search size={16} /> Pesquisar</button>
           </div>
         </form>
       </section>
 
       <section className="form-panel atendimento-search-panel">
-        <form className="atendimento-search-grid faturas-search-grid" onSubmit={handleSearch}>
+        <form id="faturas-search-form" className="atendimento-search-grid faturas-search-grid" onSubmit={handleSearch}>
           <label className="field"><select value={draftFilters.sacadoTipo} onChange={(event) => setDraftFilters({ ...draftFilters, sacadoTipo: event.target.value as FaturaFilters["sacadoTipo"] })}><option value="TODOS">TODOS</option><option value="ASSOCIADO">ASSOCIADO</option><option value="EMPRESA">EMPRESA</option></select><span>Tipo sacado</span></label>
           <label className="field"><select value={draftFilters.situacao} onChange={(event) => setDraftFilters({ ...draftFilters, situacao: event.target.value as FaturaFilters["situacao"] })}><option value="TODOS">TODOS</option><option value="ABERTA">ABERTA</option><option value="PAGA">PAGA</option></select><span>Situação</span></label>
           <label className="field"><input type="date" value={draftFilters.inicio} onChange={(event) => setDraftFilters({ ...draftFilters, inicio: event.target.value })} placeholder=" " /><span>Vencimento inicial</span></label>
           <label className="field"><input type="date" value={draftFilters.fim} onChange={(event) => setDraftFilters({ ...draftFilters, fim: event.target.value })} placeholder=" " /><span>Vencimento final</span></label>
           <label className="field"><input value={draftFilters.valor} onChange={(event) => setDraftFilters({ ...draftFilters, valor: event.target.value })} placeholder=" " /><span>Valor procurado</span></label>
-          <button type="submit"><Search size={16} /> Pesquisar</button>
         </form>
       </section>
 
