@@ -111,6 +111,7 @@ button:disabled, .secondary-button.disabled { box-shadow: none; filter: none; }
 .empty-state { color: #6b7280; padding: 18px; text-align: center; }
 .list-summary { color: #6b7280; font-size: 0.86rem; margin: -4px 0 4px; text-align: right; }
 .pagination-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #6b7280; font-size: 0.82rem; margin: -2px 0 8px; }
+.pagination-bar.list-footer { border-top: 1px solid #e6e8eb; margin: 10px 0 0; padding-top: 10px; }
 .pagination-bar > div { display: inline-flex; align-items: center; gap: 8px; }
 .pagination-bar .icon-button { width: 30px; height: 30px; min-height: 30px; }
 

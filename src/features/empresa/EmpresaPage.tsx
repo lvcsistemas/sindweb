@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState }      from "react";
+import { FormEvent, useEffect, useState }               from "react";
 import { useMutation, useQuery, useQueryClient }        from "@tanstack/react-query";
 import { Building2, Camera, ChevronLeft, ChevronRight, Plus, Save, Search, Trash2 } from "lucide-react";
 import { Breadcrumb }                                   from "../../shared/Breadcrumb";
@@ -356,7 +356,6 @@ export function EmpresaPage() {
     onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel remover a contribuicao.")
   });
 
-  const totalLabel  = useMemo(() => `${empresasTotal} registro${empresasTotal === 1 ? "" : "s"}`, [empresasTotal]);
   const pageCount   = Math.max(1, Math.ceil(empresasTotal / EMPRESAS_PAGE_SIZE));
   const pageStart   = empresasTotal === 0 ? 0 : (page - 1) * EMPRESAS_PAGE_SIZE + 1;
   const pageEnd     = Math.min(page * EMPRESAS_PAGE_SIZE, empresasTotal);
@@ -539,19 +538,6 @@ export function EmpresaPage() {
       <section className={`split-view ${formOpen ? "" : "list-only"}`}>
         <div className="list-panel">
           <label className="search-box"><Search size={16} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por razao, fantasia, CNPJ ou cidade" /></label>
-          <div className="list-summary">{totalLabel}</div>
-          <div className="pagination-bar">
-            <span>Registros {pageStart} a {pageEnd} de {empresasTotal}</span>
-            <div>
-              <button type="button" className="icon-button" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={page <= 1} aria-label="Pagina anterior">
-                <ChevronLeft size={16} />
-              </button>
-              <span>Pagina {page}</span>
-              <button type="button" className="icon-button" onClick={() => setPage((current) => Math.min(pageCount, current + 1))} disabled={page >= pageCount} aria-label="Proxima pagina">
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
           <div className="record-list">
             {empresasQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
             {empresas.map((item) => (
@@ -573,6 +559,18 @@ export function EmpresaPage() {
               </div>
             ))}
             {!empresasQuery.isLoading && empresas.length === 0 ? <div className="empty-state">Nenhuma empresa encontrada.</div> : null}
+          </div>
+          <div className="pagination-bar list-footer">
+            <span>Mostrando {pageStart} a {pageEnd} de {empresasTotal}</span>
+            <div>
+              <button type="button" className="icon-button" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={page <= 1} aria-label="Pagina anterior">
+                <ChevronLeft size={16} />
+              </button>
+              <span>Pagina {page}</span>
+              <button type="button" className="icon-button" onClick={() => setPage((current) => Math.min(pageCount, current + 1))} disabled={page >= pageCount} aria-label="Proxima pagina">
+                <ChevronRight size={16} />
+              </button>
+            </div>
           </div>
         </div>
 
