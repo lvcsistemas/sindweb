@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState }               from "react";
 import { useMutation, useQuery, useQueryClient }        from "@tanstack/react-query";
-import { Building2, Camera, ChevronLeft, ChevronRight, Plus, Save, Search, Trash2 } from "lucide-react";
+import { Building2, Camera, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight, Plus, Save, Search, Trash2 } from "lucide-react";
 import { Breadcrumb }                                   from "../../shared/Breadcrumb";
 import type { EmpresaCadastro, EmpresaCadastroInsert }  from "../../types/database";
 import { listAuxiliares }                               from "../auxiliares/auxiliaresApi";
@@ -563,12 +563,18 @@ export function EmpresaPage() {
           <div className="pagination-bar list-footer">
             <span>Mostrando {pageStart} a {pageEnd} de {empresasTotal}</span>
             <div>
+              <button type="button" className="icon-button" onClick={() => setPage(1)} disabled={page <= 1} aria-label="Primeira pagina">
+                <ChevronsLeft size={16} />
+              </button>
               <button type="button" className="icon-button" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={page <= 1} aria-label="Pagina anterior">
                 <ChevronLeft size={16} />
               </button>
               <span>Pagina {page}</span>
               <button type="button" className="icon-button" onClick={() => setPage((current) => Math.min(pageCount, current + 1))} disabled={page >= pageCount} aria-label="Proxima pagina">
                 <ChevronRight size={16} />
+              </button>
+              <button type="button" className="icon-button" onClick={() => setPage(pageCount)} disabled={page >= pageCount} aria-label="Ultima pagina">
+                <ChevronsRight size={16} />
               </button>
             </div>
           </div>
