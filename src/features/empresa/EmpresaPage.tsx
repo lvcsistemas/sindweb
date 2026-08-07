@@ -549,12 +549,12 @@ export function EmpresaPage() {
           <label className="search-box"><Search size={16} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por razao, fantasia, CNPJ ou cidade" /></label>
           <div className="list-summary">{totalLabel}</div>
           <div className="pagination-bar">
-            <span>{pageStart}-{pageEnd} de {empresasTotal}</span>
+            <span>Registros {pageStart} a {pageEnd} de {empresasTotal}</span>
             <div>
               <button type="button" className="icon-button" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={page <= 1} aria-label="Pagina anterior">
                 <ChevronLeft size={16} />
               </button>
-              <span>Pagina {page} de {pageCount}</span>
+              <span>Pagina {page}</span>
               <button type="button" className="icon-button" onClick={() => setPage((current) => Math.min(pageCount, current + 1))} disabled={page >= pageCount} aria-label="Proxima pagina">
                 <ChevronRight size={16} />
               </button>
