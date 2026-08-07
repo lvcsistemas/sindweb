@@ -156,14 +156,14 @@ export function FaturasPage() {
 
           {message ? <div className={gerarMutation.isError ? "form-error" : "form-success"}>{message}</div> : null}
 
-          <div className="form-actions">
+          <div className="form-actions faturas-generate-actions">
             <button type="submit" disabled={gerarMutation.isPending}><FileText size={16} /> {gerarMutation.isPending ? "Gerando..." : "Gerar Faturas"}</button>
           </div>
         </form>
       </section>
 
       <section className="form-panel atendimento-search-panel">
-        <form className="atendimento-search-grid homologacao-search-grid" onSubmit={handleSearch}>
+        <form className="atendimento-search-grid faturas-search-grid" onSubmit={handleSearch}>
           <label className="field"><select value={draftFilters.sacadoTipo} onChange={(event) => setDraftFilters({ ...draftFilters, sacadoTipo: event.target.value as FaturaFilters["sacadoTipo"] })}><option value="TODOS">TODOS</option><option value="ASSOCIADO">ASSOCIADO</option><option value="EMPRESA">EMPRESA</option></select><span>Tipo sacado</span></label>
           <label className="field"><select value={draftFilters.situacao} onChange={(event) => setDraftFilters({ ...draftFilters, situacao: event.target.value as FaturaFilters["situacao"] })}><option value="TODOS">TODOS</option><option value="ABERTA">ABERTA</option><option value="PAGA">PAGA</option></select><span>Situação</span></label>
           <label className="field"><input type="date" value={draftFilters.inicio} onChange={(event) => setDraftFilters({ ...draftFilters, inicio: event.target.value })} placeholder=" " /><span>Vencimento inicial</span></label>
