@@ -1,12 +1,12 @@
 import { FormEvent, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText, Search, Trash2 } from "lucide-react";
+import { CheckCircle2, FileText, Search, Trash2 } from "lucide-react";
 import { Breadcrumb } from "../../shared/Breadcrumb";
 import { listAssociados } from "../associados/associadosApi";
 import { listBancos } from "../bancos/bancosApi";
 import { listContribuicoes } from "../contribuicao/contribuicaoApi";
 import { listEmpresasCadastro } from "../empresa/empresaApi";
-import { cancelarFatura, gerarFaturas, listFaturas, type FaturaFilters, type GerarFaturasPayload } from "./faturasApi";
+import { baixarFaturaManual, cancelarFatura, gerarFaturas, listFaturas, type FaturaFilters, type GerarFaturasPayload } from "./faturasApi";
 
 const currentYear = new Date().getFullYear();
 const currentMonth = new Date().getMonth() + 1;
@@ -98,6 +98,15 @@ export function FaturasPage() {
     onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel excluir a fatura.")
   });
 
+  const baixarMutation = useMutation({
+    mutationFn: baixarFaturaManual,
+    onSuccess: async () => {
+      setMessage("Baixa manual registrada com sucesso.");
+      await queryClient.invalidateQueries({ queryKey: ["faturas"] });
+    },
+    onError: (error) => setMessage(error instanceof Error ? error.message : "Nao foi possivel baixar a fatura.")
+  });
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage(null);
@@ -113,6 +122,12 @@ export function FaturasPage() {
     if (!window.confirm("Confirma excluir esta fatura? Ela ficara disponivel em Faturas Excluidas.")) return;
     setMessage(null);
     cancelarMutation.mutate(id);
+  }
+
+  function handleBaixaManual(id: number) {
+    if (!window.confirm("Deseja dar baixa manual nesta fatura?")) return;
+    setMessage(null);
+    baixarMutation.mutate(id);
   }
 
   return (
@@ -184,10 +199,11 @@ export function FaturasPage() {
                 <th>Contribuição</th>
                 <th>Competência</th>
                 <th>Vencimento</th>
+                <th>Pagamento</th>
                 <th>Banco</th>
                 <th className="numeric-cell">Valor</th>
                 <th>Situação</th>
-                <th className="numeric-cell">Excluir</th>
+                <th className="numeric-cell">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -198,13 +214,19 @@ export function FaturasPage() {
                   <td><strong>{item.contribuicao_tipo}</strong><span>{item.nm_contribuicao}</span></td>
                   <td>{String(item.competencia_mes).padStart(2, "0")}/{item.competencia_ano}</td>
                   <td>{formatDate(item.dt_vencimento)}</td>
+                  <td>{formatDate(item.dt_pagamento)}</td>
                   <td><strong>{item.banco_numero} - {item.banco_nome}</strong><span>Ag {item.agencia_numero} - Conta {item.conta_numero}</span></td>
                   <td className="numeric-cell">{formatCurrency(item.valor_total)}</td>
                   <td>{item.situacao}</td>
                   <td className="numeric-cell">
-                    <button type="button" className="icon-button danger-icon" title="Excluir" onClick={() => handleCancelar(item.id)} disabled={cancelarMutation.isPending}>
-                      <Trash2 size={16} />
-                    </button>
+                    <div className="row-actions">
+                      <button type="button" className="icon-button" title="Baixa manual" onClick={() => handleBaixaManual(item.id)} disabled={baixarMutation.isPending || item.situacao === "PAGA"}>
+                        <CheckCircle2 size={16} />
+                      </button>
+                      <button type="button" className="icon-button danger-icon" title="Excluir" onClick={() => handleCancelar(item.id)} disabled={cancelarMutation.isPending}>
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

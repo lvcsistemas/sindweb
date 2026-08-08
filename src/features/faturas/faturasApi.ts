@@ -47,6 +47,11 @@ function toDateOnly(year: number, month: number, day: number) {
   return `${year}-${String(month).padStart(2, "0")}-${String(safeDay).padStart(2, "0")}`;
 }
 
+function todayLocalDateOnly() {
+  const date = new Date();
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
 function referenciaFromVencimento(year: number, month: number) {
   if (month === 1) return { mes: 12, ano: year - 1 };
   return { mes: month - 1, ano: year };
@@ -135,6 +140,31 @@ export async function cancelarFatura(id: number) {
       situacao: "CANCELADA",
       cancelada_em: new Date().toISOString(),
       cancelada_por: user.id,
+      updated_by: user.id
+    })
+    .eq("id", id);
+  raiseSupabaseError(error);
+}
+
+export async function baixarFaturaManual(id: number) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.id) throw new Error("Sessao expirada. Entre novamente para baixar a fatura.");
+
+  const { data: fatura, error: faturaError } = await supabaseUnsafe
+    .from("faturas")
+    .select("id, situacao")
+    .eq("id", id)
+    .single();
+  raiseSupabaseError(faturaError);
+
+  if (fatura?.situacao === "CANCELADA") throw new Error("Fatura cancelada nao pode receber baixa.");
+  if (fatura?.situacao === "PAGA") return;
+
+  const { error } = await supabaseUnsafe
+    .from("faturas")
+    .update({
+      situacao: "PAGA",
+      dt_pagamento: todayLocalDateOnly(),
       updated_by: user.id
     })
     .eq("id", id);

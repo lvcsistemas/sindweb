@@ -282,6 +282,7 @@ export type Fatura = {
   competencia_ano: number;
   dt_emissao: string;
   dt_vencimento: string;
+  dt_pagamento: string | null;
   valor_base: number;
   tx_bancaria: number;
   multa_percentual: number;
@@ -300,7 +301,7 @@ export type Fatura = {
   updated_at: string;
 };
 
-export type FaturaInsert = Omit<Fatura, "id" | "valor_total" | "cancelada_em" | "cancelada_por" | "created_by" | "updated_by" | "created_at" | "updated_at"> & {
+export type FaturaInsert = Omit<Fatura, "id" | "valor_total" | "dt_pagamento" | "cancelada_em" | "cancelada_por" | "created_by" | "updated_by" | "created_at" | "updated_at"> & {
   id?: number;
   created_by?: string | null;
   updated_by?: string | null;

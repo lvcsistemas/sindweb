@@ -103,6 +103,7 @@ button:disabled, .secondary-button.disabled { box-shadow: none; filter: none; }
 .record-row-action { background: none; border: 0; color: #9d3429; cursor: pointer; padding: 6px; display: grid; place-items: center; border-radius: 4px; }
 .record-row-action:hover { background: #fff3f0; }
 .danger-icon { border-color: #f0c7bf; color: #9d3429; background: #fff3f0; }
+.row-actions { display: inline-flex; align-items: center; justify-content: flex-end; gap: 6px; }
 .avatar { width: 42px; height: 42px; border-radius: 50%; background: #e2e5e9; color: #20242a; display: grid; place-items: center; font-weight: 800; overflow: hidden; }
 .avatar.large { width: 76px; height: 76px; }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
