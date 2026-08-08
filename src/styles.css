@@ -222,6 +222,7 @@ textarea { resize: vertical; }
 .data-table.clickable-rows tbody tr { cursor: pointer; }
 .data-table.clickable-rows tbody tr:hover { background: #f1f2f4; }
 .data-table tbody tr:last-child td { border-bottom: 0; }
+.data-table tfoot td { border-top: 1px solid #cfd4da; background: linear-gradient(180deg, #f8f9fb 0%, #eef1f4 100%); font-weight: 800; }
 .data-table td strong, .data-table td span { display: block; }
 .data-table td strong { font-weight: 750; }
 .data-table td span { margin-top: 3px; font-size: 0.82rem; opacity: 0.82; }
@@ -230,6 +231,9 @@ textarea { resize: vertical; }
 .atendimento-row.canceled { color: #b45f06; }
 .atendimento-row.overdue { color: #c62828; }
 .numeric-cell { text-align: right; white-space: nowrap; }
+.invoice-totals { display: flex; align-items: center; justify-content: flex-end; gap: 18px; flex-wrap: wrap; text-align: right; }
+.invoice-totals span { margin-top: 0 !important; opacity: 1 !important; color: #15171a; }
+.invoice-totals strong { color: #6b7280; font-size: 0.72rem; text-transform: uppercase; }
 @keyframes atendimento-alert-border {
   0%, 49% { border-color: #d32f2f; box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.7), 0 8px 22px rgba(17, 24, 39, 0.05); }
   50%, 100% { border-color: #d7dbe0; box-shadow: 0 8px 22px rgba(17, 24, 39, 0.05); }

@@ -87,6 +87,15 @@ export function FaturasPage() {
   const associados = associadosQuery.data ?? [];
   const empresas = empresasQuery.data ?? [];
   const totalLabel = useMemo(() => `${faturas.length} registro${faturas.length === 1 ? "" : "s"}`, [faturas.length]);
+  const totais = useMemo(() => {
+    const totalAReceber = faturas.reduce((total, item) => total + Number(item.valor_total || 0), 0);
+    const totalRecebido = faturas.reduce((total, item) => total + Number(item.valor_recebido || 0), 0);
+    return {
+      totalAReceber,
+      totalRecebido,
+      totalRestante: totalAReceber - totalRecebido
+    };
+  }, [faturas]);
 
   const gerarMutation = useMutation({
     mutationFn: async (values: GerarFaturasPayload) => {
@@ -262,6 +271,18 @@ export function FaturasPage() {
                 </tr>
               ))}
             </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan={7}>Totais</td>
+                <td colSpan={3}>
+                  <div className="invoice-totals">
+                    <span><strong>Total a receber</strong>{formatCurrency(totais.totalAReceber)}</span>
+                    <span><strong>Total recebido</strong>{formatCurrency(totais.totalRecebido)}</span>
+                    <span><strong>Total restante</strong>{formatCurrency(totais.totalRestante)}</span>
+                  </div>
+                </td>
+              </tr>
+            </tfoot>
           </table>
           {faturasQuery.isLoading ? <div className="empty-state">Carregando...</div> : null}
           {!faturasQuery.isLoading && faturas.length === 0 ? <div className="empty-state">Nenhuma fatura encontrada.</div> : null}
