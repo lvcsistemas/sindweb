@@ -26,6 +26,13 @@ export type GerarFaturasResultado = {
   ignoradas: number;
 };
 
+export type BaixaManualPayload = {
+  id: number;
+  dtPagamento: string;
+  formaPagamentoId: number;
+  valorRecebido: number;
+};
+
 function raiseSupabaseError(error: { message?: string } | null) {
   if (error) throw new Error(error.message || "Erro ao acessar o Supabase.");
 }
@@ -45,11 +52,6 @@ function lastDayOfMonth(year: number, month: number) {
 function toDateOnly(year: number, month: number, day: number) {
   const safeDay = Math.min(day, lastDayOfMonth(year, month));
   return `${year}-${String(month).padStart(2, "0")}-${String(safeDay).padStart(2, "0")}`;
-}
-
-function todayLocalDateOnly() {
-  const date = new Date();
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
 function referenciaFromVencimento(year: number, month: number) {
@@ -146,14 +148,17 @@ export async function cancelarFatura(id: number) {
   raiseSupabaseError(error);
 }
 
-export async function baixarFaturaManual(id: number) {
+export async function baixarFaturaManual(payload: BaixaManualPayload) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user?.id) throw new Error("Sessao expirada. Entre novamente para baixar a fatura.");
+  if (!payload.dtPagamento) throw new Error("Informe a data de pagamento.");
+  if (!payload.formaPagamentoId) throw new Error("Selecione a forma de pagamento.");
+  if (!Number.isFinite(payload.valorRecebido) || payload.valorRecebido <= 0) throw new Error("Informe o valor recebido.");
 
   const { data: fatura, error: faturaError } = await supabaseUnsafe
     .from("faturas")
     .select("id, situacao")
-    .eq("id", id)
+    .eq("id", payload.id)
     .single();
   raiseSupabaseError(faturaError);
 
@@ -164,10 +169,12 @@ export async function baixarFaturaManual(id: number) {
     .from("faturas")
     .update({
       situacao: "PAGA",
-      dt_pagamento: todayLocalDateOnly(),
+      dt_pagamento: payload.dtPagamento,
+      forma_pagamento_id: payload.formaPagamentoId,
+      valor_recebido: payload.valorRecebido,
       updated_by: user.id
     })
-    .eq("id", id);
+    .eq("id", payload.id);
   raiseSupabaseError(error);
 }
 

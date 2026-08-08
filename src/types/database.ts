@@ -283,7 +283,9 @@ export type Fatura = {
   dt_emissao: string;
   dt_vencimento: string;
   dt_pagamento: string | null;
+  forma_pagamento_id: number | null;
   valor_base: number;
+  valor_recebido: number | null;
   tx_bancaria: number;
   multa_percentual: number;
   juros_dia_percentual: number;
@@ -301,7 +303,7 @@ export type Fatura = {
   updated_at: string;
 };
 
-export type FaturaInsert = Omit<Fatura, "id" | "valor_total" | "dt_pagamento" | "cancelada_em" | "cancelada_por" | "created_by" | "updated_by" | "created_at" | "updated_at"> & {
+export type FaturaInsert = Omit<Fatura, "id" | "valor_total" | "dt_pagamento" | "forma_pagamento_id" | "valor_recebido" | "cancelada_em" | "cancelada_por" | "created_by" | "updated_by" | "created_at" | "updated_at"> & {
   id?: number;
   created_by?: string | null;
   updated_by?: string | null;
@@ -320,6 +322,7 @@ export type FaturaLista = Fatura & {
   associado_documento: string | null;
   empresa_nome: string | null;
   empresa_documento: string | null;
+  forma_pagamento_nome: string | null;
   created_by_codinome: string | null;
   created_by_nome: string | null;
   updated_by_codinome: string | null;

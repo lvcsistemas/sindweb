@@ -6,13 +6,27 @@ import { listAssociados } from "../associados/associadosApi";
 import { listBancos } from "../bancos/bancosApi";
 import { listContribuicoes } from "../contribuicao/contribuicaoApi";
 import { listEmpresasCadastro } from "../empresa/empresaApi";
-import { baixarFaturaManual, cancelarFatura, gerarFaturas, listFaturas, type FaturaFilters, type GerarFaturasPayload } from "./faturasApi";
+import { listAuxiliares } from "../auxiliares/auxiliaresApi";
+import { baixarFaturaManual, cancelarFatura, gerarFaturas, listFaturas, type BaixaManualPayload, type FaturaFilters, type GerarFaturasPayload } from "./faturasApi";
 
 const currentYear = new Date().getFullYear();
 const currentMonth = new Date().getMonth() + 1;
 
 function dateOnly(date: Date) {
   return date.toISOString().slice(0, 10);
+}
+
+function todayLocalDateOnly() {
+  const date = new Date();
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function onlyDigits(value: string) {
+  return value.replace(/\D/g, "");
+}
+
+function parseCurrency(value: string) {
+  return Number(onlyDigits(value) || 0) / 100;
 }
 
 function monthStart() {
@@ -57,16 +71,19 @@ export function FaturasPage() {
   });
   const [sacadoSearch, setSacadoSearch] = useState("");
   const [message, setMessage] = useState<string | null>(null);
+  const [baixaForm, setBaixaForm] = useState<BaixaManualPayload | null>(null);
 
   const faturasQuery = useQuery({ queryKey: ["faturas", filters], queryFn: () => listFaturas(filters) });
   const contribuicoesQuery = useQuery({ queryKey: ["contribuicoes", ""], queryFn: () => listContribuicoes("") });
   const bancosQuery = useQuery({ queryKey: ["bancos", ""], queryFn: () => listBancos("") });
+  const formasPagamentoQuery = useQuery({ queryKey: ["auxiliares", "formas_pagamento"], queryFn: () => listAuxiliares("formas_pagamento", "") });
   const associadosQuery = useQuery({ queryKey: ["faturas-associados", sacadoSearch], queryFn: () => listAssociados(sacadoSearch), enabled: form.escopo === "ESPECIFICO" && form.sacadoTipo === "ASSOCIADO" });
   const empresasQuery = useQuery({ queryKey: ["faturas-empresas", sacadoSearch], queryFn: () => listEmpresasCadastro(sacadoSearch), enabled: form.escopo === "ESPECIFICO" && form.sacadoTipo === "EMPRESA" });
 
   const faturas = faturasQuery.data ?? [];
   const contribuicoes = contribuicoesQuery.data ?? [];
   const bancos = bancosQuery.data ?? [];
+  const formasPagamento = (formasPagamentoQuery.data ?? []).filter((item) => item.ativo === "S");
   const associados = associadosQuery.data ?? [];
   const empresas = empresasQuery.data ?? [];
   const totalLabel = useMemo(() => `${faturas.length} registro${faturas.length === 1 ? "" : "s"}`, [faturas.length]);
@@ -101,6 +118,7 @@ export function FaturasPage() {
   const baixarMutation = useMutation({
     mutationFn: baixarFaturaManual,
     onSuccess: async () => {
+      setBaixaForm(null);
       setMessage("Baixa manual registrada com sucesso.");
       await queryClient.invalidateQueries({ queryKey: ["faturas"] });
     },
@@ -125,9 +143,22 @@ export function FaturasPage() {
   }
 
   function handleBaixaManual(id: number) {
-    if (!window.confirm("Deseja dar baixa manual nesta fatura?")) return;
+    const fatura = faturas.find((item) => item.id === id);
+    if (!fatura) return;
     setMessage(null);
-    baixarMutation.mutate(id);
+    setBaixaForm({
+      id,
+      dtPagamento: fatura.dt_pagamento ?? todayLocalDateOnly(),
+      formaPagamentoId: fatura.forma_pagamento_id ?? formasPagamento[0]?.id ?? 0,
+      valorRecebido: Number(fatura.valor_recebido ?? fatura.valor_total ?? 0)
+    });
+  }
+
+  function handleBaixaSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!baixaForm) return;
+    setMessage(null);
+    baixarMutation.mutate(baixaForm);
   }
 
   return (
@@ -214,9 +245,9 @@ export function FaturasPage() {
                   <td><strong>{item.contribuicao_tipo}</strong><span>{item.nm_contribuicao}</span></td>
                   <td>{String(item.competencia_mes).padStart(2, "0")}/{item.competencia_ano}</td>
                   <td>{formatDate(item.dt_vencimento)}</td>
-                  <td>{formatDate(item.dt_pagamento)}</td>
+                  <td><strong>{formatDate(item.dt_pagamento)}</strong><span>{item.forma_pagamento_nome ?? "-"}</span></td>
                   <td><strong>{item.banco_numero} - {item.banco_nome}</strong><span>Ag {item.agencia_numero} - Conta {item.conta_numero}</span></td>
-                  <td className="numeric-cell">{formatCurrency(item.valor_total)}</td>
+                  <td className="numeric-cell"><strong>{formatCurrency(item.valor_total)}</strong><span>{item.valor_recebido ? `Recebido ${formatCurrency(item.valor_recebido)}` : "Recebido -"}</span></td>
                   <td>{item.situacao}</td>
                   <td className="numeric-cell">
                     <div className="row-actions">
@@ -236,6 +267,38 @@ export function FaturasPage() {
           {!faturasQuery.isLoading && faturas.length === 0 ? <div className="empty-state">Nenhuma fatura encontrada.</div> : null}
         </div>
       </section>
+
+      {baixaForm ? <div className="modal-backdrop" role="presentation">
+        <form className="modal-panel modal-form" role="dialog" aria-modal="true" aria-label="Baixa manual da fatura" onSubmit={handleBaixaSubmit}>
+          <div>
+            <h2>Baixa Manual</h2>
+            <p>Informe os dados da liquidação da fatura.</p>
+          </div>
+
+          <div className="form-grid compact">
+            <label className="field">
+              <input type="date" value={baixaForm.dtPagamento} onChange={(event) => setBaixaForm({ ...baixaForm, dtPagamento: event.target.value })} placeholder=" " required />
+              <span>Pagamento</span>
+            </label>
+            <label className="field">
+              <select value={baixaForm.formaPagamentoId} onChange={(event) => setBaixaForm({ ...baixaForm, formaPagamentoId: Number(event.target.value) })} required>
+                <option value={0}>Selecione</option>
+                {formasPagamento.map((item) => <option key={item.id} value={item.id}>{item.nome}</option>)}
+              </select>
+              <span>Forma de Pagamento</span>
+            </label>
+            <label className="field">
+              <input className="currency-input" value={formatCurrency(baixaForm.valorRecebido)} onChange={(event) => setBaixaForm({ ...baixaForm, valorRecebido: parseCurrency(event.target.value) })} placeholder=" " required />
+              <span>Valor Recebido</span>
+            </label>
+          </div>
+
+          <div className="modal-actions">
+            <button type="button" className="secondary-button" onClick={() => setBaixaForm(null)}>Cancelar</button>
+            <button type="submit" disabled={baixarMutation.isPending}>{baixarMutation.isPending ? "Salvando..." : "Salvar Baixa"}</button>
+          </div>
+        </form>
+      </div> : null}
     </main>
   );
 }
