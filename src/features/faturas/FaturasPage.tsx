@@ -1,13 +1,14 @@
 import { FormEvent, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, FileText, Search, Trash2 } from "lucide-react";
+import { CheckCircle2, FileText, Printer, Search, Trash2 } from "lucide-react";
 import { Breadcrumb } from "../../shared/Breadcrumb";
 import { listAssociados } from "../associados/associadosApi";
 import { listBancos } from "../bancos/bancosApi";
 import { listContribuicoes } from "../contribuicao/contribuicaoApi";
 import { listEmpresasCadastro } from "../empresa/empresaApi";
 import { listAuxiliares } from "../auxiliares/auxiliaresApi";
-import { baixarFaturaManual, cancelarFatura, gerarFaturas, listFaturas, type BaixaManualPayload, type FaturaFilters, type GerarFaturasPayload } from "./faturasApi";
+import { buildBoletoItauHtml } from "./boletoItau";
+import { baixarFaturaManual, cancelarFatura, gerarBoletoItau, gerarFaturas, listFaturas, type BaixaManualPayload, type FaturaFilters, type GerarFaturasPayload } from "./faturasApi";
 
 const currentYear = new Date().getFullYear();
 const currentMonth = new Date().getMonth() + 1;
@@ -72,6 +73,7 @@ export function FaturasPage() {
   const [sacadoSearch, setSacadoSearch] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [baixaForm, setBaixaForm] = useState<BaixaManualPayload | null>(null);
+  const [boletoPrintingId, setBoletoPrintingId] = useState<number | null>(null);
 
   const faturasQuery = useQuery({ queryKey: ["faturas", filters], queryFn: () => listFaturas(filters) });
   const contribuicoesQuery = useQuery({ queryKey: ["contribuicoes", ""], queryFn: () => listContribuicoes("") });
@@ -170,6 +172,32 @@ export function FaturasPage() {
     baixarMutation.mutate(baixaForm);
   }
 
+  async function handleImprimirBoleto(id: number) {
+    const printWindow = window.open("", "_blank", "width=980,height=760");
+    if (!printWindow) {
+      setMessage("Nao foi possivel abrir a janela de impressao. Verifique o bloqueador de pop-ups.");
+      return;
+    }
+
+    setMessage(null);
+    setBoletoPrintingId(id);
+    printWindow.document.write("<!doctype html><html><head><meta charset=\"utf-8\"><title>Gerando boleto</title></head><body>Gerando boleto...</body></html>");
+    printWindow.document.close();
+
+    try {
+      const boleto = await gerarBoletoItau(id);
+      printWindow.document.open();
+      printWindow.document.write(buildBoletoItauHtml(boleto));
+      printWindow.document.close();
+      await queryClient.invalidateQueries({ queryKey: ["faturas"] });
+    } catch (error) {
+      printWindow.close();
+      setMessage(error instanceof Error ? error.message : "Nao foi possivel gerar o boleto.");
+    } finally {
+      setBoletoPrintingId(null);
+    }
+  }
+
   return (
     <main className="module-page">
       <Breadcrumb items={[{ label: "Financeiro" }, { label: "Emissão de Faturas" }]} />
@@ -260,6 +288,9 @@ export function FaturasPage() {
                   <td>{item.situacao}</td>
                   <td className="numeric-cell">
                     <div className="row-actions">
+                      <button type="button" className="icon-button" title="Imprimir boleto Itaú" onClick={() => handleImprimirBoleto(item.id)} disabled={boletoPrintingId === item.id}>
+                        <Printer size={16} />
+                      </button>
                       <button type="button" className="icon-button" title="Baixa manual" onClick={() => handleBaixaManual(item.id)} disabled={baixarMutation.isPending || item.situacao === "PAGA"}>
                         <CheckCircle2 size={16} />
                       </button>

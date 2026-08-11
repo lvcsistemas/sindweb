@@ -294,6 +294,8 @@ export type Fatura = {
   valor_total: number;
   nosso_numero: string | null;
   linha_digitavel: string | null;
+  codigo_barras: string | null;
+  boleto_gerado_em: string | null;
   situacao: string;
   cancelada_em: string | null;
   cancelada_por: string | null;
@@ -303,7 +305,7 @@ export type Fatura = {
   updated_at: string;
 };
 
-export type FaturaInsert = Omit<Fatura, "id" | "valor_total" | "dt_pagamento" | "forma_pagamento_id" | "valor_recebido" | "cancelada_em" | "cancelada_por" | "created_by" | "updated_by" | "created_at" | "updated_at"> & {
+export type FaturaInsert = Omit<Fatura, "id" | "valor_total" | "dt_pagamento" | "forma_pagamento_id" | "valor_recebido" | "codigo_barras" | "boleto_gerado_em" | "cancelada_em" | "cancelada_por" | "created_by" | "updated_by" | "created_at" | "updated_at"> & {
   id?: number;
   created_by?: string | null;
   updated_by?: string | null;

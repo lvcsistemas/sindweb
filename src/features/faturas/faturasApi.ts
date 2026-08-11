@@ -1,5 +1,6 @@
 import { supabase } from "../../lib/supabase";
-import type { Banco, Contribuicao, FaturaInsert, FaturaLista } from "../../types/database";
+import type { Banco, Config, Contribuicao, Fatura, FaturaInsert, FaturaLista } from "../../types/database";
+import { gerarDadosBoletoItau, type BoletoItauData } from "./boletoItau";
 
 const supabaseUnsafe = supabase as any;
 
@@ -178,6 +179,98 @@ export async function baixarFaturaManual(payload: BaixaManualPayload) {
   raiseSupabaseError(error);
 }
 
+export async function gerarBoletoItau(faturaId: number): Promise<BoletoItauData> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.id) throw new Error("Sessao expirada. Entre novamente para gerar o boleto.");
+
+  const { data: faturaData, error: faturaError } = await supabaseUnsafe
+    .from("faturas")
+    .select("*")
+    .eq("id", faturaId)
+    .single();
+  raiseSupabaseError(faturaError);
+
+  const fatura = faturaData as Fatura;
+  if (fatura.situacao === "CANCELADA") throw new Error("Fatura cancelada nao pode gerar boleto.");
+  if (Number(fatura.valor_total || 0) <= 0) throw new Error("Fatura sem valor nao pode gerar boleto.");
+
+  const { data: bancoData, error: bancoError } = await supabaseUnsafe
+    .from("bancos")
+    .select("*")
+    .eq("id", fatura.banco_id)
+    .single();
+  raiseSupabaseError(bancoError);
+
+  const { data: contribuicaoData, error: contribuicaoError } = await supabaseUnsafe
+    .from("contribuicoes")
+    .select("*")
+    .eq("id", fatura.contribuicao_id)
+    .single();
+  raiseSupabaseError(contribuicaoError);
+
+  const { data: configData, error: configError } = await supabaseUnsafe
+    .from("config")
+    .select("*")
+    .eq("id", 1)
+    .single();
+  raiseSupabaseError(configError);
+
+  const banco = bancoData as Banco;
+  const contribuicao = contribuicaoData as Contribuicao;
+  const config = configData as Config;
+  const sacado = await getSacadoBoleto(fatura);
+  const faturaAny = fatura as Fatura & { codigo_barras?: string | null; boleto_gerado_em?: string | null };
+
+  if (faturaAny.codigo_barras && fatura.linha_digitavel && fatura.nosso_numero) {
+    return {
+      fatura,
+      banco,
+      contribuicao,
+      config,
+      sacado,
+      nossoNumero: fatura.nosso_numero,
+      linhaDigitavel: fatura.linha_digitavel,
+      codigoBarras: faturaAny.codigo_barras
+    };
+  }
+
+  const boleto = gerarDadosBoletoItau(fatura, banco);
+  const { data: bancoAtualizado, error: bancoUpdateError } = await supabaseUnsafe
+    .from("bancos")
+    .update({ nosso_numero_proximo: boleto.proximoNossoNumero })
+    .eq("id", banco.id)
+    .eq("nosso_numero_proximo", banco.nosso_numero_proximo)
+    .select("id")
+    .maybeSingle();
+  raiseSupabaseError(bancoUpdateError);
+  if (!bancoAtualizado) throw new Error("Nosso numero foi alterado por outro usuario. Tente novamente.");
+
+  const { data: faturaAtualizada, error: faturaUpdateError } = await supabaseUnsafe
+    .from("faturas")
+    .update({
+      nosso_numero: boleto.nossoNumero,
+      linha_digitavel: boleto.linhaDigitavel,
+      codigo_barras: boleto.codigoBarras,
+      boleto_gerado_em: new Date().toISOString(),
+      updated_by: user.id
+    })
+    .eq("id", fatura.id)
+    .select("*")
+    .single();
+  raiseSupabaseError(faturaUpdateError);
+
+  return {
+    fatura: faturaAtualizada as Fatura,
+    banco: { ...banco, nosso_numero_proximo: boleto.proximoNossoNumero },
+    contribuicao,
+    config,
+    sacado,
+    nossoNumero: boleto.nossoNumero,
+    linhaDigitavel: boleto.linhaDigitavel,
+    codigoBarras: boleto.codigoBarras
+  };
+}
+
 export async function gerarFaturas(payload: GerarFaturasPayload) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user?.id) throw new Error("Sessao expirada. Entre novamente para gerar faturas.");
@@ -258,5 +351,45 @@ function buildFaturaPayload(
     situacao: "ABERTA",
     created_by: userId,
     updated_by: userId
+  };
+}
+
+async function getSacadoBoleto(fatura: Fatura) {
+  if (fatura.sacado_tipo === "ASSOCIADO") {
+    const { data, error } = await supabaseUnsafe
+      .from("associados")
+      .select("nome, cpf, endereco, numero, complemento, bairro, cidade, uf, cep")
+      .eq("id", fatura.associado_id)
+      .single();
+    raiseSupabaseError(error);
+    return {
+      nome: data?.nome ?? null,
+      documento: data?.cpf ?? null,
+      endereco: data?.endereco ?? null,
+      numero: data?.numero ?? null,
+      complemento: data?.complemento ?? null,
+      bairro: data?.bairro ?? null,
+      cidade: data?.cidade ?? null,
+      uf: data?.uf ?? null,
+      cep: data?.cep ?? null
+    };
+  }
+
+  const { data, error } = await supabaseUnsafe
+    .from("empresas")
+    .select("nm_fantasia, razao_social, cei_cnpj, endereco, numero, complemento, bairro, cidade, uf, cep")
+    .eq("id", fatura.empresa_id)
+    .single();
+  raiseSupabaseError(error);
+  return {
+    nome: data?.nm_fantasia ?? data?.razao_social ?? null,
+    documento: data?.cei_cnpj ?? null,
+    endereco: data?.endereco ?? null,
+    numero: data?.numero ?? null,
+    complemento: data?.complemento ?? null,
+    bairro: data?.bairro ?? null,
+    cidade: data?.cidade ?? null,
+    uf: data?.uf ?? null,
+    cep: data?.cep ?? null
   };
 }
