@@ -120,6 +120,9 @@ button:disabled, .secondary-button.disabled { box-shadow: none; filter: none; }
 .record-row.my-action > div:first-child { flex: 1; min-width: 0; }
 .record-row.my-action > div:first-child strong,
 .record-row.my-action > div:first-child span { white-space: normal; overflow: visible; text-overflow: clip; }
+.exam-record-row { min-height: 62px; overflow: hidden; align-items: center; }
+.exam-record-row > div { min-width: 0; display: grid; gap: 3px; line-height: 1.2; }
+.exam-record-row strong, .exam-record-row span { min-width: 0; }
 
 .form-panel { border: 0; border-radius: 0; padding: 18px; display: grid; gap: 14px; }
 .form-panel.embedded-form { padding: 0; box-shadow: none; background: transparent; }
